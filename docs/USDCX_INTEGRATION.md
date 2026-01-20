@@ -73,7 +73,8 @@ The VeilPay Clarity contract integrates with the USDCx token contract:
 - **Stacks Domain ID**: 10003
 
 **Mainnet**:
-- **Contract**: [To be deployed]
+- **USDCx Token**: `SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx`
+- **USDCx-v1 (Entry Point)**: `SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx-v1`
 - **Standard**: SIP-010 fungible token
 - **Decimals**: 6
 - **Symbol**: USDCx

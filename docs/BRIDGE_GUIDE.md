@@ -149,9 +149,10 @@ Once you have USDCx on Stacks:
 - Standard: SIP-010
 
 **Mainnet**:
-- **USDCx (Stacks)**: [To be deployed on mainnet]
+- **USDCx Token (Stacks)**: `SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx`
+- **USDCx-v1 (Stacks)**: `SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx-v1`
 - **USDC (Ethereum)**: `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`
-- **xReserve Bridge**: [Mainnet address]
+- **xReserve Bridge**: `0x8888888199b2Df864bf678259607d6D5EBb4e3Ce`
 - Symbol: USDCx
 - Decimals: 6
 - Standard: SIP-010
@@ -159,6 +160,8 @@ Once you have USDCx on Stacks:
 **Bridge Configuration**:
 - **Stacks Domain ID**: 10003 (constant across all networks)
 - **Ethereum Domain ID**: 0
+- **Magic Bytes**: `0x5a2e0acd` (deposit intent validation)
+- **Version**: `u1` (protocol version)
 
 ### Token Format
 

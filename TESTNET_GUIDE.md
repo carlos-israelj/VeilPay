@@ -24,7 +24,14 @@ Complete guide to testing VeilPay on Stacks testnet with USDCx bridged from Ethe
 
 ### Stacks Testnet
 - **USDCx Token**: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx`
+- **USDCx-v1 (Entry Point)**: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx-v1`
 - **VeilPay Contract**: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.veilpay`
+- **Domain ID**: 10003
+
+### Stacks Mainnet
+- **USDCx Token**: `SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx`
+- **USDCx-v1 (Entry Point)**: `SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx-v1`
+- **VeilPay Contract**: [To be deployed]
 - **Domain ID**: 10003
 
 ## Step-by-Step Testing
