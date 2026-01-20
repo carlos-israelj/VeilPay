@@ -1,5 +1,16 @@
 ;; VeilPay - Private USDCx Transfers on Stacks
 ;; Uses ZK proofs verified off-chain + on-chain commitment scheme
+;;
+;; USDCx Integration: This contract enables private transfers of USDCx tokens
+;; bridged from Ethereum via Circle's xReserve protocol.
+;;
+;; How it works:
+;; 1. Users deposit USDCx and receive a private commitment
+;; 2. Commitments are stored in a Merkle tree (off-chain indexing)
+;; 3. Users can withdraw to any address by proving commitment ownership via ZK proof
+;; 4. No link between deposits and withdrawals - complete privacy
+
+(use-trait ft-trait .usdcx-trait.sip010-ft-trait)
 
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant ERR-NOT-AUTHORIZED (err u100))
@@ -41,18 +52,24 @@
 )
 
 ;; Deposit: User deposits USDCx and registers commitment
+;;
+;; This function allows users to deposit USDCx tokens into the privacy pool.
+;; The commitment is a hash of (secret, amount, nonce) generated client-side.
+;;
+;; USDCx Integration: Uses SIP-010 transfer to move tokens from user to contract
 (define-public (deposit
     (commitment (buff 32))
-    (amount uint))
+    (amount uint)
+    (token-contract <ft-trait>))
     (let (
         (commitment-id (var-get commitment-count))
     )
-        ;; Validate amount
-        (asserts! (> amount u0) ERR-INVALID-AMOUNT)
+        ;; Validate amount (minimum 1 USDCx = 1,000,000 micro-units)
+        (asserts! (>= amount u1000000) ERR-INVALID-AMOUNT)
 
-        ;; Transfer USDCx to pool (contract principal)
-        ;; Note: Replace .usdcx with actual USDCx token contract
-        (try! (contract-call? .usdcx transfer amount tx-sender (as-contract tx-sender) none))
+        ;; Transfer USDCx from user to contract pool
+        ;; This uses the SIP-010 fungible token standard
+        (try! (contract-call? token-contract transfer amount tx-sender (as-contract tx-sender) none))
 
         ;; Store commitment
         (map-set commitments commitment-id {
@@ -79,12 +96,21 @@
 )
 
 ;; Withdraw: Relayer presents verified proof + signature
+;;
+;; This function allows users to withdraw USDCx privately to any recipient.
+;; The relayer has verified the ZK proof off-chain and signed the withdrawal.
+;;
+;; Privacy guarantee: The nullifier prevents double-spending but doesn't
+;; reveal which deposit is being withdrawn.
+;;
+;; USDCx Integration: Transfers tokens from contract pool to recipient
 (define-public (withdraw
     (nullifier-hash (buff 32))
     (recipient principal)
     (amount uint)
     (root (buff 32))
-    (relayer-signature (buff 65)))
+    (relayer-signature (buff 65))
+    (token-contract <ft-trait>))
     (let (
         ;; Construct message that the relayer signed
         (message-hash (sha256 (concat
@@ -93,10 +119,10 @@
                 (concat (unwrap-panic (to-consensus-buff? recipient))
                     (unwrap-panic (to-consensus-buff? amount)))))))
     )
-        ;; 1. Verify nullifier not used
+        ;; 1. Verify nullifier not used (prevents double-spending)
         (asserts! (is-none (map-get? used-nullifiers nullifier-hash)) ERR-NULLIFIER-USED)
 
-        ;; 2. Verify root is valid
+        ;; 2. Verify root is valid (ensures commitment exists in tree)
         (asserts! (is-some (map-get? valid-roots root)) ERR-INVALID-ROOT)
 
         ;; 3. Verify signature from relayer (relayer verified ZK proof off-chain)
@@ -107,8 +133,9 @@
         ;; 4. Mark nullifier as used
         (map-set used-nullifiers nullifier-hash true)
 
-        ;; 5. Transfer USDCx to recipient
-        (try! (as-contract (contract-call? .usdcx transfer amount tx-sender recipient none)))
+        ;; 5. Transfer USDCx from pool to recipient
+        ;; Uses as-contract to transfer from contract's balance
+        (try! (as-contract (contract-call? token-contract transfer amount tx-sender recipient none)))
 
         ;; Emit event
         (print {
