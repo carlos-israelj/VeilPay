@@ -65,24 +65,44 @@ The VeilPay Clarity contract integrates with the USDCx token contract:
 
 ### USDCx Token Contract Reference
 
-- **Contract**: `SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-abtc`
+**Testnet (Sepolia)**:
+- **Contract**: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx`
 - **Standard**: SIP-010 fungible token
 - **Decimals**: 6 (same as USDC on Ethereum)
 - **Symbol**: USDCx
+- **Stacks Domain ID**: 10003
 
-### Bridge Integration
+**Mainnet**:
+- **Contract**: [To be deployed]
+- **Standard**: SIP-010 fungible token
+- **Decimals**: 6
+- **Symbol**: USDCx
+- **Stacks Domain ID**: 10003
 
-VeilPay works seamlessly with the USDCx bridge:
+### Bridge Integration (Circle xReserve)
 
-1. **Ethereum → Stacks**:
-   - Users bridge USDC via xReserve
+VeilPay works seamlessly with Circle's xReserve protocol:
+
+1. **Ethereum → Stacks** (Deposit):
+   - Approve xReserve contract (`0x008888878f94C0d87defdf0B07f46B93C1934442` testnet)
+   - Call `depositToRemote()` with Stacks address and amount
+   - Wait ~15 minutes for attestation
    - Receive USDCx on Stacks
    - Deposit into VeilPay for privacy
 
-2. **Stacks → Ethereum**:
-   - Withdraw USDCx from VeilPay
-   - Bridge back to Ethereum via xReserve
+2. **Stacks → Ethereum** (Burn):
+   - Withdraw USDCx from VeilPay privately
+   - Call `burn()` on `.usdcx-v1` contract
+   - Specify Ethereum recipient (bytes32) and amount (min 4.80 USDCx)
+   - Wait ~25 min (testnet) or ~60 min (mainnet)
    - Receive USDC on Ethereum
+
+**Bridge Specifications**:
+- **Deposit minimum**: 1 USDC (testnet), 10 USDC (mainnet)
+- **Withdrawal minimum**: 4.80 USDCx (fixed burn fee)
+- **Deposit time**: ~15 minutes
+- **Withdrawal time**: ~25 minutes (testnet), ~60 minutes (mainnet)
+- **Bridge fee**: $0 deposit, $4.80 withdrawal (burned)
 
 ### Privacy Guarantees with USDCx
 

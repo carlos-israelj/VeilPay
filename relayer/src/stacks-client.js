@@ -5,7 +5,8 @@ import {
   PostConditionMode,
   bufferCV,
   uintCV,
-  principalCV
+  principalCV,
+  contractPrincipalCV
 } from '@stacks/transactions';
 import { StacksTestnet, StacksMainnet } from '@stacks/network';
 
@@ -17,6 +18,10 @@ export class StacksClient {
 
     this.contractAddress = process.env.CONTRACT_ADDRESS;
     this.contractName = process.env.CONTRACT_NAME || 'veilpay';
+
+    // USDCx token contract (official Circle deployment)
+    this.usdcxAddress = process.env.USDCX_ADDRESS || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
+    this.usdcxName = process.env.USDCX_NAME || 'usdcx';
   }
 
   /**
@@ -32,7 +37,8 @@ export class StacksClient {
         principalCV(recipient),
         uintCV(amount),
         bufferCV(Buffer.from(root, 'hex')),
-        bufferCV(Buffer.from(signature, 'hex'))
+        bufferCV(Buffer.from(signature, 'hex')),
+        contractPrincipalCV(this.usdcxAddress, this.usdcxName)
       ],
       senderKey: process.env.RELAYER_PRIVATE_KEY,
       network: this.network,

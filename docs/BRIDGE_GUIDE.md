@@ -84,35 +84,32 @@ https://faucet.circle.com/
 
 **Official Bridge Guide**: https://docs.stacks.co/more-guides/bridging-usdcx
 
-**Using the Bridge**:
+**Bridge Process (Ethereum → Stacks)**:
 
-1. **Visit xReserve Bridge**:
-   - Testnet: [Testnet bridge URL]
-   - Mainnet: [Mainnet bridge URL]
+1. **Approve xReserve Contract**:
+   - Approve USDC spending by xReserve bridge
+   - Contract: `0x008888878f94C0d87defdf0B07f46B93C1934442` (testnet)
+   - Wait for Ethereum confirmation
 
-2. **Connect Wallets**:
-   - Connect Ethereum wallet (source)
-   - Connect Stacks wallet (destination)
+2. **Call depositToRemote()**:
+   - Amount: Minimum 1 USDC (testnet) or 10 USDC (mainnet)
+   - Recipient: Your Stacks address (encoded as bytes32)
+   - Domain ID: 10003 (Stacks domain)
+   - Transaction on Ethereum
 
-3. **Initiate Bridge**:
-   ```
-   From: Ethereum (Sepolia/Mainnet)
-   To: Stacks
-   Token: USDC
-   Amount: [Enter amount]
-   ```
+3. **Wait for Attestation**:
+   - Circle's attestation service verifies deposit
+   - Duration: ~15 minutes (both testnet and mainnet)
+   - Automatic minting process
 
-4. **Approve USDC**:
-   - First transaction: Approve USDC spending
-   - Wait for confirmation
+4. **Receive USDCx on Stacks**:
+   - USDCx minted to your Stacks address
+   - Contract: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx`
+   - Check balance in Stacks wallet or explorer
 
-5. **Deposit USDC**:
-   - Second transaction: Deposit to bridge
-   - Wait for confirmation (2-5 minutes)
-
-6. **Receive USDCx on Stacks**:
-   - USDCx appears in your Stacks wallet
-   - Check balance in wallet or explorer
+**Important Minimums**:
+- **Testnet**: 1 USDC minimum
+- **Mainnet**: 10 USDC minimum
 
 ### Step 3: Use USDCx with VeilPay
 
@@ -143,17 +140,25 @@ Once you have USDCx on Stacks:
 
 ### Contract Information
 
-**Testnet**:
-- Contract: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx`
+**Testnet (Sepolia)**:
+- **USDCx (Stacks)**: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx`
+- **USDC (Ethereum)**: `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238`
+- **xReserve Bridge**: `0x008888878f94C0d87defdf0B07f46B93C1934442`
 - Symbol: USDCx
 - Decimals: 6
 - Standard: SIP-010
 
 **Mainnet**:
-- Contract: [Mainnet USDCx contract]
+- **USDCx (Stacks)**: [To be deployed on mainnet]
+- **USDC (Ethereum)**: `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`
+- **xReserve Bridge**: [Mainnet address]
 - Symbol: USDCx
 - Decimals: 6
 - Standard: SIP-010
+
+**Bridge Configuration**:
+- **Stacks Domain ID**: 10003 (constant across all networks)
+- **Ethereum Domain ID**: 0
 
 ### Token Format
 
@@ -211,29 +216,50 @@ After withdrawing from VeilPay, you can bridge USDCx back to Ethereum:
 
 1. **Withdraw from VeilPay** → Receive USDCx on Stacks
 
-2. **Bridge USDCx to Ethereum**:
-   - Use xReserve bridge in reverse
-   - Connect Stacks wallet (source)
-   - Connect Ethereum wallet (destination)
-   - Bridge USDCx → USDC
+2. **Burn USDCx on Stacks**:
+   - Call `burn()` on `.usdcx-v1` contract
+   - Specify amount (minimum 4.80 USDCx)
+   - Specify Ethereum domain (0) and recipient address
+   - Recipient address must be padded to 32 bytes
 
-3. **Receive USDC on Ethereum**:
-   - USDC appears in your Ethereum wallet
+3. **Wait for Verification**:
+   - Duration: ~25 minutes (testnet) or ~60 minutes (mainnet)
+   - xReserve verifies burn transaction
+
+4. **Receive USDC on Ethereum**:
+   - USDC released from xReserve to your Ethereum address
    - No link to original bridge transaction!
+   - **Privacy maintained through VeilPay!**
 
 ## Fees
 
 ### Bridge Fees (xReserve)
 
-**Ethereum → Stacks**:
-- Gas fee: ~$5-20 (depends on Ethereum gas price)
-- Bridge fee: 0.1% of amount (Circle fee)
-- Minimum: Varies by network conditions
+**Ethereum → Stacks (Deposit)**:
+- **Testnet**:
+  - Minimum: 1 USDC
+  - Gas fee: Sepolia ETH (free from faucet)
+  - Bridge fee: None
+  - Duration: ~15 minutes
 
-**Stacks → Ethereum**:
-- Gas fee: ~1-2 STX (~$1-2)
-- Bridge fee: 0.1% of amount
-- Settlement time: 5-10 minutes
+- **Mainnet**:
+  - Minimum: 10 USDC
+  - Gas fee: ~$5-20 (depends on Ethereum gas price)
+  - Bridge fee: None (Circle covers operational costs)
+  - Duration: ~15 minutes
+
+**Stacks → Ethereum (Withdrawal)**:
+- **Testnet**:
+  - Minimum: 4.80 USDCx
+  - Gas fee: STX (from faucet)
+  - Bridge fee: $4.80 USDC (burned)
+  - Duration: ~25 minutes
+
+- **Mainnet**:
+  - Minimum: 4.80 USDCx
+  - Gas fee: ~1-2 STX (~$1-2)
+  - Bridge fee: $4.80 USDC (burned)
+  - Duration: ~60 minutes
 
 ### VeilPay Fees
 
@@ -241,31 +267,43 @@ After withdrawing from VeilPay, you can bridge USDCx back to Ethereum:
 - **Withdrawal**: Gas + optional relayer fee (<0.5%)
 - **No protocol fee**: VeilPay doesn't charge fees
 
-### Total Cost Example
+### Total Cost Example (Mainnet)
 
 Bridge 100 USDC from Ethereum → Use VeilPay → Bridge back:
 
 ```
-1. Ethereum → Stacks:
-   - 100 USDC bridge fee: $0.10
+1. Ethereum → Stacks (Deposit):
+   - Amount: 100 USDC
    - Ethereum gas: ~$10
-   - Total: ~$10.10
+   - Bridge fee: $0 (Circle covers)
+   - Duration: ~15 minutes
+   - Total cost: ~$10
 
 2. Deposit to VeilPay:
+   - Amount: 100 USDCx
    - Stacks gas: ~$0.10
-   - Total: ~$0.10
+   - VeilPay fee: $0
+   - Total cost: ~$0.10
 
-3. Withdraw from VeilPay:
+3. Withdraw from VeilPay (Private!):
+   - Amount: 100 USDCx
    - Stacks gas: ~$0.10
    - Relayer fee: ~$0.50
-   - Total: ~$0.60
+   - Total cost: ~$0.60
 
-4. Stacks → Ethereum:
-   - 100 USDC bridge fee: $0.10
+4. Stacks → Ethereum (Burn):
+   - Amount: 95.20 USDCx (after bridge fee)
    - Stacks gas: ~$1
-   - Total: ~$1.10
+   - Bridge fee: $4.80 (minimum burn)
+   - Duration: ~60 minutes
+   - Total cost: ~$5.80
 
-GRAND TOTAL: ~$11.90 for complete privacy
+GRAND TOTAL: ~$16.50 for complete privacy
+RECEIVED: 95.20 USDC on Ethereum
+PRIVACY COST: ~$16.50 (or ~17.3% for this amount)
+
+Note: For larger amounts, privacy cost percentage decreases
+      (e.g., $1000 USDC = only ~2% privacy cost)
 ```
 
 ## Troubleshooting
@@ -308,33 +346,88 @@ GRAND TOTAL: ~$11.90 for complete privacy
 
 ## Code Examples
 
-### Check USDCx Balance
+### Bridge USDC from Ethereum to Stacks
 
-```clarity
-;; Read-only call to check balance
-(contract-call? .usdcx get-balance tx-sender)
+```typescript
+import { createPublicClient, createWalletClient, http, parseUnits } from 'viem';
+import { sepolia } from 'viem/chains';
+import { privateKeyToAccount } from 'viem/accounts';
+
+// Contract addresses (Testnet)
+const USDC_ADDRESS = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238';
+const XRESERVE_ADDRESS = '0x008888878f94C0d87defdf0B07f46B93C1934442';
+const STACKS_DOMAIN_ID = 10003;
+
+// Initialize clients
+const account = privateKeyToAccount(`0x${process.env.PRIVATE_KEY}`);
+const client = createWalletClient({
+  account,
+  chain: sepolia,
+  transport: http()
+});
+
+// Step 1: Approve USDC spending
+const approveHash = await client.writeContract({
+  address: USDC_ADDRESS,
+  abi: erc20Abi,
+  functionName: 'approve',
+  args: [XRESERVE_ADDRESS, parseUnits('10', 6)] // 10 USDC
+});
+
+await publicClient.waitForTransactionReceipt({ hash: approveHash });
+
+// Step 2: Deposit to Stacks
+// Convert Stacks address to bytes32
+const stacksAddressBytes32 = '0x' + Buffer.from(stacksAddress).toString('hex').padStart(64, '0');
+
+const depositHash = await client.writeContract({
+  address: XRESERVE_ADDRESS,
+  abi: xReserveAbi,
+  functionName: 'depositToRemote',
+  args: [
+    parseUnits('10', 6),           // amount
+    STACKS_DOMAIN_ID,              // destination domain
+    stacksAddressBytes32           // recipient
+  ]
+});
+
+console.log('Deposit transaction:', depositHash);
+console.log('Wait ~15 minutes for USDCx to appear on Stacks');
 ```
 
-```javascript
-// JavaScript/TypeScript
-import { callReadOnlyFunction } from '@stacks/transactions';
+### Check USDCx Balance on Stacks
+
+```typescript
+import { callReadOnlyFunction, principalCV } from '@stacks/transactions';
+import { StacksTestnet } from '@stacks/network';
 
 const balance = await callReadOnlyFunction({
   contractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
   contractName: 'usdcx',
   functionName: 'get-balance',
-  functionArgs: [principalCV(address)],
-  network: new StacksTestnet()
+  functionArgs: [principalCV(stacksAddress)],
+  network: new StacksTestnet(),
+  senderAddress: stacksAddress
 });
+
+console.log('USDCx Balance:', balance.value);
 ```
 
 ### Deposit USDCx to VeilPay
 
-```javascript
+```typescript
 import { makeContractCall, bufferCV, uintCV, contractPrincipalCV } from '@stacks/transactions';
+import { StacksTestnet } from '@stacks/network';
+import { generateDeposit } from './crypto'; // VeilPay utility
 
-// Generate commitment
-const { commitment } = await generateDeposit(amount);
+// Amount in micro-units (6 decimals)
+const amount = 10_000_000; // 10 USDCx
+
+// Generate private commitment
+const { secret, nonce, commitment } = await generateDeposit(amount);
+
+// Store secret and nonce securely!
+localStorage.setItem('veilpay_secret', JSON.stringify({ secret, nonce, commitment }));
 
 // Deposit to VeilPay
 const txOptions = {
@@ -346,10 +439,45 @@ const txOptions = {
     uintCV(amount),
     contractPrincipalCV('ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM', 'usdcx')
   ],
-  // ... other options
+  network: new StacksTestnet(),
+  anchorMode: 'any',
+  postConditionMode: 'allow',
+  onFinish: (data) => {
+    console.log('Deposit successful!', data.txId);
+  }
 };
 
 await makeContractCall(txOptions);
+```
+
+### Burn USDCx to Bridge Back to Ethereum
+
+```typescript
+import { makeContractCall, uintCV, bufferCV } from '@stacks/transactions';
+
+// Ethereum address as bytes32 (padded)
+const ethereumAddress = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb';
+const recipientBytes32 = ethereumAddress.slice(2).padStart(64, '0');
+
+// Burn USDCx (minimum 4.80 USDCx)
+const burnTxOptions = {
+  contractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+  contractName: 'usdcx-v1',
+  functionName: 'burn',
+  functionArgs: [
+    uintCV(10_000_000),                              // amount (10 USDCx)
+    uintCV(0),                                       // Ethereum domain ID
+    bufferCV(Buffer.from(recipientBytes32, 'hex'))   // recipient bytes32
+  ],
+  network: new StacksTestnet(),
+  anchorMode: 'any',
+  onFinish: (data) => {
+    console.log('Burn initiated!', data.txId);
+    console.log('Wait ~25 minutes for USDC on Ethereum');
+  }
+};
+
+await makeContractCall(burnTxOptions);
 ```
 
 ## Resources

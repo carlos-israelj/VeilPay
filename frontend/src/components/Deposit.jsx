@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { generateDeposit } from '../utils/crypto';
-import { makeContractCall } from '@stacks/transactions';
+import { makeContractCall, bufferCV, uintCV, contractPrincipalCV } from '@stacks/transactions';
 import { StacksTestnet } from '@stacks/network';
 
 export default function Deposit({ userSession }) {
@@ -28,7 +28,7 @@ export default function Deposit({ userSession }) {
       });
       localStorage.setItem('veilpay_deposits', JSON.stringify(storedDeposits));
 
-      // Call contract deposit function
+      // Call contract deposit function with USDCx token
       const txOptions = {
         contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
         contractName: import.meta.env.VITE_CONTRACT_NAME || 'veilpay',
@@ -36,6 +36,10 @@ export default function Deposit({ userSession }) {
         functionArgs: [
           bufferCV(Buffer.from(deposit.commitment, 'hex')),
           uintCV(amount),
+          contractPrincipalCV(
+            'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+            'usdcx'
+          )
         ],
         network: new StacksTestnet(),
         appDetails: {
@@ -43,7 +47,7 @@ export default function Deposit({ userSession }) {
           icon: window.location.origin + '/logo.png',
         },
         onFinish: (data) => {
-          console.log('Transaction submitted:', data.txId);
+          console.log('Deposit successful:', data.txId);
           setDepositData(deposit);
           setLoading(false);
         },
