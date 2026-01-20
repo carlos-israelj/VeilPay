@@ -1,0 +1,32 @@
+{
+  "name": "veilpay",
+  "version": "0.1.0",
+  "description": "Private USDCx transfers on Stacks using Zero-Knowledge proofs",
+  "main": "index.js",
+  "scripts": {
+    "build:circuits": "cd circuits && npm run build",
+    "test:circuits": "cd circuits && npm test",
+    "dev:relayer": "cd relayer && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "test": "npm run test:circuits"
+  },
+  "keywords": [
+    "stacks",
+    "zero-knowledge",
+    "privacy",
+    "blockchain",
+    "circom",
+    "zk-snarks"
+  ],
+  "author": "Carlos Israel Jiménez",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/carlos-israelj/VeilPay.git"
+  },
+  "workspaces": [
+    "circuits",
+    "relayer",
+    "frontend"
+  ]
+}
