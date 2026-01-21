@@ -27,14 +27,18 @@ export async function generateDeposit(amount) {
   const secret = randomFieldElement();
   const nonce = randomFieldElement();
 
+  // Convert amount to micro-units (USDCx has 6 decimals)
+  // If amount is a decimal number, multiply by 1,000,000
+  const amountInMicroUnits = Math.floor(Number(amount) * 1_000_000);
+
   // Calculate commitment: poseidon(secret, amount, nonce)
-  const commitment = p([secret, BigInt(amount), nonce]);
+  const commitment = p([secret, BigInt(amountInMicroUnits), nonce]);
 
   return {
     secret: secret.toString(),
     nonce: nonce.toString(),
     commitment: p.F.toString(commitment, 16),
-    amount: amount.toString()
+    amount: amountInMicroUnits.toString()
   };
 }
 
@@ -52,7 +56,13 @@ export async function calculateNullifier(secret, nonce) {
  */
 export async function verifyCommitment(secret, amount, nonce, expectedCommitment) {
   const p = await getPoseidon();
-  const commitment = p([BigInt(secret), BigInt(amount), BigInt(nonce)]);
+
+  // Convert amount to micro-units if it's a decimal
+  const amountInMicroUnits = typeof amount === 'number' && amount < 1000
+    ? Math.floor(amount * 1_000_000)
+    : BigInt(amount);
+
+  const commitment = p([BigInt(secret), BigInt(amountInMicroUnits), BigInt(nonce)]);
   const commitmentHex = p.F.toString(commitment, 16);
   return commitmentHex === expectedCommitment;
 }

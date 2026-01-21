@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AppConfig, UserSession, showConnect } from '@stacks/connect';
 import Deposit from './components/Deposit';
 import Withdraw from './components/Withdraw';
+import Bridge from './components/Bridge';
 import Header from './components/Header';
 import Stats from './components/Stats';
 
@@ -10,7 +11,7 @@ const userSession = new UserSession({ appConfig });
 
 function App() {
   const [userData, setUserData] = useState(null);
-  const [activeTab, setActiveTab] = useState('deposit');
+  const [activeTab, setActiveTab] = useState('bridge');
 
   const connectWallet = () => {
     showConnect({
@@ -54,6 +55,16 @@ function App() {
             <>
               <div className="flex space-x-4 mb-6 border-b border-gray-700">
                 <button
+                  onClick={() => setActiveTab('bridge')}
+                  className={`px-6 py-3 font-semibold transition ${
+                    activeTab === 'bridge'
+                      ? 'text-blue-400 border-b-2 border-blue-400'
+                      : 'text-gray-400 hover:text-gray-200'
+                  }`}
+                >
+                  Bridge
+                </button>
+                <button
                   onClick={() => setActiveTab('deposit')}
                   className={`px-6 py-3 font-semibold transition ${
                     activeTab === 'deposit'
@@ -75,7 +86,9 @@ function App() {
                 </button>
               </div>
 
-              {activeTab === 'deposit' ? (
+              {activeTab === 'bridge' ? (
+                <Bridge stacksAddress={userData?.profile?.stxAddress?.testnet} />
+              ) : activeTab === 'deposit' ? (
                 <Deposit userSession={userSession} />
               ) : (
                 <Withdraw userSession={userSession} />

@@ -5,6 +5,7 @@ import { verifyProof } from './verifier.js';
 import { MerkleTreeManager } from './merkle.js';
 import { RelayerSigner } from './signer.js';
 import { StacksClient } from './stacks-client.js';
+import { BlockchainIndexer } from './indexer.js';
 
 dotenv.config();
 
@@ -18,6 +19,11 @@ const PORT = process.env.PORT || 3001;
 const merkleTree = new MerkleTreeManager();
 const signer = new RelayerSigner(process.env.RELAYER_PRIVATE_KEY);
 const stacksClient = new StacksClient(process.env.STACKS_NETWORK || 'testnet');
+const indexer = new BlockchainIndexer(
+  process.env.CONTRACT_ADDRESS,
+  process.env.CONTRACT_NAME,
+  process.env.STACKS_NETWORK || 'testnet'
+);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -33,11 +39,14 @@ app.get('/root', (req, res) => {
 // Get merkle proof for a commitment
 app.get('/proof/:commitment', (req, res) => {
   const { commitment } = req.params;
+  console.log('Proof request for commitment:', commitment);
+  console.log('Available leaves:', merkleTree.leaves);
   try {
     const proof = merkleTree.getProof(commitment);
     res.json({ proof });
   } catch (error) {
-    res.status(404).json({ error: 'Commitment not found' });
+    console.error('Error getting proof:', error.message);
+    res.status(404).json({ error: 'Commitment not found', leaves: merkleTree.leaves });
   }
 });
 
@@ -129,8 +138,16 @@ app.get('/stats', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`VeilPay Relayer running on port ${PORT}`);
   console.log(`Relayer address: ${signer.getAddress()}`);
-  console.log(`Current merkle root: ${merkleTree.getRoot().toString('hex')}`);
+  console.log(`Contract: ${process.env.CONTRACT_ADDRESS}.${process.env.CONTRACT_NAME}`);
+
+  // Wait for Poseidon to initialize
+  console.log('Initializing Poseidon...');
+  await merkleTree.ensureInitialized();
+
+  // Start blockchain indexer
+  console.log('Starting blockchain indexer...');
+  indexer.startMonitoring(merkleTree, stacksClient, 30000); // Poll every 30 seconds
 });

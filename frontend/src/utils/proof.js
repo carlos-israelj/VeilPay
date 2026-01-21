@@ -16,15 +16,25 @@ export async function generateProof({
   root
 }) {
   try {
+    // Convert hex strings to BigInt strings for circuit
+    const convertHexToBigInt = (hex) => {
+      // Remove 0x prefix if present
+      const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex;
+      return BigInt('0x' + cleanHex).toString();
+    };
+
+    // Calculate nullifier hash
+    const nullifierHash = await calculateNullifier(secret, nonce);
+
     // Prepare circuit inputs
     const input = {
       secret: secret,
       amount: amount,
       nonce: nonce,
-      pathElements: pathElements,
+      pathElements: pathElements.map(convertHexToBigInt),
       pathIndices: pathIndices,
-      root: root,
-      nullifierHash: await calculateNullifier(secret, nonce),
+      root: convertHexToBigInt(root),
+      nullifierHash: convertHexToBigInt(nullifierHash),
       recipient: recipientToFieldElement(recipient)
     };
 

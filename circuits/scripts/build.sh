@@ -9,12 +9,15 @@ PTAU_FILE="powersOfTau28_hez_final_14.ptau"
 mkdir -p $BUILD_DIR
 
 echo "Compiling circuit..."
-circom ${CIRCUIT_NAME}.circom --r1cs --wasm --sym -o $BUILD_DIR
+circom ${CIRCUIT_NAME}.circom --r1cs --wasm --sym -o $BUILD_DIR -l ../node_modules
 
 # Download powers of tau if not exists
 if [ ! -f $BUILD_DIR/$PTAU_FILE ]; then
     echo "Downloading powers of tau..."
-    wget -P $BUILD_DIR https://hermez.s3-eu-west-1.amazonaws.com/$PTAU_FILE
+    wget -P $BUILD_DIR https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_14.ptau || \
+    wget -P $BUILD_DIR https://storage.googleapis.com/zkevm/powersOfTau28_hez_final_14.ptau || \
+    curl -o $BUILD_DIR/$PTAU_FILE https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_14.ptau || \
+    echo "Failed to download Powers of Tau. Please download manually from https://github.com/iden3/snarkjs#7-prepare-phase-2"
 fi
 
 echo "Generating zkey (trusted setup)..."
