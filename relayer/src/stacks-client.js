@@ -26,20 +26,30 @@ export class StacksClient {
 
   /**
    * Submit a withdrawal transaction
+   * Includes message-hash parameter for signature verification
    */
-  async submitWithdrawal({ nullifierHash, recipient, amount, root, signature }) {
+  async submitWithdrawal({ nullifierHash, recipient, amount, root, messageHash, signature }) {
+    console.log('[STACKS-CLIENT] Submitting withdrawal');
+    console.log('[STACKS-CLIENT] messageHash length:', messageHash.length, 'characters =', messageHash.length / 2, 'bytes');
+    console.log('[STACKS-CLIENT] signature length:', signature.length, 'characters =', signature.length / 2, 'bytes');
+
+    const functionArgs = [
+      bufferCV(Buffer.from(nullifierHash, 'hex')),
+      principalCV(recipient),
+      uintCV(amount),
+      bufferCV(Buffer.from(root, 'hex')),
+      bufferCV(Buffer.from(messageHash, 'hex')),
+      bufferCV(Buffer.from(signature, 'hex')),
+      contractPrincipalCV(this.usdcxAddress, this.usdcxName)
+    ];
+
+    console.log('[STACKS-CLIENT] functionArgs count:', functionArgs.length);
+
     const txOptions = {
       contractAddress: this.contractAddress,
       contractName: this.contractName,
       functionName: 'withdraw',
-      functionArgs: [
-        bufferCV(Buffer.from(nullifierHash, 'hex')),
-        principalCV(recipient),
-        uintCV(amount),
-        bufferCV(Buffer.from(root, 'hex')),
-        bufferCV(Buffer.from(signature, 'hex')),
-        contractPrincipalCV(this.usdcxAddress, this.usdcxName)
-      ],
+      functionArgs,
       senderKey: process.env.RELAYER_PRIVATE_KEY,
       network: this.network,
       anchorMode: AnchorMode.Any,
@@ -47,7 +57,15 @@ export class StacksClient {
     };
 
     const transaction = await makeContractCall(txOptions);
+    console.log('Transaction prepared, broadcasting...');
     const broadcastResponse = await broadcastTransaction(transaction, this.network);
+
+    console.log('Broadcast response:', JSON.stringify(broadcastResponse, null, 2));
+
+    // Check if broadcast was successful
+    if (broadcastResponse.error) {
+      throw new Error(`Broadcast failed: ${broadcastResponse.error} - ${broadcastResponse.reason}`);
+    }
 
     return broadcastResponse.txid;
   }

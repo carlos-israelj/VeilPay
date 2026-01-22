@@ -79,10 +79,7 @@ export class RelayerSigner {
       privateKey: this.privateKey
     });
 
-    // Return both messageHash and signature for veilpay contract
-    return {
-      messageHash: messageHash.toString('hex'),
-      signature: signature.data
-    };
+    // Return only signature (signature.data is already a hex string)
+    return signature.data;
   }
 }

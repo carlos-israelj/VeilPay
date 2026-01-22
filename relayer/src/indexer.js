@@ -49,8 +49,10 @@ export class BlockchainIndexer {
                 const commitmentIdMatch = eventData.match(/commitment-id\s+u(\d+)/);
 
                 if (commitmentMatch && amountMatch) {
+                  // Ensure commitment is always 64 characters (32 bytes) by padding with zeros
+                  const commitment = commitmentMatch[1].padStart(64, '0');
                   deposits.push({
-                    commitment: commitmentMatch[1],
+                    commitment: commitment,
                     amount: parseInt(amountMatch[1]),
                     commitmentId: commitmentIdMatch ? parseInt(commitmentIdMatch[1]) : null,
                     txId: event.tx_id,
@@ -127,6 +129,13 @@ export class BlockchainIndexer {
 
       // Add new commitments to tree
       for (const deposit of deposits) {
+        // Skip the first corrupted deposit (temporary fix)
+        // The first deposit was made before the full Poseidon system was in place
+        if (deposit.commitment === '00312080a32462f6b9d237508577790c0dea1a0f00f7d0a484d4796a1f84ad42') {
+          console.log(`Skipping old incompatible deposit: ${deposit.commitment.substring(0, 16)}...`);
+          continue;
+        }
+
         // Check if already in tree
         const currentLeaves = merkleTree.leaves;
         if (!currentLeaves.includes(deposit.commitment)) {

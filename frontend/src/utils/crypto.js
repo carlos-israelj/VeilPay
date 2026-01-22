@@ -37,7 +37,7 @@ export async function generateDeposit(amount) {
   return {
     secret: secret.toString(),
     nonce: nonce.toString(),
-    commitment: p.F.toString(commitment, 16),
+    commitment: p.F.toString(commitment, 16).padStart(64, '0'),
     amount: amountInMicroUnits.toString()
   };
 }
@@ -48,7 +48,7 @@ export async function generateDeposit(amount) {
 export async function calculateNullifier(secret, nonce) {
   const p = await getPoseidon();
   const nullifier = p([BigInt(secret), BigInt(nonce)]);
-  return p.F.toString(nullifier, 16);
+  return p.F.toString(nullifier, 16).padStart(64, '0');
 }
 
 /**

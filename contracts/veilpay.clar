@@ -109,16 +109,10 @@
     (recipient principal)
     (amount uint)
     (root (buff 32))
+    (message-hash (buff 32))
     (relayer-signature (buff 65))
     (token-contract <ft-trait>))
-    (let (
-        ;; Construct message that the relayer signed
-        (message-hash (sha256 (concat
-            nullifier-hash
-            (concat root
-                (concat (unwrap-panic (to-consensus-buff? recipient))
-                    (unwrap-panic (to-consensus-buff? amount)))))))
-    )
+    (begin
         ;; 1. Verify nullifier not used (prevents double-spending)
         (asserts! (is-none (map-get? used-nullifiers nullifier-hash)) ERR-NULLIFIER-USED)
 

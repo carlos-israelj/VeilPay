@@ -1,18 +1,25 @@
-import { MerkleTree } from 'merkletreejs';
 import { buildPoseidon } from 'circomlibjs';
 
 export class MerkleTreeManager {
   constructor(levels = 20) {
     this.levels = levels;
     this.leaves = [];
-    this.tree = null;
     this.poseidon = null;
+    this.zeroCache = [];
   }
 
   async initialize() {
     // Initialize Poseidon hash function
     this.poseidon = await buildPoseidon();
-    console.log('Merkle tree initialized (using Poseidon)');
+
+    // Pre-calculate zero values for each level
+    // zeros[0] = 0, zeros[i] = Poseidon(zeros[i-1], zeros[i-1])
+    this.zeroCache[0] = 0n;
+    for (let i = 1; i <= this.levels; i++) {
+      this.zeroCache[i] = this.poseidon([this.zeroCache[i - 1], this.zeroCache[i - 1]]);
+    }
+
+    console.log('Merkle tree initialized (using Poseidon with', this.levels, 'levels)');
   }
 
   async ensureInitialized() {
@@ -22,30 +29,36 @@ export class MerkleTreeManager {
   }
 
   /**
-   * Hash function using Poseidon
-   * This must match the hash used in the ZK circuit
+   * Hash a pair of nodes using Poseidon(2)
+   * This matches exactly what the circuit does
    */
-  hashFn(data) {
+  hashPair(left, right) {
     if (!this.poseidon) {
       throw new Error('Poseidon not initialized');
     }
 
-    // Convert hex string to BigInt if needed
-    let value;
-    if (typeof data === 'string') {
-      // Remove 0x prefix if present
-      const cleanHex = data.startsWith('0x') ? data.slice(2) : data;
-      value = BigInt('0x' + cleanHex);
-    } else if (typeof data === 'bigint') {
-      value = data;
+    // Convert to BigInt if needed
+    let leftBigInt, rightBigInt;
+
+    if (typeof left === 'bigint') {
+      leftBigInt = left;
+    } else if (typeof left === 'string') {
+      leftBigInt = BigInt('0x' + left);
     } else {
-      value = BigInt(data);
+      leftBigInt = left;
     }
 
-    // Poseidon hash returns a field element
-    const hash = this.poseidon([value]);
-    // Convert to hex string for merkletreejs
-    return Buffer.from(this.poseidon.F.toString(hash, 16).padStart(64, '0'), 'hex');
+    if (typeof right === 'bigint') {
+      rightBigInt = right;
+    } else if (typeof right === 'string') {
+      rightBigInt = BigInt('0x' + right);
+    } else {
+      rightBigInt = right;
+    }
+
+    // Poseidon(2) - takes 2 inputs
+    const hash = this.poseidon([leftBigInt, rightBigInt]);
+    return hash;
   }
 
   /**
@@ -53,51 +66,54 @@ export class MerkleTreeManager {
    */
   addLeaf(commitment) {
     this.leaves.push(commitment);
-    this.rebuildTree();
-  }
-
-  /**
-   * Rebuild the merkle tree
-   */
-  rebuildTree() {
-    try {
-      console.log(`Rebuilding tree with ${this.leaves.length} leaves`);
-      // Don't pad to full capacity - just use actual leaves
-      // The Merkle tree library will handle the tree structure
-      const leavesToUse = this.leaves.length > 0 ? this.leaves : ['0'];
-
-      this.tree = new MerkleTree(
-        leavesToUse,
-        (data) => this.hashFn(data),
-        { sortPairs: false }
-      );
-      console.log('Tree rebuilt successfully');
-    } catch (error) {
-      console.error('Error rebuilding tree:', error);
-      throw error;
-    }
   }
 
   /**
    * Get the current merkle root
+   * Builds the tree dynamically matching the circuit logic
    */
   getRoot() {
-    if (!this.tree) {
-      // Return empty root for uninitialized tree
+    if (this.leaves.length === 0) {
       return Buffer.alloc(32);
     }
-    return this.tree.getRoot();
+
+    // Start with leaves
+    let currentLevel = this.leaves.map(leaf => BigInt('0x' + leaf));
+
+    // Build tree level by level
+    for (let level = 0; level < this.levels; level++) {
+      const nextLevel = [];
+
+      for (let i = 0; i < currentLevel.length; i += 2) {
+        const left = currentLevel[i];
+        const right = i + 1 < currentLevel.length ? currentLevel[i + 1] : this.zeroCache[level];
+
+        const parent = this.hashPair(left, right);
+        nextLevel.push(parent);
+      }
+
+      // If we've reduced to a single node, continue hashing with zeros
+      if (nextLevel.length === 1 && level < this.levels - 1) {
+        let node = nextLevel[0];
+        for (let i = level + 1; i < this.levels; i++) {
+          node = this.hashPair(node, this.zeroCache[i]);
+        }
+        const rootHex = this.poseidon.F.toString(node, 16).padStart(64, '0');
+        return Buffer.from(rootHex, 'hex');
+      }
+
+      currentLevel = nextLevel;
+    }
+
+    const rootHex = this.poseidon.F.toString(currentLevel[0], 16).padStart(64, '0');
+    return Buffer.from(rootHex, 'hex');
   }
 
   /**
    * Get merkle proof for a commitment
    */
   getProof(commitment) {
-    if (!this.tree) {
-      throw new Error('Tree not initialized');
-    }
-
-    // Try exact match first
+    // Find leaf index
     let index = this.leaves.indexOf(commitment);
     let matchedLeaf = commitment;
 
@@ -115,19 +131,53 @@ export class MerkleTreeManager {
       throw new Error('Commitment not found in tree');
     }
 
-    const proof = this.tree.getProof(matchedLeaf, index);
+    const pathElements = [];
+    const pathIndices = [];
 
-    // Format proof for circuit
-    const pathElements = proof.map(p => p.data.toString('hex'));
-    const pathIndices = proof.map(p => p.position === 'right' ? 1 : 0);
+    // Build proof level by level
+    let currentLevel = this.leaves.map(leaf => BigInt('0x' + leaf));
+    let currentIndex = index;
 
-    // Pad arrays to match circuit depth (20 levels)
-    const TREE_LEVELS = 20;
-    const zeroPad = '0000000000000000000000000000000000000000000000000000000000000000';
+    for (let level = 0; level < this.levels; level++) {
+      const isRightNode = currentIndex % 2 === 1;
+      const siblingIndex = isRightNode ? currentIndex - 1 : currentIndex + 1;
 
-    while (pathElements.length < TREE_LEVELS) {
-      pathElements.push(zeroPad);
-      pathIndices.push(0);
+      let sibling;
+      if (siblingIndex < currentLevel.length) {
+        sibling = currentLevel[siblingIndex];
+      } else {
+        sibling = this.zeroCache[level];
+      }
+
+      // Convert sibling to hex string
+      const siblingHex = typeof sibling === 'bigint'
+        ? sibling.toString(16).padStart(64, '0')
+        : this.poseidon.F.toString(sibling, 16).padStart(64, '0');
+      pathElements.push(siblingHex);
+      pathIndices.push(isRightNode ? 1 : 0);
+
+      // Build next level
+      const nextLevel = [];
+      for (let i = 0; i < currentLevel.length; i += 2) {
+        const left = currentLevel[i];
+        const right = i + 1 < currentLevel.length ? currentLevel[i + 1] : this.zeroCache[level];
+        nextLevel.push(this.hashPair(left, right));
+      }
+
+      currentLevel = nextLevel;
+      currentIndex = Math.floor(currentIndex / 2);
+
+      // If we've reduced to a single node, fill remaining levels with zeros
+      if (currentLevel.length === 1 && level < this.levels - 1) {
+        for (let i = level + 1; i < this.levels; i++) {
+          const zeroHex = typeof this.zeroCache[i] === 'bigint'
+            ? this.zeroCache[i].toString(16).padStart(64, '0')
+            : this.poseidon.F.toString(this.zeroCache[i], 16).padStart(64, '0');
+          pathElements.push(zeroHex);
+          pathIndices.push(0);
+        }
+        break;
+      }
     }
 
     return {
@@ -162,6 +212,5 @@ export class MerkleTreeManager {
   import(state) {
     this.leaves = state.leaves;
     this.levels = state.levels;
-    this.rebuildTree();
   }
 }

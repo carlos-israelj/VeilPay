@@ -38,9 +38,14 @@ app.get('/root', (req, res) => {
 
 // Get merkle proof for a commitment
 app.get('/proof/:commitment', (req, res) => {
-  const { commitment } = req.params;
+  let { commitment } = req.params;
   console.log('Proof request for commitment:', commitment);
+
+  // Ensure commitment is 64 characters (pad with zeros if needed)
+  commitment = commitment.padStart(64, '0');
+  console.log('Padded commitment:', commitment);
   console.log('Available leaves:', merkleTree.leaves);
+
   try {
     const proof = merkleTree.getProof(commitment);
     res.json({ proof });
@@ -65,14 +70,20 @@ app.post('/withdraw', async (req, res) => {
     // 1. Verify the ZK proof
     console.log('Verifying ZK proof...');
     const isValid = await verifyProof(proof, publicSignals);
+    console.log('Proof verification result:', isValid);
 
     if (!isValid) {
+      console.log('Proof verification failed!');
       return res.status(400).json({ error: 'Invalid ZK proof' });
     }
 
     // 2. Verify the root matches our current tree
     const currentRoot = merkleTree.getRoot().toString('hex');
+    console.log('Current root:', currentRoot);
+    console.log('Provided root:', root);
+
     if (root !== currentRoot) {
+      console.log('Root mismatch!');
       return res.status(400).json({
         error: 'Invalid merkle root',
         currentRoot
@@ -80,21 +91,27 @@ app.post('/withdraw', async (req, res) => {
     }
 
     // 3. Sign the withdrawal request
-    const signature = await signer.signWithdrawal(
+    console.log('Signing withdrawal...');
+    const { messageHash, signature } = await signer.signWithdrawal(
       nullifierHash,
       recipient,
       amount,
       root
     );
+    console.log('Message hash:', messageHash.substring(0, 20) + '...');
+    console.log('Signature generated:', signature.substring(0, 20) + '...');
 
     // 4. Submit transaction to Stacks
+    console.log('Submitting transaction to Stacks...');
     const txid = await stacksClient.submitWithdrawal({
       nullifierHash,
       recipient,
       amount,
       root,
+      messageHash,
       signature
     });
+    console.log('Transaction submitted! TxID:', txid);
 
     res.json({
       success: true,
