@@ -1,40 +1,40 @@
 import { createHash } from 'crypto';
-import {
-  createStacksPrivateKey,
-  pubKeyfromPrivKey,
-  publicKeyToAddress,
-  AddressVersion,
-  signMessageHashRsv,
+import * as stacksTransactions from '@stacks/transactions';
+
+const {
+  privateKeyToPublic,
+  privateKeyToAddress,
+  getAddressFromPrivateKey,
+  signWithKey,
   serializeCV,
   principalCV,
   uintCV
-} from '@stacks/transactions';
+} = stacksTransactions;
 
 export class RelayerSigner {
   constructor(privateKeyHex) {
     if (!privateKeyHex) {
       throw new Error('Private key required');
     }
-    this.privateKey = createStacksPrivateKey(privateKeyHex);
-    this.publicKey = pubKeyfromPrivKey(privateKeyHex);
+    // Store the raw hex private key (v7 API doesn't use createStacksPrivateKey)
+    this.privateKeyHex = privateKeyHex;
+    // Get the public key from private key
+    this.publicKey = privateKeyToPublic(privateKeyHex);
   }
 
   /**
    * Get relayer address
    */
   getAddress(network = 'testnet') {
-    const version = network === 'mainnet'
-      ? AddressVersion.MainnetSingleSig
-      : AddressVersion.TestnetSingleSig;
-
-    return publicKeyToAddress(version, this.publicKey);
+    // Use getAddressFromPrivateKey which handles both mainnet/testnet
+    return getAddressFromPrivateKey(this.privateKeyHex, network);
   }
 
   /**
    * Get public key in compressed format
    */
   getPublicKey() {
-    return this.publicKey.data.toString('hex');
+    return this.publicKey;
   }
 
   /**
@@ -73,10 +73,10 @@ export class RelayerSigner {
 
     console.log('[SIGNER-FIXED] Message hash:', messageHash.toString('hex'));
 
-    // Sign with secp256k1
+    // Sign with secp256k1 - v7 API uses raw privateKeyHex string
     const signature = signMessageHashRsv({
       messageHash: messageHash.toString('hex'),
-      privateKey: this.privateKey
+      privateKey: this.privateKeyHex
     });
 
     // Return both messageHash and signature for veilpay contract

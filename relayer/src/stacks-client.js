@@ -1,4 +1,7 @@
-import {
+import * as stacksTransactions from '@stacks/transactions';
+import * as stacksNetwork from '@stacks/network';
+
+const {
   makeContractCall,
   broadcastTransaction,
   AnchorMode,
@@ -7,14 +10,15 @@ import {
   uintCV,
   principalCV,
   contractPrincipalCV
-} from '@stacks/transactions';
-import { StacksTestnet, StacksMainnet } from '@stacks/network';
+} = stacksTransactions;
+
+const { STACKS_TESTNET, STACKS_MAINNET } = stacksNetwork;
 
 export class StacksClient {
   constructor(networkType = 'testnet') {
     this.network = networkType === 'mainnet'
-      ? new StacksMainnet()
-      : new StacksTestnet();
+      ? STACKS_MAINNET
+      : STACKS_TESTNET;
 
     this.contractAddress = process.env.CONTRACT_ADDRESS;
     this.contractName = process.env.CONTRACT_NAME || 'veilpay';
