@@ -112,6 +112,8 @@ export default function Deposit({ userSession }) {
       const usdcxName = import.meta.env.VITE_USDCX_NAME || 'usdcx';
 
       // Using Pc helper for post-conditions (modern syntax)
+      // For USDCx token transfers, we specify the exact token name from the contract
+      // Token name is 'usdcx-token' as defined in the USDCx contract
       const postConditions = [
         Pc.principal(senderAddress)
           .willSendEq(deposit.amount)
@@ -129,7 +131,7 @@ export default function Deposit({ userSession }) {
           Cl.contractPrincipal(usdcxAddress, usdcxName)
         ],
         postConditions,
-        postConditionMode: PostConditionMode.Deny,
+        postConditionMode: PostConditionMode.Deny, // Re-enabled for security
         network: STACKS_TESTNET,
         appDetails: {
           name: 'VeilPay',

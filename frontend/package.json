@@ -12,7 +12,8 @@
     "circomlibjs": "^0.1.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "snarkjs": "^0.7.0"
+    "snarkjs": "^0.7.0",
+    "viem": "^2.44.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",
