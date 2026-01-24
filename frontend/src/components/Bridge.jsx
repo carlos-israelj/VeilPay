@@ -80,10 +80,16 @@ export default function Bridge({ stacksAddress }) {
   const [ethAddress, setEthAddress] = useState('');
   const [usdcBalance, setUsdcBalance] = useState('0');
   const [ethBalance, setEthBalance] = useState('0');
+  const [bridgeStep, setBridgeStep] = useState(''); // 'approving', 'depositing', 'waiting', 'completed'
+  const [txHash, setTxHash] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [recipientAddress, setRecipientAddress] = useState('');
+  const [useConnectedWallet, setUseConnectedWallet] = useState(true);
 
   const connectEthWallet = async () => {
     if (!window.ethereum) {
-      alert('Please install MetaMask or another Ethereum wallet');
+      setBridgeStep('error');
       return;
     }
 
@@ -119,7 +125,7 @@ export default function Bridge({ stacksAddress }) {
       await updateBalances(accounts[0]);
     } catch (error) {
       console.error('Error connecting wallet:', error);
-      alert('Failed to connect wallet: ' + error.message);
+      setBridgeStep('error');
     }
   };
 
@@ -143,24 +149,26 @@ export default function Bridge({ stacksAddress }) {
     setUsdcBalance(formatUnits(usdc, 6));
   };
 
+  const disconnectEthWallet = () => {
+    setEthAddress('');
+    setUsdcBalance('0');
+    setEthBalance('0');
+    setBridgeStep('');
+    setTxHash('');
+  };
+
   const handleBridge = async () => {
-    if (!ethAddress) {
-      alert('Please connect your Ethereum wallet first');
-      return;
-    }
+    const targetAddress = useConnectedWallet ? stacksAddress : recipientAddress;
 
-    if (!stacksAddress) {
-      alert('Please connect your Stacks wallet first');
-      return;
-    }
-
-    if (!amount || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount');
+    if (!ethAddress || !targetAddress || !amount || parseFloat(amount) <= 0) {
       return;
     }
 
     try {
       setLoading(true);
+      setBridgeStep('approving');
+      setTxHash('');
+      setProgress(0);
 
       const walletClient = createWalletClient({
         chain: sepolia,
@@ -174,10 +182,10 @@ export default function Bridge({ stacksAddress }) {
 
       const value = parseUnits(amount, 6); // USDC has 6 decimals
       const maxFee = 0n;
-      const remoteRecipient = encodeStacksAddress(stacksAddress);
+      const remoteRecipient = encodeStacksAddress(targetAddress);
       const hookData = '0x';
 
-      console.log('Bridging', amount, 'USDC to Stacks address:', stacksAddress);
+      console.log('Bridging', amount, 'USDC to Stacks address:', targetAddress);
       console.log('Encoded recipient (bytes32):', remoteRecipient);
 
       // Step 1: Approve xReserve to spend USDC
@@ -195,6 +203,7 @@ export default function Bridge({ stacksAddress }) {
       console.log('Approval confirmed');
 
       // Step 2: Deposit to Stacks
+      setBridgeStep('depositing');
       console.log('Depositing to Stacks...');
       const depositTx = await walletClient.writeContract({
         address: XRESERVE_CONTRACT,
@@ -205,17 +214,33 @@ export default function Bridge({ stacksAddress }) {
       });
 
       console.log('Deposit tx:', depositTx);
-      console.log('Bridge initiated! View on Sepolia Etherscan:',
-        `https://sepolia.etherscan.io/tx/${depositTx}`);
+      setTxHash(depositTx);
 
-      alert(`Bridge successful! Transaction: ${depositTx}\n\nUSDCx will arrive on Stacks in ~15 minutes.`);
+      // Start waiting period (18 minutes = 1080 seconds)
+      setBridgeStep('waiting');
+      setLoading(false);
+      const totalTime = 18 * 60; // 18 minutes in seconds
+      setTimeRemaining(totalTime);
+
+      // Update progress bar every second
+      const startTime = Date.now();
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = Math.max(0, totalTime - elapsed);
+        setTimeRemaining(remaining);
+        setProgress(Math.min(100, (elapsed / totalTime) * 100));
+
+        if (remaining === 0) {
+          clearInterval(interval);
+          setBridgeStep('completed');
+        }
+      }, 1000);
 
       // Update balances
       await updateBalances(ethAddress);
     } catch (error) {
       console.error('Bridge error:', error);
-      alert('Bridge failed: ' + error.message);
-    } finally {
+      setBridgeStep('error');
       setLoading(false);
     }
   };
@@ -226,7 +251,7 @@ export default function Bridge({ stacksAddress }) {
         <h3 className="text-[#9656D6] font-bold text-lg mb-2">Bridge USDC from Ethereum</h3>
         <p className="text-[#353945] text-sm">
           Bridge USDC from Ethereum Sepolia to get USDCx on Stacks testnet.
-          This uses Circle's xReserve protocol.
+          This uses Circle's xReserve protocol. Bridging takes approximately 18 minutes.
         </p>
       </div>
 
@@ -235,14 +260,22 @@ export default function Bridge({ stacksAddress }) {
           onClick={connectEthWallet}
           className="w-full bg-[#3772FF] hover:bg-[#2C5CE6] text-[#FBFCFC] font-bold py-4 px-6 rounded-full transition"
         >
-          Connect Ethereum Wallet (MetaMask)
+          Connect Ethereum Wallet
         </button>
       ) : (
         <>
           <div className="bg-[#F4F5F6] p-6 rounded-2xl border border-[#E5E8EB] space-y-4">
-            <div>
-              <p className="text-[#777E90] text-xs font-bold mb-2">Ethereum Address:</p>
-              <p className="text-[#22262E] text-sm font-mono break-all">{ethAddress}</p>
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <p className="text-[#777E90] text-xs font-bold mb-2">Ethereum Address:</p>
+                <p className="text-[#22262E] text-sm font-mono break-all">{ethAddress}</p>
+              </div>
+              <button
+                onClick={disconnectEthWallet}
+                className="ml-4 bg-[#FBFCFC] hover:bg-[#E5E8EB] text-[#22262E] px-4 py-2 rounded-full text-xs font-bold transition border border-[#E5E8EB]"
+              >
+                Disconnect
+              </button>
             </div>
             <div className="grid grid-cols-2 gap-6 mt-4">
               <div className="bg-[#FBFCFC] p-4 rounded-xl border border-[#E5E8EB]">
@@ -254,6 +287,51 @@ export default function Bridge({ stacksAddress }) {
                 <p className="text-[#22262E] font-bold text-lg">{parseFloat(usdcBalance).toFixed(2)} USDC</p>
               </div>
             </div>
+          </div>
+
+          {/* Recipient Selection */}
+          <div>
+            <label className="block text-[#22262E] font-bold mb-3">Stacks Recipient Address</label>
+
+            <div className="flex items-center gap-3 mb-3">
+              <button
+                onClick={() => setUseConnectedWallet(true)}
+                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition border-2 ${
+                  useConnectedWallet
+                    ? 'bg-[#3772FF] text-[#FBFCFC] border-[#3772FF]'
+                    : 'bg-[#FBFCFC] text-[#777E90] border-[#E5E8EB] hover:border-[#3772FF]'
+                }`}
+              >
+                Use Connected Wallet
+              </button>
+              <button
+                onClick={() => setUseConnectedWallet(false)}
+                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition border-2 ${
+                  !useConnectedWallet
+                    ? 'bg-[#3772FF] text-[#FBFCFC] border-[#3772FF]'
+                    : 'bg-[#FBFCFC] text-[#777E90] border-[#E5E8EB] hover:border-[#3772FF]'
+                }`}
+              >
+                Custom Address
+              </button>
+            </div>
+
+            {useConnectedWallet ? (
+              <div className="bg-[#F4F5F6] p-4 rounded-xl border border-[#E5E8EB]">
+                <p className="text-[#777E90] text-xs font-bold mb-1">Recipient:</p>
+                <p className="text-[#22262E] text-sm font-mono break-all">
+                  {stacksAddress || 'Connect Stacks wallet first'}
+                </p>
+              </div>
+            ) : (
+              <input
+                type="text"
+                value={recipientAddress}
+                onChange={(e) => setRecipientAddress(e.target.value)}
+                placeholder="ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+                className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition font-mono text-sm"
+              />
+            )}
           </div>
 
           <div>
@@ -274,35 +352,142 @@ export default function Bridge({ stacksAddress }) {
 
           <button
             onClick={handleBridge}
-            disabled={loading || !amount || parseFloat(amount) < 1}
+            disabled={loading || !amount || parseFloat(amount) < 1 || bridgeStep === 'waiting'}
             className="w-full bg-[#3772FF] hover:bg-[#2C5CE6] disabled:bg-[#B0B4C3] text-[#FBFCFC] font-bold py-4 px-6 rounded-full transition"
           >
-            {loading ? 'Bridging...' : 'Bridge USDC to Stacks'}
+            {loading ? (bridgeStep === 'approving' ? 'Approving USDC...' : 'Depositing to Bridge...') : 'Bridge USDC to Stacks'}
           </button>
 
-          <div className="bg-[#EF466F] bg-opacity-10 p-6 rounded-2xl border border-[#EF466F] border-opacity-30">
-            <p className="text-[#353945] text-sm">
-              <strong className="text-[#EF466F]">Need testnet USDC?</strong>
-              <br />
-              Get USDC from Circle Faucet: <a
-                href="https://faucet.circle.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#3772FF] underline font-medium"
-              >
-                faucet.circle.com
-              </a>
-              <br />
-              Get ETH from Sepolia Faucet: <a
-                href="https://www.alchemy.com/faucets/ethereum-sepolia"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#3772FF] underline font-medium"
-              >
-                alchemy.com/faucets
-              </a>
-            </p>
-          </div>
+          {/* Bridge Status Messages */}
+          {bridgeStep === 'approving' && (
+            <div className="bg-[#3772FF] bg-opacity-10 p-6 rounded-2xl border border-[#3772FF] border-opacity-30">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="animate-spin h-5 w-5 border-2 border-[#3772FF] border-t-transparent rounded-full"></div>
+                <p className="text-[#3772FF] font-bold">Step 1: Approving USDC</p>
+              </div>
+              <p className="text-[#353945] text-sm">
+                Please confirm the approval transaction in your Ethereum wallet...
+              </p>
+            </div>
+          )}
+
+          {bridgeStep === 'depositing' && (
+            <div className="bg-[#3772FF] bg-opacity-10 p-6 rounded-2xl border border-[#3772FF] border-opacity-30">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="animate-spin h-5 w-5 border-2 border-[#3772FF] border-t-transparent rounded-full"></div>
+                <p className="text-[#3772FF] font-bold">Step 2: Depositing to Bridge</p>
+              </div>
+              <p className="text-[#353945] text-sm">
+                Please sign and send the bridge transaction in your Ethereum wallet...
+              </p>
+            </div>
+          )}
+
+          {bridgeStep === 'waiting' && txHash && (
+            <div className="bg-[#45B26A] bg-opacity-10 p-6 rounded-2xl border border-[#45B26A] border-opacity-30 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-5 w-5 bg-[#45B26A] rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+                <p className="text-[#45B26A] font-bold">Bridge Transaction Submitted!</p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[#353945] text-sm font-medium">Transaction Hash:</p>
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#3772FF] text-sm font-mono break-all hover:underline block"
+                >
+                  {txHash}
+                </a>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <p className="text-[#353945] text-sm font-bold">Estimated Time Remaining:</p>
+                  <p className="text-[#3772FF] font-bold">
+                    {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, '0')}
+                  </p>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-[#E5E8EB] rounded-full h-3 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-[#3772FF] to-[#45B26A] h-full rounded-full transition-all duration-1000 ease-linear"
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+
+                <p className="text-[#777E90] text-xs text-center">
+                  Your USDCx will arrive on Stacks in approximately {Math.ceil(timeRemaining / 60)} minutes
+                </p>
+              </div>
+            </div>
+          )}
+
+          {bridgeStep === 'completed' && txHash && (
+            <div className="bg-[#45B26A] bg-opacity-10 p-6 rounded-2xl border border-[#45B26A] border-opacity-30 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-6 w-6 bg-[#45B26A] rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold">✓</span>
+                </div>
+                <p className="text-[#45B26A] font-bold text-lg">Bridge Complete!</p>
+              </div>
+
+              <p className="text-[#353945] text-sm">
+                Your USDCx should now be available on Stacks. Check your balance in the Deposit tab.
+              </p>
+
+              <div className="space-y-2">
+                <p className="text-[#353945] text-sm font-medium">Transaction:</p>
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#3772FF] text-sm font-mono break-all hover:underline block"
+                >
+                  {txHash}
+                </a>
+              </div>
+            </div>
+          )}
+
+          {bridgeStep === 'error' && (
+            <div className="bg-[#EF466F] bg-opacity-10 p-6 rounded-2xl border border-[#EF466F] border-opacity-30">
+              <p className="text-[#EF466F] font-bold mb-2">Bridge Failed</p>
+              <p className="text-[#353945] text-sm">
+                Please try again or check the console for error details.
+              </p>
+            </div>
+          )}
+
+          {!bridgeStep && (
+            <div className="bg-[#EF466F] bg-opacity-10 p-6 rounded-2xl border border-[#EF466F] border-opacity-30">
+              <p className="text-[#353945] text-sm">
+                <strong className="text-[#EF466F]">Need testnet USDC?</strong>
+                <br />
+                Get USDC from Circle Faucet: <a
+                  href="https://faucet.circle.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#3772FF] underline font-medium"
+                >
+                  faucet.circle.com
+                </a>
+                <br />
+                Get ETH from Sepolia Faucet: <a
+                  href="https://www.alchemy.com/faucets/ethereum-sepolia"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#3772FF] underline font-medium"
+                >
+                  alchemy.com/faucets
+                </a>
+              </p>
+            </div>
+          )}
         </>
       )}
     </div>
