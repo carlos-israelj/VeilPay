@@ -231,14 +231,92 @@ export default function Deposit({ userSession }) {
           <p className="text-[#45B26A] font-bold text-base mb-2">
             Deposit successful!
           </p>
-          <p className="text-[#353945] text-sm mb-3">
-            Your deposit details have been saved. Keep them safe to withdraw
-            later.
+          <p className="text-[#353945] text-sm mb-4">
+            Share these credentials with the person who will withdraw the funds. They need ALL three values.
           </p>
-          <div className="mt-3 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB] text-xs break-all">
-            <p className="text-[#777E90] font-bold mb-1">Commitment:</p>
-            <p className="text-[#22262E]">{depositData.commitment}</p>
+
+          {/* Secret */}
+          <div className="mt-3 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
+            <div className="flex justify-between items-center mb-1">
+              <p className="text-[#777E90] font-bold text-xs">Secret:</p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(depositData.secret);
+                  alert('Secret copied to clipboard!');
+                }}
+                className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-bold"
+              >
+                Copy
+              </button>
+            </div>
+            <p className="text-[#22262E] text-xs font-mono break-all">{depositData.secret}</p>
           </div>
+
+          {/* Nonce */}
+          <div className="mt-3 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
+            <div className="flex justify-between items-center mb-1">
+              <p className="text-[#777E90] font-bold text-xs">Nonce:</p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(depositData.nonce);
+                  alert('Nonce copied to clipboard!');
+                }}
+                className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-bold"
+              >
+                Copy
+              </button>
+            </div>
+            <p className="text-[#22262E] text-xs font-mono break-all">{depositData.nonce}</p>
+          </div>
+
+          {/* Amount */}
+          <div className="mt-3 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
+            <div className="flex justify-between items-center mb-1">
+              <p className="text-[#777E90] font-bold text-xs">Amount:</p>
+              <button
+                onClick={() => {
+                  const displayAmount = (Number(depositData.amount) / 1000000).toFixed(2);
+                  navigator.clipboard.writeText(displayAmount);
+                  alert('Amount copied to clipboard!');
+                }}
+                className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-bold"
+              >
+                Copy
+              </button>
+            </div>
+            <p className="text-[#22262E] text-xs font-mono">{(Number(depositData.amount) / 1000000).toFixed(2)} USDCx</p>
+          </div>
+
+          {/* Copy All Button */}
+          <button
+            onClick={() => {
+              const displayAmount = (Number(depositData.amount) / 1000000).toFixed(2);
+              const allData = `VeilPay Withdrawal Credentials\n\nSecret: ${depositData.secret}\nNonce: ${depositData.nonce}\nAmount: ${displayAmount}\n\nShare these with the person who will withdraw the funds.`;
+              navigator.clipboard.writeText(allData);
+              alert('All credentials copied to clipboard!');
+            }}
+            className="w-full mt-4 bg-[#3772FF] hover:bg-[#2C5CE6] text-[#FBFCFC] py-3 px-4 rounded-xl font-bold text-sm transition"
+          >
+            Copy All Credentials
+          </button>
+
+          {/* Transaction Link */}
+          {depositData.txId && (
+            <div className="mt-4 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
+              <p className="text-[#777E90] font-bold text-xs mb-2">Transaction:</p>
+              <a
+                href={`https://explorer.hiro.so/txid/${depositData.txId}?chain=testnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-mono break-all flex items-center gap-2"
+              >
+                {depositData.txId}
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+          )}
         </div>
       )}
 

@@ -71,7 +71,17 @@ export default function History() {
         senderAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
       });
 
-      return cvToValue(result);
+      const value = cvToValue(result);
+      // The contract returns (ok true) or (ok false)
+      // cvToValue converts this to { type: 'ok', value: boolean }
+      console.log('Nullifier check result:', value);
+
+      // Extract the actual boolean value
+      if (value && typeof value === 'object' && 'value' in value) {
+        return value.value;
+      }
+
+      return value;
     } catch (error) {
       console.error('Error checking nullifier:', error);
       return false;
