@@ -139,12 +139,19 @@ export default function Deposit({ userSession }) {
         },
         onFinish: (data) => {
           console.log('Deposit successful:', data.txId);
-          setDepositData(deposit);
-          setLoading(false);
-          // Reload deposits to show the new one
+
+          // Update the deposit with txId
           const storedDeposits = JSON.parse(
             localStorage.getItem('veilpay_deposits') || '[]'
           );
+          const lastDepositIndex = storedDeposits.length - 1;
+          if (lastDepositIndex >= 0) {
+            storedDeposits[lastDepositIndex].txId = data.txId;
+            localStorage.setItem('veilpay_deposits', JSON.stringify(storedDeposits));
+          }
+
+          setDepositData({ ...deposit, txId: data.txId });
+          setLoading(false);
           setDeposits(storedDeposits);
         },
         onCancel: () => {
