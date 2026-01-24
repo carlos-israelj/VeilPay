@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react';
 import { generateDeposit } from '../utils/crypto';
 import {
-  bufferCV,
-  uintCV,
-  contractPrincipalCV,
-  principalCV,
-  callReadOnlyFunction,
+  Cl,
+  fetchCallReadOnlyFunction,
   cvToValue,
   PostConditionMode,
   Pc
 } from '@stacks/transactions';
-import { StacksTestnet } from '@stacks/network';
+import { STACKS_TESTNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
 
 export default function Deposit({ userSession }) {
@@ -50,14 +47,14 @@ export default function Deposit({ userSession }) {
         const address = userData.profile.stxAddress.testnet;
 
         // Call get-balance on USDCx contract
-        const result = await callReadOnlyFunction({
+        const result = await fetchCallReadOnlyFunction({
           contractAddress: import.meta.env.VITE_USDCX_ADDRESS || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
           contractName: import.meta.env.VITE_USDCX_NAME || 'usdcx',
           functionName: 'get-balance',
           functionArgs: [
-            principalCV(address)
+            Cl.principal(address)
           ],
-          network: new StacksTestnet(),
+          network: STACKS_TESTNET,
           senderAddress: address,
         });
 
@@ -127,13 +124,13 @@ export default function Deposit({ userSession }) {
         contractName: import.meta.env.VITE_CONTRACT_NAME || 'veilpay',
         functionName: 'deposit',
         functionArgs: [
-          bufferCV(Buffer.from(deposit.commitment, 'hex')),
-          uintCV(deposit.amount), // Use micro-units
-          contractPrincipalCV(usdcxAddress, usdcxName)
+          Cl.buffer(Buffer.from(deposit.commitment, 'hex')),
+          Cl.uint(deposit.amount), // Use micro-units
+          Cl.contractPrincipal(usdcxAddress, usdcxName)
         ],
         postConditions,
         postConditionMode: PostConditionMode.Deny,
-        network: new StacksTestnet(),
+        network: STACKS_TESTNET,
         appDetails: {
           name: 'VeilPay',
           icon: window.location.origin + '/logo.png',

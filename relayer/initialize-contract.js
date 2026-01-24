@@ -1,6 +1,5 @@
-import { makeContractCall, broadcastTransaction, AnchorMode, bufferCV } from '@stacks/transactions';
+import { makeContractCall, broadcastTransaction, AnchorMode, privateKeyToPublic, Cl } from '@stacks/transactions';
 import { STACKS_TESTNET } from '@stacks/network';
-import { privateKeyToPublic } from '@stacks/transactions';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -30,7 +29,7 @@ async function initializeContract() {
       contractName,
       functionName: 'initialize',
       functionArgs: [
-        bufferCV(Buffer.from(publicKey, 'hex'))
+        Cl.buffer(Buffer.from(publicKey, 'hex'))
       ],
       senderKey: privateKey,
       network: STACKS_TESTNET,

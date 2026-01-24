@@ -92,8 +92,16 @@ app.post('/withdraw', async (req, res) => {
 
     // 3. Sign the withdrawal request
     console.log('Signing withdrawal...');
+
+    // Convert nullifierHash from decimal string to hex if needed
+    let nullifierHashHex = nullifierHash;
+    if (typeof nullifierHash === 'string' && nullifierHash.length !== 64) {
+      nullifierHashHex = BigInt(nullifierHash).toString(16).padStart(64, '0');
+      console.log('[INDEX] Converted nullifierHash for signing:', nullifierHashHex);
+    }
+
     const { messageHash, signature } = await signer.signWithdrawal(
-      nullifierHash,
+      nullifierHashHex,
       recipient,
       amount,
       root

@@ -1,15 +1,11 @@
 import { createHash } from 'crypto';
-import * as stacksTransactions from '@stacks/transactions';
-
-const {
+import {
   privateKeyToPublic,
-  privateKeyToAddress,
   getAddressFromPrivateKey,
-  signWithKey,
-  serializeCV,
-  principalCV,
-  uintCV
-} = stacksTransactions;
+  signMessageHashRsv,
+  Cl,
+  cvToHex
+} from '@stacks/transactions';
 
 export class RelayerSigner {
   constructor(privateKeyHex) {
@@ -41,22 +37,24 @@ export class RelayerSigner {
    * Sign a withdrawal request
    * Creates same message hash that the Clarity contract expects
    *
-   * FIXED VERSION: to-consensus-buff? INCLUDES the type byte!
+   * V7 API VERSION: Uses Cl helper and cvToHex for serialization
    */
   async signWithdrawal(nullifierHash, recipient, amount, root) {
-    // Serialize values using serializeCV (same as to-consensus-buff?)
-    const recipientCV = principalCV(recipient);
-    const amountCV = uintCV(amount);
+    // Create Clarity values using modern Cl API
+    const recipientCV = Cl.principal(recipient);
+    const amountCV = Cl.uint(amount);
 
-    const recipientSerialized = serializeCV(recipientCV);
-    const amountSerialized = serializeCV(amountCV);
+    // In v7.x, cvToHex returns hex string with '0x' prefix
+    // This matches Clarity's to-consensus-buff? serialization format
+    const recipientHex = cvToHex(recipientCV);
+    const amountHex = cvToHex(amountCV);
 
-    // KEY FIX: Do NOT remove type byte! to-consensus-buff? includes it
-    const recipientBuff = recipientSerialized;  // Keep full serialization
-    const amountBuff = amountSerialized;        // Keep full serialization
+    // Remove '0x' prefix and convert to Buffer
+    const recipientBuff = Buffer.from(recipientHex.replace('0x', ''), 'hex');
+    const amountBuff = Buffer.from(amountHex.replace('0x', ''), 'hex');
 
-    console.log('[SIGNER-FIXED] recipientBuff length:', recipientBuff.length, 'bytes');
-    console.log('[SIGNER-FIXED] amountBuff length:', amountBuff.length, 'bytes');
+    console.log('[SIGNER] recipientBuff length:', recipientBuff.length, 'bytes');
+    console.log('[SIGNER] amountBuff length:', amountBuff.length, 'bytes');
 
     // Construct message same way as Clarity contract does
     const message = Buffer.concat([
@@ -66,14 +64,15 @@ export class RelayerSigner {
       amountBuff
     ]);
 
-    console.log('[SIGNER-FIXED] Total message length:', message.length, 'bytes');
+    console.log('[SIGNER] Total message length:', message.length, 'bytes');
 
     // Hash the message
     const messageHash = createHash('sha256').update(message).digest();
 
-    console.log('[SIGNER-FIXED] Message hash:', messageHash.toString('hex'));
+    console.log('[SIGNER] Message hash:', messageHash.toString('hex'));
 
     // Sign with secp256k1 - v7 API uses raw privateKeyHex string
+    // In v7.x, signMessageHashRsv returns the signature hex string directly
     const signature = signMessageHashRsv({
       messageHash: messageHash.toString('hex'),
       privateKey: this.privateKeyHex
@@ -82,7 +81,7 @@ export class RelayerSigner {
     // Return both messageHash and signature for veilpay contract
     return {
       messageHash: messageHash.toString('hex'),
-      signature: signature.data
+      signature: signature // v7 returns hex string directly, not object with .data
     };
   }
 }

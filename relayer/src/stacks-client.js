@@ -1,18 +1,12 @@
-import * as stacksTransactions from '@stacks/transactions';
-import * as stacksNetwork from '@stacks/network';
-
-const {
+import {
   makeContractCall,
   broadcastTransaction,
   AnchorMode,
   PostConditionMode,
-  bufferCV,
-  uintCV,
-  principalCV,
-  contractPrincipalCV
-} = stacksTransactions;
+  Cl
+} from '@stacks/transactions';
 
-const { STACKS_TESTNET, STACKS_MAINNET } = stacksNetwork;
+import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
 
 export class StacksClient {
   constructor(networkType = 'testnet') {
@@ -34,20 +28,40 @@ export class StacksClient {
    */
   async submitWithdrawal({ nullifierHash, recipient, amount, root, messageHash, signature }) {
     console.log('[STACKS-CLIENT] Submitting withdrawal');
-    console.log('[STACKS-CLIENT] messageHash length:', messageHash.length, 'characters =', messageHash.length / 2, 'bytes');
-    console.log('[STACKS-CLIENT] signature length:', signature.length, 'characters =', signature.length / 2, 'bytes');
+
+    // Convert nullifierHash from decimal string to hex if needed
+    let nullifierHashHex = nullifierHash;
+    if (typeof nullifierHash === 'string' && nullifierHash.length !== 64) {
+      // It's likely a decimal string (not 64 hex chars), convert to hex
+      nullifierHashHex = BigInt(nullifierHash).toString(16).padStart(64, '0');
+      console.log('[STACKS-CLIENT] Converted nullifierHash from decimal to hex:', nullifierHashHex);
+    } else if (typeof nullifierHash === 'number' || typeof nullifierHash === 'bigint') {
+      // It's a number, convert to hex
+      nullifierHashHex = BigInt(nullifierHash).toString(16).padStart(64, '0');
+      console.log('[STACKS-CLIENT] Converted nullifierHash from number to hex:', nullifierHashHex);
+    }
+
+    console.log('[STACKS-CLIENT] Raw inputs:');
+    console.log('  nullifierHash:', nullifierHashHex, `(${nullifierHashHex.length} chars = ${nullifierHashHex.length / 2} bytes)`);
+    console.log('  recipient:', recipient);
+    console.log('  amount:', amount);
+    console.log('  root:', root, `(${root.length} chars = ${root.length / 2} bytes)`);
+    console.log('  messageHash:', messageHash, `(${messageHash.length} chars = ${messageHash.length / 2} bytes)`);
+    console.log('  signature:', signature, `(${signature.length} chars = ${signature.length / 2} bytes)`);
 
     const functionArgs = [
-      bufferCV(Buffer.from(nullifierHash, 'hex')),
-      principalCV(recipient),
-      uintCV(amount),
-      bufferCV(Buffer.from(root, 'hex')),
-      bufferCV(Buffer.from(messageHash, 'hex')),
-      bufferCV(Buffer.from(signature, 'hex')),
-      contractPrincipalCV(this.usdcxAddress, this.usdcxName)
+      Cl.buffer(Buffer.from(nullifierHashHex, 'hex')),
+      Cl.principal(recipient),
+      Cl.uint(amount),
+      Cl.buffer(Buffer.from(root, 'hex')),
+      Cl.buffer(Buffer.from(signature, 'hex')),
+      Cl.contractPrincipal(this.usdcxAddress, this.usdcxName)
     ];
 
-    console.log('[STACKS-CLIENT] functionArgs count:', functionArgs.length);
+    console.log('[STACKS-CLIENT] Clarity function args:');
+    functionArgs.forEach((arg, idx) => {
+      console.log(`  [${idx}]:`, arg);
+    });
 
     const txOptions = {
       contractAddress: this.contractAddress,
@@ -62,7 +76,12 @@ export class StacksClient {
 
     const transaction = await makeContractCall(txOptions);
     console.log('Transaction prepared, broadcasting...');
-    const broadcastResponse = await broadcastTransaction(transaction, this.network);
+
+    // In v7.x, broadcastTransaction expects { transaction, network }
+    const broadcastResponse = await broadcastTransaction({
+      transaction,
+      network: this.network
+    });
 
     console.log('Broadcast response:', JSON.stringify(broadcastResponse, null, 2));
 
@@ -83,7 +102,7 @@ export class StacksClient {
       contractName: this.contractName,
       functionName: 'update-root',
       functionArgs: [
-        bufferCV(Buffer.from(newRoot, 'hex'))
+        Cl.buffer(Buffer.from(newRoot, 'hex'))
       ],
       senderKey: process.env.RELAYER_PRIVATE_KEY,
       network: this.network,
@@ -92,7 +111,17 @@ export class StacksClient {
     };
 
     const transaction = await makeContractCall(txOptions);
-    const broadcastResponse = await broadcastTransaction(transaction, this.network);
+
+    // In v7.x, broadcastTransaction expects { transaction, network }
+    const broadcastResponse = await broadcastTransaction({
+      transaction,
+      network: this.network
+    });
+
+    // Check if broadcast was successful
+    if (broadcastResponse.error) {
+      throw new Error(`Broadcast failed: ${broadcastResponse.error} - ${broadcastResponse.reason}`);
+    }
 
     return broadcastResponse.txid;
   }
