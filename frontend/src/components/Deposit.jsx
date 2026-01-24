@@ -162,31 +162,31 @@ export default function Deposit({ userSession }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* USDCx Balance Display */}
-      <div className="bg-gray-800 p-4 rounded-lg">
+      <div className="bg-[#F4F5F6] p-6 rounded-2xl border border-[#E5E8EB]">
         <div className="flex justify-between items-center">
-          <span className="text-gray-400 text-sm">Your USDCx Balance:</span>
-          <span className="text-white font-bold text-lg">{usdcxBalance} USDCx</span>
+          <span className="text-[#777E90] text-sm font-bold">Your USDCx Balance:</span>
+          <span className="text-[#22262E] font-bold text-2xl">{usdcxBalance} USDCx</span>
         </div>
       </div>
 
       {/* Deposit History */}
       {deposits.length > 0 && (
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="text-white font-semibold mb-3">Your Deposits ({deposits.length})</h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+        <div className="bg-[#F4F5F6] p-6 rounded-2xl border border-[#E5E8EB]">
+          <h3 className="text-[#22262E] font-bold text-lg mb-4">Your Deposits ({deposits.length})</h3>
+          <div className="space-y-3 max-h-64 overflow-y-auto">
             {deposits.map((dep, idx) => (
-              <div key={idx} className="bg-gray-700 p-3 rounded text-sm">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-purple-400 font-semibold">
+              <div key={idx} className="bg-[#FBFCFC] p-4 rounded-xl border border-[#E5E8EB]">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[#3772FF] font-bold text-base">
                     {dep.amountDisplay || (dep.amount / 1000000).toFixed(2)} USDCx
                   </span>
-                  <span className="text-gray-400 text-xs">
+                  <span className="text-[#777E90] text-xs font-medium">
                     {new Date(dep.timestamp).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="text-gray-400 text-xs break-all">
+                <div className="text-[#777E90] text-xs break-all">
                   Commitment: {dep.commitment.substring(0, 20)}...
                 </div>
               </div>
@@ -196,7 +196,7 @@ export default function Deposit({ userSession }) {
       )}
 
       <div>
-        <label className="block text-gray-300 mb-2">Amount (USDCx)</label>
+        <label className="block text-[#22262E] font-bold mb-3">Amount (USDCx)</label>
         <input
           type="number"
           value={amount}
@@ -204,9 +204,9 @@ export default function Deposit({ userSession }) {
           placeholder="Enter amount (min 1.00)"
           step="0.01"
           min="1.00"
-          className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition"
         />
-        <p className="text-gray-400 text-xs mt-1">
+        <p className="text-[#777E90] text-xs mt-2 font-medium">
           Available: {usdcxBalance} USDCx | Minimum: 1.00 USDCx
         </p>
       </div>
@@ -214,30 +214,30 @@ export default function Deposit({ userSession }) {
       <button
         onClick={handleDeposit}
         disabled={!amount || loading || parseFloat(amount) < 1}
-        className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition"
+        className="w-full bg-[#3772FF] hover:bg-[#2C5CE6] disabled:bg-[#B0B4C3] text-[#FBFCFC] font-bold py-4 px-6 rounded-full transition"
       >
         {loading ? 'Processing...' : 'Deposit'}
       </button>
 
       {depositData && (
-        <div className="mt-6 p-4 bg-green-900 bg-opacity-30 rounded-lg">
-          <p className="text-green-400 font-semibold mb-2">
+        <div className="mt-6 p-6 bg-[#45B26A] bg-opacity-10 rounded-2xl border border-[#45B26A] border-opacity-30">
+          <p className="text-[#45B26A] font-bold text-base mb-2">
             Deposit successful!
           </p>
-          <p className="text-gray-300 text-sm">
+          <p className="text-[#353945] text-sm mb-3">
             Your deposit details have been saved. Keep them safe to withdraw
             later.
           </p>
-          <div className="mt-2 p-2 bg-gray-800 rounded text-xs break-all">
-            <p className="text-gray-400">Commitment:</p>
-            <p className="text-white">{depositData.commitment}</p>
+          <div className="mt-3 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB] text-xs break-all">
+            <p className="text-[#777E90] font-bold mb-1">Commitment:</p>
+            <p className="text-[#22262E]">{depositData.commitment}</p>
           </div>
         </div>
       )}
 
-      <div className="mt-4 p-4 bg-yellow-900 bg-opacity-30 rounded-lg">
-        <p className="text-yellow-400 text-sm">
-          <strong>Important:</strong> Your deposit credentials are stored
+      <div className="mt-4 p-6 bg-[#EF466F] bg-opacity-10 rounded-2xl border border-[#EF466F] border-opacity-30">
+        <p className="text-[#353945] text-sm">
+          <strong className="text-[#EF466F]">Important:</strong> Your deposit credentials are stored
           locally. Make sure to back them up before clearing browser data.
         </p>
       </div>

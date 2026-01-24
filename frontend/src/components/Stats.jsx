@@ -24,15 +24,25 @@ export default function Stats() {
   if (!stats) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-4 mb-8">
-      <div className="bg-gradient-to-br from-purple-900 to-purple-700 p-4 rounded-lg">
-        <p className="text-purple-200 text-sm">Total Deposits</p>
-        <p className="text-white text-2xl font-bold">{stats.totalDeposits}</p>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-[#FBFCFC] p-8 rounded-3xl border border-[#E5E8EB] shadow-lg">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-12 h-12 rounded-full bg-[#3772FF] bg-opacity-10 flex items-center justify-center">
+            <span className="text-[#3772FF] text-xl font-bold">📊</span>
+          </div>
+          <p className="text-[#777E90] text-sm font-bold">Total Deposits</p>
+        </div>
+        <p className="text-[#22262E] text-4xl font-bold">{stats.totalDeposits}</p>
       </div>
-      <div className="bg-gradient-to-br from-blue-900 to-blue-700 p-4 rounded-lg">
-        <p className="text-blue-200 text-sm">Merkle Root</p>
-        <p className="text-white text-xs font-mono">
-          {stats.currentRoot.slice(0, 10)}...
+      <div className="bg-[#FBFCFC] p-8 rounded-3xl border border-[#E5E8EB] shadow-lg">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-12 h-12 rounded-full bg-[#45B26A] bg-opacity-10 flex items-center justify-center">
+            <span className="text-[#45B26A] text-xl font-bold">🌳</span>
+          </div>
+          <p className="text-[#777E90] text-sm font-bold">Merkle Root</p>
+        </div>
+        <p className="text-[#22262E] text-sm font-mono break-all">
+          {stats.currentRoot.slice(0, 16)}...
         </p>
       </div>
     </div>

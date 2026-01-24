@@ -33,59 +33,89 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black">
-      <Header
-        userData={userData}
-        connectWallet={connectWallet}
-        disconnectWallet={disconnectWallet}
-      />
+    <div className="flex flex-col bg-[#FBFCFC] min-h-screen">
+      {/* Header */}
+      <div className="bg-[#FBFCFC] border-b border-[#E5E8EB]">
+        <Header
+          userData={userData}
+          connectWallet={connectWallet}
+          disconnectWallet={disconnectWallet}
+        />
+      </div>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-2xl shadow-2xl p-8">
-          <h1 className="text-4xl font-bold text-white mb-2 text-center">
-            VeilPay
-          </h1>
-          <p className="text-gray-300 text-center mb-8">
-            Private USDCx transfers using Zero-Knowledge proofs
-          </p>
+      {/* Hero Section */}
+      <div className="bg-[#FBFCFC] py-20 px-40">
+        <div className="flex flex-col items-center gap-10">
+          <div className="flex flex-col items-center gap-5 max-w-2xl">
+            <span className="text-[#777E90] text-base font-bold">
+              Privacy-First Payments on Stacks
+            </span>
+            <h1 className="text-[#22262E] text-6xl font-bold text-center">
+              VeilPay
+            </h1>
+            <p className="text-[#777E90] text-base text-center">
+              Private USDCx transfers using Zero-Knowledge proofs
+            </p>
+          </div>
 
-          <Stats />
+          {/* Stats Component */}
+          <div className="w-full max-w-4xl">
+            <Stats />
+          </div>
 
-          {userData ? (
-            <>
-              <div className="flex space-x-4 mb-6 border-b border-gray-700">
-                <button
-                  onClick={() => setActiveTab('bridge')}
-                  className={`px-6 py-3 font-semibold transition ${
-                    activeTab === 'bridge'
-                      ? 'text-blue-400 border-b-2 border-blue-400'
-                      : 'text-gray-400 hover:text-gray-200'
-                  }`}
-                >
-                  Bridge
-                </button>
-                <button
-                  onClick={() => setActiveTab('deposit')}
-                  className={`px-6 py-3 font-semibold transition ${
-                    activeTab === 'deposit'
-                      ? 'text-purple-400 border-b-2 border-purple-400'
-                      : 'text-gray-400 hover:text-gray-200'
-                  }`}
-                >
-                  Deposit
-                </button>
-                <button
-                  onClick={() => setActiveTab('withdraw')}
-                  className={`px-6 py-3 font-semibold transition ${
-                    activeTab === 'withdraw'
-                      ? 'text-purple-400 border-b-2 border-purple-400'
-                      : 'text-gray-400 hover:text-gray-200'
-                  }`}
-                >
-                  Withdraw
-                </button>
-              </div>
+          {!userData && (
+            <button
+              onClick={connectWallet}
+              className="flex flex-col items-start bg-[#3772FF] text-left py-4 px-6 rounded-[90px] border-0 cursor-pointer hover:bg-[#2C5CE6] transition"
+            >
+              <span className="text-[#FBFCFC] text-base font-bold">
+                Connect Wallet
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
 
+      {/* Main Content */}
+      {userData && (
+        <div className="bg-[#F4F5F6] py-16 px-40">
+          <div className="bg-[#FBFCFC] rounded-3xl p-12 shadow-xl max-w-5xl mx-auto">
+            {/* Tabs */}
+            <div className="flex items-center gap-4 mb-12 border-b border-[#E5E8EB]">
+              <button
+                onClick={() => setActiveTab('bridge')}
+                className={`px-6 py-4 font-bold text-sm transition border-b-2 ${
+                  activeTab === 'bridge'
+                    ? 'text-[#3772FF] border-[#3772FF]'
+                    : 'text-[#777E90] border-transparent hover:text-[#22262E]'
+                }`}
+              >
+                Bridge
+              </button>
+              <button
+                onClick={() => setActiveTab('deposit')}
+                className={`px-6 py-4 font-bold text-sm transition border-b-2 ${
+                  activeTab === 'deposit'
+                    ? 'text-[#3772FF] border-[#3772FF]'
+                    : 'text-[#777E90] border-transparent hover:text-[#22262E]'
+                }`}
+              >
+                Deposit
+              </button>
+              <button
+                onClick={() => setActiveTab('withdraw')}
+                className={`px-6 py-4 font-bold text-sm transition border-b-2 ${
+                  activeTab === 'withdraw'
+                    ? 'text-[#3772FF] border-[#3772FF]'
+                    : 'text-[#777E90] border-transparent hover:text-[#22262E]'
+                }`}
+              >
+                Withdraw
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="min-h-[400px]">
               {activeTab === 'bridge' ? (
                 <Bridge stacksAddress={userData?.profile?.stxAddress?.testnet} />
               ) : activeTab === 'deposit' ? (
@@ -93,39 +123,70 @@ function App() {
               ) : (
                 <Withdraw userSession={userSession} />
               )}
-            </>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-300 mb-6">
-                Connect your wallet to start using VeilPay
-              </p>
-              <button
-                onClick={connectWallet}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition"
-              >
-                Connect Wallet
-              </button>
             </div>
-          )}
 
-          <div className="mt-8 p-4 bg-blue-900 bg-opacity-30 rounded-lg">
-            <h3 className="text-white font-semibold mb-2">How it works:</h3>
-            <ul className="text-gray-300 text-sm space-y-2">
-              <li>
-                <strong>Deposit:</strong> Lock USDCx with a private commitment
-              </li>
-              <li>
-                <strong>Withdraw:</strong> Prove ownership without revealing the
-                deposit
-              </li>
-              <li>
-                <strong>Privacy:</strong> Zero-Knowledge proofs ensure complete
-                anonymity
-              </li>
-            </ul>
+            {/* How it Works Section */}
+            <div className="mt-12 p-8 bg-[#F4F5F6] rounded-2xl">
+              <h3 className="text-[#22262E] text-xl font-bold mb-6">
+                How it works
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#3772FF] flex items-center justify-center">
+                      <span className="text-[#FBFCFC] text-sm font-bold">1</span>
+                    </div>
+                    <span className="text-[#22262E] text-base font-bold">Deposit</span>
+                  </div>
+                  <p className="text-[#777E90] text-sm">
+                    Lock USDCx with a private commitment using Zero-Knowledge proofs
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#3772FF] flex items-center justify-center">
+                      <span className="text-[#FBFCFC] text-sm font-bold">2</span>
+                    </div>
+                    <span className="text-[#22262E] text-base font-bold">Withdraw</span>
+                  </div>
+                  <p className="text-[#777E90] text-sm">
+                    Prove ownership without revealing the deposit to any address
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#45B26A] flex items-center justify-center">
+                      <span className="text-[#FBFCFC] text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-[#22262E] text-base font-bold">Privacy</span>
+                  </div>
+                  <p className="text-[#777E90] text-sm">
+                    Complete anonymity ensured through cryptographic proofs
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </main>
+      )}
+
+      {/* Footer */}
+      <div className="bg-[#FBFCFC] py-12 px-40 mt-auto border-t border-[#E5E8EB]">
+        <div className="flex justify-between items-center max-w-7xl mx-auto">
+          <div className="flex items-center gap-8">
+            <span className="text-[#22262E] text-xl font-bold">VeilPay</span>
+            <div className="bg-[#E5E8EB] w-[1px] h-6"></div>
+            <span className="text-[#777E90] text-sm">
+              Privacy-preserving payments on Stacks
+            </span>
+          </div>
+          <div className="flex items-center gap-6">
+            <span className="text-[#777E90] text-xs">
+              © 2024 VeilPay. Built with ZK-SNARKs
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

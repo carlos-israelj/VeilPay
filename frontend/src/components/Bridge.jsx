@@ -221,10 +221,10 @@ export default function Bridge({ stacksAddress }) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-blue-900 bg-opacity-30 p-4 rounded-lg">
-        <h3 className="text-blue-400 font-semibold mb-2">Bridge USDC from Ethereum</h3>
-        <p className="text-gray-300 text-sm">
+    <div className="space-y-8">
+      <div className="bg-[#9656D6] bg-opacity-10 p-6 rounded-2xl border border-[#9656D6] border-opacity-30">
+        <h3 className="text-[#9656D6] font-bold text-lg mb-2">Bridge USDC from Ethereum</h3>
+        <p className="text-[#353945] text-sm">
           Bridge USDC from Ethereum Sepolia to get USDCx on Stacks testnet.
           This uses Circle's xReserve protocol.
         </p>
@@ -233,29 +233,31 @@ export default function Bridge({ stacksAddress }) {
       {!ethAddress ? (
         <button
           onClick={connectEthWallet}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition"
+          className="w-full bg-[#3772FF] hover:bg-[#2C5CE6] text-[#FBFCFC] font-bold py-4 px-6 rounded-full transition"
         >
           Connect Ethereum Wallet (MetaMask)
         </button>
       ) : (
         <>
-          <div className="bg-gray-800 p-4 rounded-lg space-y-2">
-            <p className="text-gray-400 text-sm">Ethereum Address:</p>
-            <p className="text-white text-sm font-mono break-all">{ethAddress}</p>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div>
-                <p className="text-gray-400 text-xs">ETH Balance</p>
-                <p className="text-white font-semibold">{parseFloat(ethBalance).toFixed(4)} ETH</p>
+          <div className="bg-[#F4F5F6] p-6 rounded-2xl border border-[#E5E8EB] space-y-4">
+            <div>
+              <p className="text-[#777E90] text-xs font-bold mb-2">Ethereum Address:</p>
+              <p className="text-[#22262E] text-sm font-mono break-all">{ethAddress}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-6 mt-4">
+              <div className="bg-[#FBFCFC] p-4 rounded-xl border border-[#E5E8EB]">
+                <p className="text-[#777E90] text-xs font-bold mb-1">ETH Balance</p>
+                <p className="text-[#22262E] font-bold text-lg">{parseFloat(ethBalance).toFixed(4)} ETH</p>
               </div>
-              <div>
-                <p className="text-gray-400 text-xs">USDC Balance</p>
-                <p className="text-white font-semibold">{parseFloat(usdcBalance).toFixed(2)} USDC</p>
+              <div className="bg-[#FBFCFC] p-4 rounded-xl border border-[#E5E8EB]">
+                <p className="text-[#777E90] text-xs font-bold mb-1">USDC Balance</p>
+                <p className="text-[#22262E] font-bold text-lg">{parseFloat(usdcBalance).toFixed(2)} USDC</p>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-gray-300 mb-2">Amount (USDC)</label>
+            <label className="block text-[#22262E] font-bold mb-3">Amount (USDC)</label>
             <input
               type="number"
               value={amount}
@@ -263,9 +265,9 @@ export default function Bridge({ stacksAddress }) {
               placeholder="Enter amount (min 1.00)"
               step="0.01"
               min="1.00"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition"
             />
-            <p className="text-gray-400 text-xs mt-1">
+            <p className="text-[#777E90] text-xs mt-2 font-medium">
               Minimum: 1.00 USDC | Time: ~15 minutes
             </p>
           </div>
@@ -273,20 +275,20 @@ export default function Bridge({ stacksAddress }) {
           <button
             onClick={handleBridge}
             disabled={loading || !amount || parseFloat(amount) < 1}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition"
+            className="w-full bg-[#3772FF] hover:bg-[#2C5CE6] disabled:bg-[#B0B4C3] text-[#FBFCFC] font-bold py-4 px-6 rounded-full transition"
           >
             {loading ? 'Bridging...' : 'Bridge USDC to Stacks'}
           </button>
 
-          <div className="bg-yellow-900 bg-opacity-30 p-4 rounded-lg">
-            <p className="text-yellow-400 text-sm">
-              <strong>Need testnet USDC?</strong>
+          <div className="bg-[#EF466F] bg-opacity-10 p-6 rounded-2xl border border-[#EF466F] border-opacity-30">
+            <p className="text-[#353945] text-sm">
+              <strong className="text-[#EF466F]">Need testnet USDC?</strong>
               <br />
               Get USDC from Circle Faucet: <a
                 href="https://faucet.circle.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline"
+                className="text-[#3772FF] underline font-medium"
               >
                 faucet.circle.com
               </a>
@@ -295,7 +297,7 @@ export default function Bridge({ stacksAddress }) {
                 href="https://www.alchemy.com/faucets/ethereum-sepolia"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline"
+                className="text-[#3772FF] underline font-medium"
               >
                 alchemy.com/faucets
               </a>
