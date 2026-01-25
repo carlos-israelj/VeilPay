@@ -1,9 +1,9 @@
 import { groth16 } from 'snarkjs';
 
-// Load circuit files from GitHub Releases
-const GITHUB_RELEASE_URL = 'https://github.com/carlos-israelj/VeilPay/releases/download/v1.0.0-circuits';
-const CIRCUIT_WASM = `${GITHUB_RELEASE_URL}/withdraw.wasm`;
-const ZKEY_FILE = `${GITHUB_RELEASE_URL}/withdraw_final.zkey`;
+// Load circuit files from jsDelivr CDN (serves GitHub releases with CORS)
+const CDN_BASE_URL = 'https://cdn.jsdelivr.net/gh/carlos-israelj/VeilPay@v1.0.0-circuits/frontend/public/circuits';
+const CIRCUIT_WASM = `${CDN_BASE_URL}/withdraw.wasm`;
+const ZKEY_FILE = `${CDN_BASE_URL}/withdraw_final.zkey`;
 
 /**
  * Generate ZK proof for withdrawal
@@ -63,7 +63,7 @@ export async function generateProof({
  */
 export async function verifyProof(proof, publicSignals) {
   try {
-    const vkey = await fetch(`${GITHUB_RELEASE_URL}/verification_key.json`).then(r => r.json());
+    const vkey = await fetch(`${CDN_BASE_URL}/verification_key.json`).then(r => r.json());
     const verified = await groth16.verify(vkey, publicSignals, proof);
     return verified;
   } catch (error) {
