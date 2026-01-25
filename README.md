@@ -213,11 +213,11 @@ flowchart TB
     VeilPayContract <-->|Store| ValidRoots
     VeilPayContract <-->|Check| Nullifiers
 
-    DepositUI -->|commitment = poseidon(secret, amount, nonce)| Crypto
-    Crypto -->|deposit(commitment)| VeilPayContract
+    DepositUI -->|calc commitment| Crypto
+    Crypto -->|deposit| VeilPayContract
     VeilPayContract -->|emit event| Indexer
     Indexer -->|add leaf| MerkleTree
-    MerkleTree -->|update-root| VeilPayContract
+    MerkleTree -->|update root| VeilPayContract
 
     WithdrawUI -->|get proof| Relayer
     Relayer -->|Merkle proof| MerkleTree
@@ -225,9 +225,9 @@ flowchart TB
     ProofGen -->|use circuit| WithdrawCircuit
     WithdrawCircuit -->|verify| PoseidonCircuit
     WithdrawCircuit -->|verify| MerkleCircuit
-    ProofGen -->|proof + signals| Verifier
+    ProofGen -->|proof signals| Verifier
     Verifier -->|verify proof| Relayer
-    Relayer -->|sign + submit tx| VeilPayContract
+    Relayer -->|sign submit tx| VeilPayContract
     VeilPayContract -->|transfer USDCx| WithdrawUI
 
     WalletConnect --> Leather
