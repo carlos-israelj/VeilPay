@@ -6,6 +6,7 @@ export default function FAQ() {
   const faqs = [
     {
       category: "Getting Started",
+      classification: "PUBLIC",
       questions: [
         {
           q: "What is VeilPay?",
@@ -27,6 +28,7 @@ export default function FAQ() {
     },
     {
       category: "Using VeilPay",
+      classification: "INTERNAL",
       questions: [
         {
           q: "What is the minimum deposit amount?",
@@ -52,6 +54,7 @@ export default function FAQ() {
     },
     {
       category: "Privacy & Security",
+      classification: "CONFIDENTIAL",
       questions: [
         {
           q: "How private is VeilPay?",
@@ -77,6 +80,7 @@ export default function FAQ() {
     },
     {
       category: "Technical Questions",
+      classification: "INTERNAL",
       questions: [
         {
           q: "What is a ZK-SNARK?",
@@ -102,6 +106,7 @@ export default function FAQ() {
     },
     {
       category: "Troubleshooting",
+      classification: "PUBLIC",
       questions: [
         {
           q: "Why does my withdrawal fail with 'Assert Failed' error?",
@@ -127,6 +132,7 @@ export default function FAQ() {
     },
     {
       category: "Bridge (xReserve)",
+      classification: "PUBLIC",
       questions: [
         {
           q: "Why does bridging take 18 minutes?",
@@ -153,131 +159,226 @@ export default function FAQ() {
     setOpenIndex(openIndex === key ? null : key);
   };
 
-  return (
-    <div className="space-y-8">
-      {/* Introduction */}
-      <div className="bg-[#9656D6] bg-opacity-10 p-6 rounded-2xl border border-[#9656D6] border-opacity-30">
-        <h3 className="text-[#9656D6] font-bold text-lg mb-2">Frequently Asked Questions</h3>
-        <p className="text-[#353945] text-sm">
-          Find answers to common questions about VeilPay's privacy protocol, usage, and technical details.
-        </p>
-      </div>
+  const getClassificationColor = (classification) => {
+    switch (classification) {
+      case 'CONFIDENTIAL':
+        return { border: 'border-red-400/30', text: 'text-red-400', bg: 'bg-red-400/10' };
+      case 'INTERNAL':
+        return { border: 'border-yellow-400/30', text: 'text-yellow-400', bg: 'bg-yellow-400/10' };
+      default:
+        return { border: 'border-[#00ff88]/30', text: 'text-[#00ff88]', bg: 'bg-[#00ff88]/10' };
+    }
+  };
 
-      {/* FAQ Categories */}
-      {faqs.map((category, catIndex) => (
-        <div key={catIndex}>
-          <h4 className="text-[#22262E] font-bold text-base mb-4 flex items-center gap-2">
-            <span className="text-[#3772FF]">•</span>
-            {category.category}
-          </h4>
-          <div className="space-y-3">
-            {category.questions.map((faq, qIndex) => {
-              const isOpen = openIndex === `${catIndex}-${qIndex}`;
-              return (
-                <div
-                  key={qIndex}
-                  className="bg-[#F4F5F6] rounded-xl border border-[#E5E8EB] overflow-hidden transition-all"
-                >
-                  <button
-                    onClick={() => toggleQuestion(catIndex, qIndex)}
-                    className="w-full p-5 text-left flex items-center justify-between hover:bg-[#E5E8EB] transition"
-                  >
-                    <span className="text-[#22262E] font-bold text-sm pr-4">{faq.q}</span>
-                    <span className={`text-[#3772FF] text-xl transition-transform ${isOpen ? 'rotate-180' : ''}`}>
-                      ▼
-                    </span>
-                  </button>
-                  {isOpen && (
-                    <div className="px-5 pb-5 pt-2">
-                      <p className="text-[#353945] text-sm leading-relaxed">{faq.a}</p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+  return (
+    <div className="space-y-8 fade-in-up">
+      {/* Introduction Header with Declassification Style */}
+      <div className="crypto-box-accent p-6 stagger-1 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-20 text-[#00ff88] font-mono text-xs rotate-12">
+          DECLASSIFIED
+        </div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-white font-black text-2xl" style={{ fontFamily: "'Syne', sans-serif" }}>
+            KNOWLEDGE_BASE_ACCESS
+          </h3>
+          <div className="flex items-center gap-2 text-[#00ff88] text-xs font-mono">
+            <div className="w-2 h-2 bg-[#00ff88] rounded-full animate-pulse"></div>
+            UNRESTRICTED
           </div>
         </div>
-      ))}
-
-      {/* Additional Resources */}
-      <div className="bg-[#3772FF] bg-opacity-10 p-6 rounded-2xl border border-[#3772FF] border-opacity-30">
-        <h4 className="text-[#3772FF] font-bold text-base mb-3">Additional Resources</h4>
-        <ul className="space-y-2 text-[#353945] text-sm">
-          <li className="flex items-start gap-2">
-            <span className="text-[#3772FF] font-bold">•</span>
-            <span>
-              <strong>GitHub Repository:</strong>{' '}
-              <a
-                href="https://github.com/carlos-israelj/VeilPay"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#3772FF] underline hover:text-[#2C5CE6]"
-              >
-                github.com/carlos-israelj/VeilPay
-              </a>
-            </span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-[#3772FF] font-bold">•</span>
-            <span>
-              <strong>Stacks Documentation:</strong>{' '}
-              <a
-                href="https://docs.stacks.co"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#3772FF] underline hover:text-[#2C5CE6]"
-              >
-                docs.stacks.co
-              </a>
-            </span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-[#3772FF] font-bold">•</span>
-            <span>
-              <strong>USDCx Bridge Guide:</strong>{' '}
-              <a
-                href="https://docs.stacks.co/more-guides/bridging-usdcx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#3772FF] underline hover:text-[#2C5CE6]"
-              >
-                docs.stacks.co/more-guides/bridging-usdcx
-              </a>
-            </span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-[#3772FF] font-bold">•</span>
-            <span>
-              <strong>Circom Documentation:</strong>{' '}
-              <a
-                href="https://docs.circom.io"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#3772FF] underline hover:text-[#2C5CE6]"
-              >
-                docs.circom.io
-              </a>
-            </span>
-          </li>
-        </ul>
+        <p className="text-gray-400 text-sm font-mono leading-relaxed">
+          Access declassified documentation on VeilPay's privacy protocol, usage guidelines, and technical specifications.
+        </p>
       </div>
 
-      {/* Contact */}
-      <div className="bg-[#45B26A] bg-opacity-10 p-6 rounded-2xl border border-[#45B26A] border-opacity-30">
-        <h4 className="text-[#45B26A] font-bold text-base mb-2">Still have questions?</h4>
-        <p className="text-[#353945] text-sm">
-          VeilPay is an open-source project. If you have technical questions or found a bug,
-          please open an issue on{' '}
-          <a
-            href="https://github.com/carlos-israelj/VeilPay/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#3772FF] underline hover:text-[#2C5CE6] font-medium"
-          >
-            GitHub
-          </a>
-          .
-        </p>
+      {/* FAQ Categories with Document Classification Style */}
+      {faqs.map((category, catIndex) => {
+        const colors = getClassificationColor(category.classification);
+
+        return (
+          <div key={catIndex} className={`crypto-box p-6 stagger-${Math.min(catIndex + 2, 5)}`}>
+            {/* Category Header with Classification Badge */}
+            <div className="mb-6 pb-4 border-b border-[#00ff88]/20">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-white font-bold text-lg font-mono flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-sm">
+                    {catIndex + 1}
+                  </div>
+                  {category.category.toUpperCase().replace(/ /g, '_')}
+                </h4>
+                <div className={`${colors.border} ${colors.text} ${colors.bg} border px-3 py-1 text-xs font-mono font-bold`}>
+                  {category.classification}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-gray-500 text-xs font-mono">
+                <span>CLEARANCE LEVEL:</span>
+                <div className="flex-1 h-1 bg-black/60 relative overflow-hidden">
+                  <div
+                    className={`h-full ${colors.bg} transition-all duration-1000`}
+                    style={{ width: category.classification === 'CONFIDENTIAL' ? '100%' : category.classification === 'INTERNAL' ? '60%' : '30%' }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Questions Accordion */}
+            <div className="space-y-3">
+              {category.questions.map((faq, qIndex) => {
+                const isOpen = openIndex === `${catIndex}-${qIndex}`;
+                return (
+                  <div
+                    key={qIndex}
+                    className="relative crypto-box border border-[#00ff88]/10 overflow-hidden transition-all group hover:border-[#00ff88]/30"
+                  >
+                    {/* Declassification Stamp - appears on hover */}
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className={`${colors.text} text-[10px] font-mono font-bold px-2 py-1 border ${colors.border} rotate-12`}>
+                        AUTHORIZED
+                      </div>
+                    </div>
+
+                    {/* Question Button */}
+                    <button
+                      onClick={() => toggleQuestion(catIndex, qIndex)}
+                      className="w-full p-5 text-left flex items-start justify-between hover:bg-black/40 transition-all group/btn"
+                    >
+                      <div className="flex items-start gap-4 flex-1 pr-4">
+                        <div className={`w-6 h-6 border ${colors.border} flex items-center justify-center text-xs ${colors.text} flex-shrink-0 mt-0.5 group-hover/btn:bg-[#00ff88]/5 transition-colors`}>
+                          Q
+                        </div>
+                        <span className="text-white font-bold text-sm font-mono group-hover/btn:text-[#00ff88] transition-colors">
+                          {faq.q}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        {/* Status indicator */}
+                        <div className={`text-xs font-mono ${isOpen ? 'text-[#00ff88]' : 'text-gray-600'} transition-colors`}>
+                          {isOpen ? 'OPEN' : 'CLOSED'}
+                        </div>
+                        {/* Arrow */}
+                        <span className={`text-[#00ff88] text-lg transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                          ▼
+                        </span>
+                      </div>
+                    </button>
+
+                    {/* Answer - with declassification reveal animation */}
+                    <div
+                      className={`overflow-hidden transition-all duration-500 ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
+                    >
+                      <div className="px-5 pb-5 pt-2 border-t border-[#00ff88]/20">
+                        {/* Declassification header */}
+                        <div className="flex items-center gap-3 mb-3 pb-2 border-b border-[#00ff88]/10">
+                          <div className="w-6 h-6 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-xs text-[#00ff88] flex-shrink-0">
+                            A
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] font-mono text-gray-500">
+                            <span>REDACTED:</span>
+                            <div className="flex gap-1">
+                              {[...Array(10)].map((_, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-1 h-3 transition-all duration-300 ${isOpen ? 'bg-[#00ff88]/20' : 'bg-gray-700'}`}
+                                  style={{ transitionDelay: `${i * 50}ms` }}
+                                ></div>
+                              ))}
+                            </div>
+                            <span className={`transition-all duration-500 ${isOpen ? 'text-[#00ff88]' : 'text-gray-600'}`}>
+                              {isOpen ? '[NONE]' : '[FULL]'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Answer content with typewriter-like reveal */}
+                        <div className={`text-gray-400 text-sm leading-relaxed font-mono transition-all duration-700 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
+                          {faq.a}
+                        </div>
+
+                        {/* Document footer */}
+                        <div className="mt-4 pt-3 border-t border-[#00ff88]/10 flex items-center justify-between text-[10px] font-mono text-gray-600">
+                          <span>DOC_ID: VP-FAQ-{String(catIndex).padStart(2, '0')}{String(qIndex).padStart(2, '0')}</span>
+                          <span className={colors.text}>CLASSIFICATION: {category.classification}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Additional Resources - Styled as declassified archives */}
+      <div className="crypto-box p-6 stagger-4 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00ff88]/50 to-transparent"></div>
+
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center">
+            <span className="text-[#00ff88] text-xs font-mono font-bold">DOC</span>
+          </div>
+          <h4 className="text-[#00ff88] font-bold text-base font-mono">EXTERNAL_REFERENCE_ARCHIVES</h4>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[
+            { title: 'GitHub Repository', url: 'https://github.com/carlos-israelj/VeilPay', code: 'REPO-001' },
+            { title: 'Stacks Documentation', url: 'https://docs.stacks.co', code: 'DOC-STX' },
+            { title: 'USDCx Bridge Guide', url: 'https://docs.stacks.co/more-guides/bridging-usdcx', code: 'GUIDE-BRIDGE' },
+            { title: 'Circom Documentation', url: 'https://docs.circom.io', code: 'DOC-ZK' }
+          ].map((resource, i) => (
+            <a
+              key={i}
+              href={resource.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="crypto-box p-4 crypto-box-hover group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-white font-bold text-sm font-mono group-hover:text-[#00ff88] transition-colors">
+                  {resource.title}
+                </span>
+                <div className="text-[#00ff88] text-xs">→</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 text-xs font-mono">REF:</span>
+                <span className="text-gray-500 text-xs font-mono">{resource.code}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Contact Section - Styled as classified document footer */}
+      <div className="status-success p-6 stagger-5 relative overflow-hidden">
+        <div className="absolute top-2 right-2 text-[#00ff88]/20 text-xs font-mono font-bold rotate-12">
+          OPEN SOURCE
+        </div>
+
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 border-2 border-[#00ff88] flex items-center justify-center text-2xl flex-shrink-0">
+            ?
+          </div>
+          <div className="flex-1">
+            <h4 className="text-[#00ff88] font-bold text-base mb-3 font-mono">REQUEST_ADDITIONAL_INFORMATION</h4>
+            <p className="text-gray-400 text-sm font-mono leading-relaxed">
+              VeilPay operates as an open-source protocol. For technical inquiries, bug reports, or documentation requests,
+              submit a formal issue report to the{' '}
+              <a
+                href="https://github.com/carlos-israelj/VeilPay/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#00ff88] hover:text-white underline font-bold transition-colors"
+              >
+                GitHub Issue Tracker
+              </a>
+              .
+            </p>
+            <div className="mt-4 pt-3 border-t border-[#00ff88]/20 text-xs font-mono text-gray-600">
+              DOCUMENT STATUS: ACTIVE | LAST UPDATED: 2025-01-25 | CLEARANCE: PUBLIC
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

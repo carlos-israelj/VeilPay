@@ -32,7 +32,6 @@ export default function Deposit({ userSession }) {
     };
 
     loadDeposits();
-    // Refresh deposits every 5 seconds (in case user makes deposits in another tab)
     const interval = setInterval(loadDeposits, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -46,20 +45,16 @@ export default function Deposit({ userSession }) {
         const userData = userSession.loadUserData();
         const address = userData.profile.stxAddress.testnet;
 
-        // Call get-balance on USDCx contract
         const result = await fetchCallReadOnlyFunction({
           contractAddress: import.meta.env.VITE_USDCX_ADDRESS || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
           contractName: import.meta.env.VITE_USDCX_NAME || 'usdcx',
           functionName: 'get-balance',
-          functionArgs: [
-            Cl.principal(address)
-          ],
+          functionArgs: [Cl.principal(address)],
           network: STACKS_TESTNET,
           senderAddress: address,
         });
 
         const balance = cvToValue(result);
-        // USDCx has 6 decimals
         const balanceFormatted = (Number(balance.value) / 1000000).toFixed(2);
         setUsdcxBalance(balanceFormatted);
       } catch (error) {
@@ -69,7 +64,6 @@ export default function Deposit({ userSession }) {
     };
 
     fetchBalance();
-    // Refresh balance every 10 seconds
     const interval = setInterval(fetchBalance, 10000);
     return () => clearInterval(interval);
   }, [userSession]);
@@ -78,7 +72,6 @@ export default function Deposit({ userSession }) {
     try {
       setLoading(true);
 
-      // Validate minimum amount
       const amountNum = parseFloat(amount);
       if (amountNum < 1.0) {
         alert('Minimum deposit amount is 1.00 USDCx');
@@ -86,10 +79,8 @@ export default function Deposit({ userSession }) {
         return;
       }
 
-      // Generate deposit commitment
       const deposit = await generateDeposit(amount);
 
-      // Store deposit data securely (in production, encrypt this)
       const storedDeposits = JSON.parse(
         localStorage.getItem('veilpay_deposits') || '[]'
       );
@@ -97,41 +88,35 @@ export default function Deposit({ userSession }) {
         secret: deposit.secret,
         nonce: deposit.nonce,
         commitment: deposit.commitment,
-        amount: deposit.amount, // Store micro-units
-        amountDisplay: amount, // Store original display amount
+        amount: deposit.amount,
+        amountDisplay: amount,
         timestamp: Date.now(),
       });
       localStorage.setItem('veilpay_deposits', JSON.stringify(storedDeposits));
 
-      // Get user address for post-conditions
       const userData = userSession.loadUserData();
       const senderAddress = userData.profile.stxAddress.testnet;
 
-      // Create post-condition: user transfers exact amount of USDCx
       const usdcxAddress = import.meta.env.VITE_USDCX_ADDRESS || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
       const usdcxName = import.meta.env.VITE_USDCX_NAME || 'usdcx';
 
-      // Using Pc helper for post-conditions (modern syntax)
-      // For USDCx token transfers, we specify the exact token name from the contract
-      // Token name is 'usdcx-token' as defined in the USDCx contract
       const postConditions = [
         Pc.principal(senderAddress)
           .willSendEq(deposit.amount)
           .ft(`${usdcxAddress}.${usdcxName}`, 'usdcx-token')
       ];
 
-      // Call contract deposit function with USDCx token
       const txOptions = {
         contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
         contractName: import.meta.env.VITE_CONTRACT_NAME || 'veilpay',
         functionName: 'deposit',
         functionArgs: [
           Cl.buffer(Buffer.from(deposit.commitment, 'hex')),
-          Cl.uint(deposit.amount), // Use micro-units
+          Cl.uint(deposit.amount),
           Cl.contractPrincipal(usdcxAddress, usdcxName)
         ],
         postConditions,
-        postConditionMode: PostConditionMode.Deny, // Re-enabled for security
+        postConditionMode: PostConditionMode.Deny,
         network: STACKS_TESTNET,
         appDetails: {
           name: 'VeilPay',
@@ -140,7 +125,6 @@ export default function Deposit({ userSession }) {
         onFinish: (data) => {
           console.log('Deposit successful:', data.txId);
 
-          // Update the deposit with txId
           const storedDeposits = JSON.parse(
             localStorage.getItem('veilpay_deposits') || '[]'
           );
@@ -169,32 +153,42 @@ export default function Deposit({ userSession }) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* USDCx Balance Display */}
-      <div className="bg-[#F4F5F6] p-6 rounded-2xl border border-[#E5E8EB]">
-        <div className="flex justify-between items-center">
-          <span className="text-[#777E90] text-sm font-bold">Your USDCx Balance:</span>
-          <span className="text-[#22262E] font-bold text-2xl">{usdcxBalance} USDCx</span>
+      <div className="crypto-box p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="crypto-label mb-1">USDCX_BALANCE</div>
+            <div className="text-white text-3xl font-black" style={{ fontFamily: "'Syne', sans-serif" }}>
+              {usdcxBalance}
+            </div>
+          </div>
+          <div className="live-indicator"></div>
         </div>
       </div>
 
       {/* Deposit History */}
       {deposits.length > 0 && (
-        <div className="bg-[#F4F5F6] p-6 rounded-2xl border border-[#E5E8EB]">
-          <h3 className="text-[#22262E] font-bold text-lg mb-4">Your Deposits ({deposits.length})</h3>
+        <div className="crypto-box p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-bold text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
+              YOUR DEPOSITS
+            </h3>
+            <div className="crypto-label">{deposits.length} TOTAL</div>
+          </div>
           <div className="space-y-3 max-h-64 overflow-y-auto">
             {deposits.map((dep, idx) => (
-              <div key={idx} className="bg-[#FBFCFC] p-4 rounded-xl border border-[#E5E8EB]">
+              <div key={idx} className="border border-[#00ff88]/20 bg-black/20 p-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-[#3772FF] font-bold text-base">
+                  <span className="text-[#00ff88] font-bold font-mono">
                     {dep.amountDisplay || (dep.amount / 1000000).toFixed(2)} USDCx
                   </span>
-                  <span className="text-[#777E90] text-xs font-medium">
+                  <span className="text-gray-500 text-xs font-mono">
                     {new Date(dep.timestamp).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="text-[#777E90] text-xs break-all">
-                  Commitment: {dep.commitment.substring(0, 20)}...
+                <div className="hash-display text-xs">
+                  {dep.commitment.substring(0, 32)}...
                 </div>
               </div>
             ))}
@@ -202,89 +196,104 @@ export default function Deposit({ userSession }) {
         </div>
       )}
 
+      {/* Deposit Form */}
       <div>
-        <label className="block text-[#22262E] font-bold mb-3">Amount (USDCx)</label>
+        <label className="crypto-label block mb-3">DEPOSIT_AMOUNT</label>
         <input
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="Enter amount (min 1.00)"
+          placeholder="1.00"
           step="0.01"
           min="1.00"
-          className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition"
+          className="crypto-input w-full"
         />
-        <p className="text-[#777E90] text-xs mt-2 font-medium">
-          Available: {usdcxBalance} USDCx | Minimum: 1.00 USDCx
+        <p className="text-gray-500 text-xs mt-2 font-mono">
+          available: {usdcxBalance} USDCx | minimum: 1.00 USDCx
         </p>
       </div>
 
       <button
         onClick={handleDeposit}
         disabled={!amount || loading || parseFloat(amount) < 1}
-        className="w-full bg-[#3772FF] hover:bg-[#2C5CE6] disabled:bg-[#B0B4C3] text-[#FBFCFC] font-bold py-4 px-6 rounded-full transition"
+        className="crypto-button-primary w-full"
       >
-        {loading ? 'Processing...' : 'Deposit'}
+        {loading ? (
+          <span className="flex items-center justify-center gap-3">
+            <div className="crypto-loader"></div>
+            PROCESSING
+          </span>
+        ) : (
+          'INITIATE DEPOSIT'
+        )}
       </button>
 
       {depositData && (
-        <div className="mt-6 p-6 bg-[#45B26A] bg-opacity-10 rounded-2xl border border-[#45B26A] border-opacity-30">
-          <p className="text-[#45B26A] font-bold text-base mb-2">
-            Deposit successful!
-          </p>
-          <p className="text-[#353945] text-sm mb-4">
-            Share these credentials with the person who will withdraw the funds. They need ALL three values.
+        <div className="status-success p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 border border-[#00ff88] flex items-center justify-center">
+              <span className="text-[#00ff88] font-bold">✓</span>
+            </div>
+            <p className="text-[#00ff88] font-bold text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
+              DEPOSIT SUCCESSFUL
+            </p>
+          </div>
+          <p className="text-gray-400 text-sm mb-6 font-mono">
+            Store these credentials securely. Required for withdrawal.
           </p>
 
           {/* Secret */}
-          <div className="mt-3 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
-            <div className="flex justify-between items-center mb-1">
-              <p className="text-[#777E90] font-bold text-xs">Secret:</p>
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <div className="crypto-label">SECRET_KEY</div>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(depositData.secret);
                   alert('Secret copied to clipboard!');
                 }}
-                className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-bold"
+                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition"
               >
-                Copy
+                [COPY]
               </button>
             </div>
-            <p className="text-[#22262E] text-xs font-mono break-all">{depositData.secret}</p>
+            <div className="hash-display">{depositData.secret}</div>
           </div>
 
           {/* Nonce */}
-          <div className="mt-3 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
-            <div className="flex justify-between items-center mb-1">
-              <p className="text-[#777E90] font-bold text-xs">Nonce:</p>
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <div className="crypto-label">NONCE_VALUE</div>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(depositData.nonce);
                   alert('Nonce copied to clipboard!');
                 }}
-                className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-bold"
+                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition"
               >
-                Copy
+                [COPY]
               </button>
             </div>
-            <p className="text-[#22262E] text-xs font-mono break-all">{depositData.nonce}</p>
+            <div className="hash-display">{depositData.nonce}</div>
           </div>
 
           {/* Amount */}
-          <div className="mt-3 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
-            <div className="flex justify-between items-center mb-1">
-              <p className="text-[#777E90] font-bold text-xs">Amount:</p>
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <div className="crypto-label">AMOUNT</div>
               <button
                 onClick={() => {
                   const displayAmount = (Number(depositData.amount) / 1000000).toFixed(2);
                   navigator.clipboard.writeText(displayAmount);
                   alert('Amount copied to clipboard!');
                 }}
-                className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-bold"
+                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition"
               >
-                Copy
+                [COPY]
               </button>
             </div>
-            <p className="text-[#22262E] text-xs font-mono">{(Number(depositData.amount) / 1000000).toFixed(2)} USDCx</p>
+            <div className="text-white font-bold font-mono text-lg">
+              {(Number(depositData.amount) / 1000000).toFixed(2)} USDCx
+            </div>
           </div>
 
           {/* Copy All Button */}
@@ -295,20 +304,20 @@ export default function Deposit({ userSession }) {
               navigator.clipboard.writeText(allData);
               alert('All credentials copied to clipboard!');
             }}
-            className="w-full mt-4 bg-[#3772FF] hover:bg-[#2C5CE6] text-[#FBFCFC] py-3 px-4 rounded-xl font-bold text-sm transition"
+            className="crypto-button-secondary w-full mt-4"
           >
-            Copy All Credentials
+            COPY ALL CREDENTIALS
           </button>
 
           {/* Transaction Link */}
           {depositData.txId && (
-            <div className="mt-4 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
-              <p className="text-[#777E90] font-bold text-xs mb-2">Transaction:</p>
+            <div className="mt-6 border-t border-[#00ff88]/20 pt-4">
+              <div className="crypto-label mb-2">TRANSACTION_ID</div>
               <a
                 href={`https://explorer.hiro.so/txid/${depositData.txId}?chain=testnet`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-mono break-all flex items-center gap-2"
+                className="text-[#00ff88] hover:text-white text-xs font-mono break-all flex items-center gap-2 transition"
               >
                 {depositData.txId}
                 <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,11 +329,17 @@ export default function Deposit({ userSession }) {
         </div>
       )}
 
-      <div className="mt-4 p-6 bg-[#EF466F] bg-opacity-10 rounded-2xl border border-[#EF466F] border-opacity-30">
-        <p className="text-[#353945] text-sm">
-          <strong className="text-[#EF466F]">Important:</strong> Your deposit credentials are stored
-          locally. Make sure to back them up before clearing browser data.
-        </p>
+      <div className="status-warning p-6">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">⚠</span>
+          <div>
+            <h4 className="text-yellow-400 font-bold text-sm mb-2 font-mono">SECURITY_WARNING</h4>
+            <p className="text-gray-400 text-xs font-mono leading-relaxed">
+              Credentials are stored locally in browser. Backup before clearing data.
+              Loss of credentials = permanent loss of funds.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

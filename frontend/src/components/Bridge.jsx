@@ -344,56 +344,62 @@ export default function Bridge({ stacksAddress }) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-[#9656D6] bg-opacity-10 p-6 rounded-2xl border border-[#9656D6] border-opacity-30">
-        <h3 className="text-[#9656D6] font-bold text-lg mb-2">Bridge USDC from Ethereum</h3>
-        <p className="text-[#353945] text-sm">
-          Bridge USDC from Ethereum Sepolia to get USDCx on Stacks testnet.
-          This uses Circle's xReserve protocol. Bridging takes approximately 18 minutes.
+    <div className="space-y-6">
+      <div className="crypto-box-accent p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-white font-black text-2xl" style={{ fontFamily: "'Syne', sans-serif" }}>
+            BRIDGE_PROTOCOL
+          </h3>
+          <div className="crypto-label">ETH→STACKS</div>
+        </div>
+        <p className="text-gray-400 text-sm font-mono">
+          Bridge USDC from Ethereum Sepolia to USDCx on Stacks testnet.
+          <br />
+          xReserve protocol | ETA: ~18 minutes
         </p>
       </div>
 
       {/* Bridge Status Messages - Always visible if there's an active transaction */}
       {bridgeStep === 'approving' && (
-        <div className="bg-[#3772FF] bg-opacity-10 p-6 rounded-2xl border border-[#3772FF] border-opacity-30">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="animate-spin h-5 w-5 border-2 border-[#3772FF] border-t-transparent rounded-full"></div>
-            <p className="text-[#3772FF] font-bold">Step 1: Approving USDC</p>
+        <div className="crypto-box p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="crypto-loader"></div>
+            <p className="text-[#00ff88] font-bold font-mono">STEP_1: APPROVING_USDC</p>
           </div>
-          <p className="text-[#353945] text-sm">
-            Please confirm the approval transaction in your Ethereum wallet...
+          <p className="text-gray-400 text-sm font-mono">
+            Confirm approval transaction in Ethereum wallet...
           </p>
         </div>
       )}
 
       {bridgeStep === 'depositing' && (
-        <div className="bg-[#3772FF] bg-opacity-10 p-6 rounded-2xl border border-[#3772FF] border-opacity-30">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="animate-spin h-5 w-5 border-2 border-[#3772FF] border-t-transparent rounded-full"></div>
-            <p className="text-[#3772FF] font-bold">Step 2: Depositing to Bridge</p>
+        <div className="crypto-box p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="crypto-loader"></div>
+            <p className="text-[#00ff88] font-bold font-mono">STEP_2: DEPOSITING_TO_BRIDGE</p>
           </div>
-          <p className="text-[#353945] text-sm">
-            Please sign and send the bridge transaction in your Ethereum wallet...
+          <p className="text-gray-400 text-sm font-mono">
+            Sign and send bridge transaction in Ethereum wallet...
           </p>
         </div>
       )}
 
       {bridgeStep === 'waiting' && txHash && (
-        <div className="bg-[#45B26A] bg-opacity-10 p-6 rounded-2xl border border-[#45B26A] border-opacity-30 space-y-4">
+        <div className="status-success p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="h-5 w-5 bg-[#45B26A] rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">✓</span>
+            <div className="w-6 h-6 border border-[#00ff88] flex items-center justify-center">
+              <span className="text-[#00ff88] font-bold text-xs">✓</span>
             </div>
-            <p className="text-[#45B26A] font-bold">Bridge Transaction Submitted!</p>
+            <p className="text-[#00ff88] font-bold font-mono">BRIDGE_TX_SUBMITTED</p>
           </div>
 
           <div className="space-y-2">
-            <p className="text-[#353945] text-sm font-medium">Transaction Hash:</p>
+            <div className="crypto-label">TRANSACTION_HASH</div>
             <a
               href={`https://sepolia.etherscan.io/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#3772FF] text-sm font-mono break-all hover:underline block"
+              className="hash-display block hover:border-[#00ff88] transition cursor-pointer"
             >
               {txHash}
             </a>
@@ -401,30 +407,30 @@ export default function Bridge({ stacksAddress }) {
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <p className="text-[#353945] text-sm font-bold">Estimated Time Remaining:</p>
-              <p className="text-[#3772FF] font-bold">
+              <div className="crypto-label">TIME_REMAINING</div>
+              <p className="text-[#00ff88] font-bold font-mono text-lg">
                 {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, '0')}
               </p>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full bg-[#E5E8EB] rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-black/40 border border-[#00ff88]/20 h-3 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-[#3772FF] to-[#45B26A] h-full rounded-full transition-all duration-1000 ease-linear"
+                className="bg-[#00ff88] h-full transition-all duration-1000 ease-linear"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
 
-            <p className="text-[#777E90] text-xs text-center">
-              Your USDCx will arrive on Stacks in approximately {Math.ceil(timeRemaining / 60)} minutes
+            <p className="text-gray-500 text-xs text-center font-mono">
+              USDCx arrival ETA: ~{Math.ceil(timeRemaining / 60)} minutes
             </p>
           </div>
 
           {!ethAddress && (
-            <div className="bg-[#3772FF] bg-opacity-10 p-4 rounded-xl border border-[#3772FF] border-opacity-20 mt-4">
-              <p className="text-[#353945] text-sm">
-                <span className="text-[#3772FF] font-bold">Note:</span> You can safely disconnect your Ethereum wallet.
-                The transaction will continue and you can monitor it here.
+            <div className="crypto-box p-4 mt-4">
+              <p className="text-gray-400 text-sm font-mono">
+                <span className="text-[#00ff88] font-bold">NOTE:</span> You can safely disconnect Ethereum wallet.
+                Transaction will continue processing.
               </p>
             </div>
           )}
@@ -432,34 +438,36 @@ export default function Bridge({ stacksAddress }) {
       )}
 
       {bridgeStep === 'completed' && txHash && (
-        <div className="bg-[#45B26A] bg-opacity-10 p-6 rounded-2xl border border-[#45B26A] border-opacity-30 space-y-4">
+        <div className="status-success p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-6 w-6 bg-[#45B26A] rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">✓</span>
+              <div className="w-8 h-8 border border-[#00ff88] flex items-center justify-center">
+                <span className="text-[#00ff88] font-bold">✓</span>
               </div>
-              <p className="text-[#45B26A] font-bold text-lg">Bridge Complete!</p>
+              <p className="text-[#00ff88] font-bold text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
+                BRIDGE_COMPLETE
+              </p>
             </div>
             <button
               onClick={clearBridgeState}
-              className="text-[#777E90] hover:text-[#22262E] text-sm font-bold transition"
+              className="text-gray-500 hover:text-white text-sm font-bold transition font-mono"
               title="Clear bridge status"
             >
-              ✕
+              [X]
             </button>
           </div>
 
-          <p className="text-[#353945] text-sm">
-            Your USDCx should now be available on Stacks. Check your balance in the Deposit tab.
+          <p className="text-gray-400 text-sm font-mono">
+            USDCx now available on Stacks. Check balance in Deposit tab.
           </p>
 
           <div className="space-y-2">
-            <p className="text-[#353945] text-sm font-medium">Transaction:</p>
+            <div className="crypto-label">TRANSACTION</div>
             <a
               href={`https://sepolia.etherscan.io/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#3772FF] text-sm font-mono break-all hover:underline block"
+              className="hash-display block hover:border-[#00ff88] transition cursor-pointer"
             >
               {txHash}
             </a>
@@ -467,18 +475,18 @@ export default function Bridge({ stacksAddress }) {
 
           <button
             onClick={clearBridgeState}
-            className="w-full bg-[#F4F5F6] hover:bg-[#E5E8EB] text-[#22262E] font-bold py-3 px-6 rounded-full transition border border-[#E5E8EB]"
+            className="crypto-button-secondary w-full"
           >
-            Clear Status
+            CLEAR STATUS
           </button>
         </div>
       )}
 
       {bridgeStep === 'error' && (
-        <div className="bg-[#EF466F] bg-opacity-10 p-6 rounded-2xl border border-[#EF466F] border-opacity-30">
-          <p className="text-[#EF466F] font-bold mb-2">Bridge Failed</p>
-          <p className="text-[#353945] text-sm">
-            Please try again or check the console for error details.
+        <div className="status-error p-6">
+          <p className="text-red-400 font-bold mb-2 font-mono">BRIDGE_FAILED</p>
+          <p className="text-gray-400 text-sm font-mono">
+            Retry operation or check console for error details.
           </p>
         </div>
       )}
@@ -486,68 +494,68 @@ export default function Bridge({ stacksAddress }) {
       {!ethAddress ? (
         <button
           onClick={connectEthWallet}
-          className="w-full bg-[#3772FF] hover:bg-[#2C5CE6] text-[#FBFCFC] font-bold py-4 px-6 rounded-full transition"
+          className="crypto-button-primary w-full"
         >
-          Connect Ethereum Wallet
+          CONNECT ETHEREUM WALLET
         </button>
       ) : (
         <>
-          <div className="bg-[#F4F5F6] p-6 rounded-2xl border border-[#E5E8EB] space-y-4">
+          <div className="crypto-box p-6 space-y-4">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <p className="text-[#777E90] text-xs font-bold mb-2">Ethereum Address:</p>
-                <p className="text-[#22262E] text-sm font-mono break-all">{ethAddress}</p>
+                <div className="crypto-label mb-2">ETHEREUM_ADDRESS</div>
+                <p className="text-white text-sm font-mono break-all">{ethAddress}</p>
               </div>
               <button
                 onClick={disconnectEthWallet}
-                className="ml-4 bg-[#FBFCFC] hover:bg-[#E5E8EB] text-[#22262E] px-4 py-2 rounded-full text-xs font-bold transition border border-[#E5E8EB]"
+                className="ml-4 bg-black/40 hover:bg-black/60 text-[#00ff88] px-4 py-2 text-xs font-bold font-mono transition border border-[#00ff88]/20 hover:border-[#00ff88]"
               >
-                Disconnect
+                [DISCONNECT]
               </button>
             </div>
             <div className="grid grid-cols-2 gap-6 mt-4">
-              <div className="bg-[#FBFCFC] p-4 rounded-xl border border-[#E5E8EB]">
-                <p className="text-[#777E90] text-xs font-bold mb-1">ETH Balance</p>
-                <p className="text-[#22262E] font-bold text-lg">{parseFloat(ethBalance).toFixed(4)} ETH</p>
+              <div className="bg-black/40 p-4 border border-[#00ff88]/20">
+                <div className="crypto-label mb-1">ETH_BALANCE</div>
+                <p className="text-white font-bold text-lg font-mono">{parseFloat(ethBalance).toFixed(4)} ETH</p>
               </div>
-              <div className="bg-[#FBFCFC] p-4 rounded-xl border border-[#E5E8EB]">
-                <p className="text-[#777E90] text-xs font-bold mb-1">USDC Balance</p>
-                <p className="text-[#22262E] font-bold text-lg">{parseFloat(usdcBalance).toFixed(2)} USDC</p>
+              <div className="bg-black/40 p-4 border border-[#00ff88]/20">
+                <div className="crypto-label mb-1">USDC_BALANCE</div>
+                <p className="text-white font-bold text-lg font-mono">{parseFloat(usdcBalance).toFixed(2)} USDC</p>
               </div>
             </div>
           </div>
 
           {/* Recipient Selection */}
           <div>
-            <label className="block text-[#22262E] font-bold mb-3">Stacks Recipient Address</label>
+            <label className="crypto-label block mb-3">STACKS_RECIPIENT_ADDRESS</label>
 
             <div className="flex items-center gap-3 mb-3">
               <button
                 onClick={() => setUseConnectedWallet(true)}
-                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition border-2 ${
+                className={`flex-1 py-3 px-4 font-bold text-sm font-mono transition border ${
                   useConnectedWallet
-                    ? 'bg-[#3772FF] text-[#FBFCFC] border-[#3772FF]'
-                    : 'bg-[#FBFCFC] text-[#777E90] border-[#E5E8EB] hover:border-[#3772FF]'
+                    ? 'bg-[#00ff88] text-black border-[#00ff88]'
+                    : 'bg-black/40 text-gray-400 border-[#00ff88]/20 hover:border-[#00ff88]'
                 }`}
               >
-                Use Connected Wallet
+                CONNECTED_WALLET
               </button>
               <button
                 onClick={() => setUseConnectedWallet(false)}
-                className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition border-2 ${
+                className={`flex-1 py-3 px-4 font-bold text-sm font-mono transition border ${
                   !useConnectedWallet
-                    ? 'bg-[#3772FF] text-[#FBFCFC] border-[#3772FF]'
-                    : 'bg-[#FBFCFC] text-[#777E90] border-[#E5E8EB] hover:border-[#3772FF]'
+                    ? 'bg-[#00ff88] text-black border-[#00ff88]'
+                    : 'bg-black/40 text-gray-400 border-[#00ff88]/20 hover:border-[#00ff88]'
                 }`}
               >
-                Custom Address
+                CUSTOM_ADDRESS
               </button>
             </div>
 
             {useConnectedWallet ? (
-              <div className="bg-[#F4F5F6] p-4 rounded-xl border border-[#E5E8EB]">
-                <p className="text-[#777E90] text-xs font-bold mb-1">Recipient:</p>
-                <p className="text-[#22262E] text-sm font-mono break-all">
+              <div className="crypto-box p-4">
+                <div className="crypto-label mb-1">RECIPIENT</div>
+                <p className="text-white text-sm font-mono break-all">
                   {stacksAddress || 'Connect Stacks wallet first'}
                 </p>
               </div>
@@ -557,54 +565,60 @@ export default function Bridge({ stacksAddress }) {
                 value={recipientAddress}
                 onChange={(e) => setRecipientAddress(e.target.value)}
                 placeholder="ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
-                className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition font-mono text-sm"
+                className="crypto-input w-full"
               />
             )}
           </div>
 
           <div>
-            <label className="block text-[#22262E] font-bold mb-3">Amount (USDC)</label>
+            <label className="crypto-label block mb-3">AMOUNT_USDC</label>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount (min 1.00)"
+              placeholder="1.00"
               step="0.01"
               min="1.00"
-              className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition"
+              className="crypto-input w-full"
             />
-            <p className="text-[#777E90] text-xs mt-2 font-medium">
-              Minimum: 1.00 USDC | Time: ~15 minutes
+            <p className="text-gray-500 text-xs mt-2 font-mono">
+              minimum: 1.00 USDC | time: ~15 minutes
             </p>
           </div>
 
           <button
             onClick={handleBridge}
             disabled={loading || !amount || parseFloat(amount) < 1 || bridgeStep === 'waiting'}
-            className="w-full bg-[#3772FF] hover:bg-[#2C5CE6] disabled:bg-[#B0B4C3] text-[#FBFCFC] font-bold py-4 px-6 rounded-full transition"
+            className="crypto-button-primary w-full"
           >
-            {loading ? (bridgeStep === 'approving' ? 'Approving USDC...' : 'Depositing to Bridge...') : 'Bridge USDC to Stacks'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-3">
+                <div className="crypto-loader"></div>
+                {bridgeStep === 'approving' ? 'APPROVING USDC' : 'DEPOSITING TO BRIDGE'}
+              </span>
+            ) : 'BRIDGE USDC TO STACKS'}
           </button>
 
           {!bridgeStep && (
-            <div className="bg-[#EF466F] bg-opacity-10 p-6 rounded-2xl border border-[#EF466F] border-opacity-30">
-              <p className="text-[#353945] text-sm">
-                <strong className="text-[#EF466F]">Need testnet USDC?</strong>
+            <div className="status-warning p-6">
+              <p className="text-gray-400 text-sm font-mono">
+                <strong className="text-yellow-400 font-bold">TESTNET_FAUCETS</strong>
                 <br />
-                Get USDC from Circle Faucet: <a
+                <br />
+                USDC: <a
                   href="https://faucet.circle.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#3772FF] underline font-medium"
+                  className="text-[#00ff88] hover:text-white underline transition"
                 >
                   faucet.circle.com
                 </a>
                 <br />
-                Get ETH from Sepolia Faucet: <a
+                ETH: <a
                   href="https://www.alchemy.com/faucets/ethereum-sepolia"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#3772FF] underline font-medium"
+                  className="text-[#00ff88] hover:text-white underline transition"
                 >
                   alchemy.com/faucets
                 </a>

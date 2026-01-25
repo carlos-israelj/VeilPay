@@ -1,0 +1,589 @@
+/* VeilPay Cryptographic Noir Design System */
+
+:root {
+  /* Color Palette */
+  --noir-bg: #0a0a0a;
+  --noir-surface: #1a1a1a;
+  --noir-border: rgba(0, 255, 136, 0.2);
+  --noir-accent: #00ff88;
+  --noir-accent-dim: rgba(0, 255, 136, 0.1);
+  --noir-text: #ffffff;
+  --noir-text-muted: #888888;
+  --noir-red: #ff4444;
+  --noir-yellow: #ffaa00;
+
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Cryptographic Box Effect */
+.crypto-box {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--noir-border);
+  backdrop-filter: blur(10px);
+}
+
+.crypto-box-accent {
+  background: var(--noir-accent-dim);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+/* Terminal-style inputs */
+.crypto-input {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--noir-border);
+  color: var(--noir-text);
+  font-family: var(--font-mono);
+  padding: 1rem 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.crypto-input:focus {
+  outline: none;
+  border-color: var(--noir-accent);
+  box-shadow: 0 0 0 1px var(--noir-accent);
+}
+
+.crypto-input::placeholder {
+  color: var(--noir-text-muted);
+  opacity: 0.5;
+}
+
+/* Buttons */
+.crypto-button-primary {
+  background: var(--noir-accent);
+  color: #000;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 1rem 2rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.crypto-button-primary:hover:not(:disabled) {
+  background: #00dd77;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.crypto-button-primary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.crypto-button-secondary {
+  background: transparent;
+  border: 1px solid var(--noir-border);
+  color: var(--noir-accent);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 1rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.crypto-button-secondary:hover:not(:disabled) {
+  background: var(--noir-accent-dim);
+  border-color: var(--noir-accent);
+}
+
+/* Live indicator */
+.live-indicator {
+  width: 8px;
+  height: 8px;
+  background: var(--noir-accent);
+  border-radius: 50%;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+  }
+}
+
+/* Hash display */
+.hash-display {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--noir-text-muted);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.75rem;
+  border-left: 2px solid var(--noir-accent);
+  word-break: break-all;
+}
+
+/* Section headers */
+.section-header {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--noir-text);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  border-left: 4px solid var(--noir-accent);
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Status indicators */
+.status-success {
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  color: var(--noir-accent);
+}
+
+.status-error {
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  color: var(--noir-red);
+}
+
+.status-warning {
+  background: rgba(255, 170, 0, 0.1);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+  color: var(--noir-yellow);
+}
+
+/* Hex pattern background */
+.hex-pattern {
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 136, 0.03) 2px, rgba(0, 255, 136, 0.03) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 136, 0.03) 2px, rgba(0, 255, 136, 0.03) 4px);
+}
+
+/* Loader */
+.crypto-loader {
+  border: 2px solid rgba(0, 255, 136, 0.1);
+  border-top: 2px solid var(--noir-accent);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Label style */
+.crypto-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(0, 255, 136, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+/* Advanced Animations & Micro-interactions */
+
+/* Fade in animation for content */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* Glitch effect for emphasis */
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+}
+
+.glitch-hover:hover {
+  animation: glitch 0.3s;
+}
+
+/* Matrix rain effect */
+@keyframes matrixRain {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.matrix-rain-char {
+  animation: matrixRain 4s linear infinite;
+}
+
+/* Pulse border effect */
+@keyframes pulseBorder {
+  0%, 100% {
+    border-color: rgba(0, 255, 136, 0.2);
+    box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4);
+  }
+  50% {
+    border-color: rgba(0, 255, 136, 0.6);
+    box-shadow: 0 0 0 4px rgba(0, 255, 136, 0);
+  }
+}
+
+.pulse-border {
+  animation: pulseBorder 2s ease-in-out infinite;
+}
+
+/* Typing indicator */
+@keyframes typing {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.typing-indicator span {
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Progress bar */
+.crypto-progress {
+  height: 4px;
+  background: rgba(0, 255, 136, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.crypto-progress-bar {
+  height: 100%;
+  background: var(--noir-accent);
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.crypto-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Toast notification */
+.crypto-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  max-width: 400px;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid var(--noir-border);
+  backdrop-filter: blur(10px);
+  padding: 1rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  z-index: 9999;
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.crypto-toast.success {
+  border-color: var(--noir-accent);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+.crypto-toast.error {
+  border-color: var(--noir-red);
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.2);
+}
+
+/* Enhanced button interactions */
+.crypto-button-primary,
+.crypto-button-secondary {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crypto-button-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.4),
+              0 8px 24px rgba(0, 255, 136, 0.2);
+}
+
+.crypto-button-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 0 0 rgba(0, 255, 136, 0);
+}
+
+/* Skeleton loading */
+.crypto-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 255, 136, 0.05) 25%,
+    rgba(0, 255, 136, 0.15) 50%,
+    rgba(0, 255, 136, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonWave 1.5s ease-in-out infinite;
+  border-radius: 2px;
+}
+
+@keyframes skeletonWave {
+  0% {background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Input focus effects */
+.crypto-input:focus {
+  animation: inputPulse 0.5s ease-out;
+}
+
+@keyframes inputPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgba(0, 255, 136, 0);
+  }
+}
+
+/* Card hover effects */
+.crypto-box-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crypto-box-hover:hover {
+  transform: translateY(-4px);
+  border-color: var(--noir-accent);
+  box-shadow: 0 8px 24px rgba(0, 255, 136, 0.15),
+              0 0 0 1px rgba(0, 255, 136, 0.1);
+}
+
+/* Tooltip */
+.crypto-tooltip {
+  position: relative;
+}
+
+.crypto-tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: rgba(0, 0, 0, 0.95);
+  color: var(--noir-accent);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  border: 1px solid var(--noir-border);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.crypto-tooltip:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Badge */
+.crypto-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--noir-border);
+  background: var(--noir-accent-dim);
+  color: var(--noir-accent);
+}
+
+.crypto-badge.pulse::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--noir-accent);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Modal/Overlay */
+.crypto-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(8px);
+  z-index: 9998;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.crypto-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid var(--noir-border);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  z-index: 9999;
+  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--noir-accent);
+  z-index: 9999;
+  transform-origin: left;
+  transition: transform 0.1s ease-out;
+}
+
+/* Copy to clipboard feedback */
+@keyframes copySuccess {
+  0%, 100% {
+    transform: scale(1);
+    color: var(--noir-text-muted);
+  }
+  50% {
+    transform: scale(1.1);
+    color: var(--noir-accent);
+  }
+}
+
+.copy-success {
+  animation: copySuccess 0.5s ease-out;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .crypto-toast {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+
+  .crypto-modal {
+    width: 95vw;
+    max-width: 95vw;
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .crypto-box {
+    box-shadow: 0 0 40px rgba(0, 255, 136, 0.03);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

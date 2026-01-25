@@ -2,11 +2,59 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/veilpay-icon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/veilpay-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/veilpay-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VeilPay - Private Payments on Stacks</title>
+
+    <!-- Typography: JetBrains Mono for code/technical, Syne for headings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+      /* Cryptographic noise background */
+      @keyframes cryptoShift {
+        0%, 100% { opacity: 0.03; transform: translateY(0); }
+        50% { opacity: 0.06; transform: translateY(-10px); }
+      }
+
+      body {
+        background: #0a0a0a;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image:
+          repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 136, 0.03) 2px, rgba(0, 255, 136, 0.03) 4px),
+          repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 136, 0.03) 2px, rgba(0, 255, 136, 0.03) 4px);
+        pointer-events: none;
+        animation: cryptoShift 8s ease-in-out infinite;
+        z-index: 1;
+      }
+
+      #root {
+        position: relative;
+        z-index: 2;
+      }
+
+      /* Custom cursor for crypto feel */
+      * {
+        cursor: default;
+      }
+
+      a, button {
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

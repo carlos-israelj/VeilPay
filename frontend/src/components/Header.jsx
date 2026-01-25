@@ -105,6 +105,16 @@ export default function Header({ userData, connectWallet, disconnectWallet, acti
                 >
                   FAQ
                 </button>
+                <button
+                  onClick={() => setActiveTab('integrations')}
+                  className={`px-3 py-2 font-bold text-xs sm:text-sm transition rounded-lg whitespace-nowrap ${
+                    activeTab === 'integrations'
+                      ? 'bg-[#3772FF] text-[#FBFCFC]'
+                      : 'text-[#777E90] hover:text-[#22262E] hover:bg-[#F4F5F6]'
+                  }`}
+                >
+                  Integrations
+                </button>
               </nav>
             </div>
 

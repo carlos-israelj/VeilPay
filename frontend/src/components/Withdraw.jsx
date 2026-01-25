@@ -112,20 +112,39 @@ export default function Withdraw({ userSession }) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#45B26A] to-[#38935A] bg-opacity-10 p-6 rounded-2xl border border-[#45B26A] border-opacity-30">
-        <h2 className="text-[#22262E] text-2xl font-bold mb-2">Withdraw USDCx</h2>
-        <p className="text-[#353945] text-sm">
-          Enter the deposit credentials (secret, nonce, amount) to withdraw funds privately to any address.
+      <div className="crypto-box-accent p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-white text-2xl font-black" style={{ fontFamily: "'Syne', sans-serif" }}>
+            WITHDRAW_PROTOCOL
+          </h2>
+          <div className="crypto-label">ZK-PROOF</div>
+        </div>
+        <p className="text-gray-400 text-sm font-mono">
+          Enter deposit credentials (secret, nonce, amount) to withdraw funds privately to any address.
         </p>
       </div>
 
       {/* Instructions */}
-      <div className="bg-[#3772FF] bg-opacity-10 p-5 rounded-xl border border-[#3772FF] border-opacity-30">
-        <h3 className="text-[#3772FF] font-bold text-sm mb-2">How to Withdraw</h3>
-        <ol className="text-[#353945] text-sm space-y-1 list-decimal list-inside">
-          <li>Enter the <strong>secret</strong>, <strong>nonce</strong>, and <strong>amount</strong> from the original deposit</li>
-          <li>Enter the <strong>recipient address</strong> (can be any Stacks address)</li>
-          <li>Click "Withdraw" to generate the ZK proof and claim your funds</li>
+      <div className="crypto-box p-5">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-6 h-6 border border-[#00ff88] flex items-center justify-center">
+            <span className="text-[#00ff88] font-bold text-xs">?</span>
+          </div>
+          <h3 className="text-[#00ff88] font-bold text-sm font-mono">WITHDRAWAL_PROTOCOL</h3>
+        </div>
+        <ol className="text-gray-400 text-xs space-y-2 font-mono pl-9">
+          <li className="flex gap-2">
+            <span className="text-[#00ff88]">1.</span>
+            <span>Enter <span className="text-white">secret</span>, <span className="text-white">nonce</span>, and <span className="text-white">amount</span> from original deposit</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-[#00ff88]">2.</span>
+            <span>Enter <span className="text-white">recipient address</span> (can be any Stacks address)</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-[#00ff88]">3.</span>
+            <span>Execute withdrawal to generate ZK proof and claim funds</span>
+          </li>
         </ol>
       </div>
 
@@ -133,66 +152,60 @@ export default function Withdraw({ userSession }) {
       <div className="space-y-4">
         {/* Secret Input */}
         <div>
-          <label className="block text-[#777E90] text-sm font-bold mb-2">
-            Secret
-          </label>
+          <label className="crypto-label block mb-3">SECRET_KEY</label>
           <input
             type="text"
             value={secret}
             onChange={(e) => setSecret(e.target.value)}
             placeholder="Enter your secret (e.g., 123456789...)"
-            className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition font-mono text-sm"
+            className="crypto-input w-full"
           />
         </div>
 
         {/* Nonce Input */}
         <div>
-          <label className="block text-[#777E90] text-sm font-bold mb-2">
-            Nonce
-          </label>
+          <label className="crypto-label block mb-3">NONCE_VALUE</label>
           <input
             type="text"
             value={nonce}
             onChange={(e) => setNonce(e.target.value)}
             placeholder="Enter your nonce (e.g., 987654321...)"
-            className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition font-mono text-sm"
+            className="crypto-input w-full"
           />
         </div>
 
         {/* Amount Input */}
         <div>
-          <label className="block text-[#777E90] text-sm font-bold mb-2">
-            Amount (USDCx)
-          </label>
+          <label className="crypto-label block mb-3">AMOUNT_USDCX</label>
           <input
             type="number"
             step="0.01"
             min="1"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter deposit amount (e.g., 1.00)"
-            className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition"
+            placeholder="1.00"
+            className="crypto-input w-full"
           />
-          <p className="text-[#777E90] text-xs mt-2">
-            This must match the exact amount that was deposited.
+          <p className="text-gray-500 text-xs mt-2 font-mono">
+            must match exact deposit amount
           </p>
         </div>
 
         {/* Calculate Commitment (Optional - for verification) */}
         {secret && nonce && amount && (
-          <div className="bg-[#F4F5F6] p-4 rounded-xl">
+          <div className="crypto-box p-4">
             <button
               onClick={handleCalculateCommitment}
-              className="text-[#3772FF] text-sm font-bold hover:underline mb-2"
+              className="text-[#00ff88] text-sm font-bold hover:text-white font-mono transition mb-2"
             >
-              → Calculate Commitment (for verification)
+              → CALCULATE_COMMITMENT (verify)
             </button>
             {calculatedCommitment && (
-              <div className="mt-2">
-                <p className="text-[#777E90] text-xs font-bold mb-1">Commitment:</p>
-                <code className="text-[#353945] text-xs font-mono break-all bg-[#FBFCFC] p-2 rounded block">
+              <div className="mt-3">
+                <div className="crypto-label mb-2">COMMITMENT_HASH</div>
+                <div className="hash-display">
                   {calculatedCommitment}
-                </code>
+                </div>
               </div>
             )}
           </div>
@@ -200,34 +213,32 @@ export default function Withdraw({ userSession }) {
 
         {/* Recipient Address */}
         <div>
-          <label className="block text-[#777E90] text-sm font-bold mb-2">
-            Recipient Address
-          </label>
+          <label className="crypto-label block mb-3">RECIPIENT_ADDRESS</label>
           <input
             type="text"
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
-            placeholder="Enter Stacks address (e.g., ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM)"
-            className="w-full bg-[#FBFCFC] text-[#22262E] px-5 py-4 rounded-xl border-2 border-[#E5E8EB] focus:outline-none focus:border-[#3772FF] transition font-mono text-sm"
+            placeholder="ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+            className="crypto-input w-full"
           />
-          <p className="text-[#777E90] text-xs mt-2">
-            Can be any Stacks address - this is what makes the transfer private!
+          <p className="text-gray-500 text-xs mt-2 font-mono">
+            any stacks address | unlinkable transfer
           </p>
         </div>
       </div>
 
       {/* Warning */}
-      <div className="bg-[#EF466F] bg-opacity-10 p-5 rounded-xl border border-[#EF466F] border-opacity-30">
+      <div className="status-error p-5">
         <div className="flex items-start gap-3">
-          <span className="text-xl">⚠️</span>
+          <span className="text-2xl">⚠</span>
           <div>
-            <h4 className="text-[#EF466F] font-bold text-sm mb-1">Important Security Notes</h4>
-            <ul className="text-[#353945] text-xs space-y-1">
-              <li>• Make sure the secret, nonce, and amount are correct</li>
-              <li>• Each deposit can only be withdrawn once</li>
-              <li>• ZK proof generation takes ~10 seconds</li>
-              <li>• Transaction confirmation takes ~10 minutes on Stacks</li>
-              <li>• Once withdrawn, the deposit cannot be recovered</li>
+            <h4 className="text-red-400 font-bold text-sm mb-2 font-mono">SECURITY_CRITICAL</h4>
+            <ul className="text-gray-400 text-xs space-y-1 font-mono">
+              <li>→ Verify secret, nonce, and amount are correct</li>
+              <li>→ Each deposit can only be withdrawn once</li>
+              <li>→ ZK proof generation: ~10 seconds</li>
+              <li>→ Transaction confirmation: ~10 minutes</li>
+              <li>→ Irreversible operation: no recovery possible</li>
             </ul>
           </div>
         </div>
@@ -237,36 +248,41 @@ export default function Withdraw({ userSession }) {
       <button
         onClick={handleWithdraw}
         disabled={loading || !secret || !nonce || !amount || !recipient}
-        className="w-full bg-[#45B26A] hover:bg-[#38935A] text-[#FBFCFC] py-4 px-6 rounded-xl font-bold text-base transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="crypto-button-primary w-full"
       >
         {loading ? (
-          <span className="flex items-center justify-center gap-2">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            Generating ZK Proof...
+          <span className="flex items-center justify-center gap-3">
+            <div className="crypto-loader"></div>
+            GENERATING ZK PROOF
           </span>
         ) : (
-          'Withdraw Funds'
+          'EXECUTE WITHDRAWAL'
         )}
       </button>
 
       {/* Success Message */}
       {withdrawalSuccess && (
-        <div className="mt-6 p-6 bg-[#45B26A] bg-opacity-10 rounded-2xl border border-[#45B26A] border-opacity-30">
-          <p className="text-[#45B26A] font-bold text-base mb-2">
-            Withdrawal successful!
-          </p>
-          <p className="text-[#353945] text-sm mb-4">
-            Your withdrawal has been submitted to the blockchain. The transaction will be confirmed in approximately 10 minutes.
+        <div className="status-success p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 border border-[#00ff88] flex items-center justify-center">
+              <span className="text-[#00ff88] font-bold">✓</span>
+            </div>
+            <p className="text-[#00ff88] font-bold text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
+              WITHDRAWAL SUCCESSFUL
+            </p>
+          </div>
+          <p className="text-gray-400 text-sm mb-6 font-mono">
+            Submitted to blockchain. Confirmation ETA: ~10 minutes.
           </p>
 
           {/* Transaction Link */}
-          <div className="mt-4 p-3 bg-[#FBFCFC] rounded-xl border border-[#E5E8EB]">
-            <p className="text-[#777E90] font-bold text-xs mb-2">Transaction:</p>
+          <div className="mt-4 border-t border-[#00ff88]/20 pt-4">
+            <div className="crypto-label mb-2">TRANSACTION_ID</div>
             <a
               href={`https://explorer.hiro.so/txid/${withdrawalSuccess}?chain=testnet`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#3772FF] hover:text-[#2C5CE6] text-xs font-mono break-all flex items-center gap-2"
+              className="text-[#00ff88] hover:text-white text-xs font-mono break-all flex items-center gap-2 transition"
             >
               {withdrawalSuccess}
               <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,10 +294,15 @@ export default function Withdraw({ userSession }) {
       )}
 
       {/* Privacy Notice */}
-      <div className="bg-[#9656D6] bg-opacity-10 p-5 rounded-xl border border-[#9656D6] border-opacity-30">
-        <h4 className="text-[#9656D6] font-bold text-sm mb-2">Privacy Guaranteed</h4>
-        <p className="text-[#353945] text-xs leading-relaxed">
-          Zero-Knowledge proofs ensure that no one can link this withdrawal to the original deposit.
+      <div className="crypto-box-accent p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-6 h-6 border border-[#00ff88] flex items-center justify-center">
+            <span className="text-[#00ff88] font-bold text-xs font-mono">#</span>
+          </div>
+          <h4 className="text-[#00ff88] font-bold text-sm font-mono">PRIVACY_GUARANTEED</h4>
+        </div>
+        <p className="text-gray-400 text-xs leading-relaxed font-mono">
+          Zero-Knowledge proofs ensure no one can link this withdrawal to the original deposit.
           The recipient address is completely private and unlinkable from the depositor's address.
         </p>
       </div>
