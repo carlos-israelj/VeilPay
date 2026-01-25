@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 // Path to verification key
 const VERIFICATION_KEY_PATH = path.join(
   __dirname,
-  '../../circuits/build/verification_key.json'
+  '../circuits/verification_key.json'
 );
 
 let verificationKey = null;
