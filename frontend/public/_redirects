@@ -1,5 +1,0 @@
-# Serve circuit files directly
-/circuits/*  /circuits/:splat  200
-
-# SPA fallback for all other routes
-/*  /index.html  200
