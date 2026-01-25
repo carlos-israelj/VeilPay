@@ -153,42 +153,45 @@ export default function Deposit({ userSession }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* USDCx Balance Display */}
-      <div className="crypto-box p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="crypto-label mb-1">USDCX_BALANCE</div>
-            <div className="text-white text-3xl font-black" style={{ fontFamily: "'Syne', sans-serif" }}>
-              {usdcxBalance}
+      <div className="crypto-box p-4 sm:p-6 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5 bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,#00ff88_5px,#00ff88_6px)]"></div>
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex-1">
+              <div className="crypto-label mb-1 sm:mb-2">USDCX_BALANCE</div>
+              <div className="text-white text-2xl sm:text-3xl lg:text-4xl font-black" style={{ fontFamily: "'Syne', sans-serif" }}>
+                {usdcxBalance}
+              </div>
             </div>
+            <div className="live-indicator"></div>
           </div>
-          <div className="live-indicator"></div>
         </div>
       </div>
 
       {/* Deposit History */}
       {deposits.length > 0 && (
-        <div className="crypto-box p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-bold text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
+        <div className="crypto-box p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h3 className="text-white font-bold text-base sm:text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
               YOUR DEPOSITS
             </h3>
             <div className="crypto-label">{deposits.length} TOTAL</div>
           </div>
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="space-y-2 sm:space-y-3 max-h-64 overflow-y-auto">
             {deposits.map((dep, idx) => (
-              <div key={idx} className="border border-[#00ff88]/20 bg-black/20 p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-[#00ff88] font-bold font-mono">
+              <div key={idx} className="border border-[#00ff88]/20 bg-black/20 p-3 sm:p-4 hover:border-[#00ff88]/40 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
+                  <span className="text-[#00ff88] font-bold font-mono text-sm sm:text-base">
                     {dep.amountDisplay || (dep.amount / 1000000).toFixed(2)} USDCx
                   </span>
                   <span className="text-gray-500 text-xs font-mono">
                     {new Date(dep.timestamp).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="hash-display text-xs">
-                  {dep.commitment.substring(0, 32)}...
+                <div className="hash-display text-xs break-all">
+                  {dep.commitment.substring(0, 48)}...
                 </div>
               </div>
             ))}
@@ -206,7 +209,7 @@ export default function Deposit({ userSession }) {
           placeholder="1.00"
           step="0.01"
           min="1.00"
-          className="crypto-input w-full"
+          className="crypto-input w-full text-sm sm:text-base"
         />
         <p className="text-gray-500 text-xs mt-2 font-mono">
           available: {usdcxBalance} USDCx | minimum: 1.00 USDCx
@@ -221,64 +224,64 @@ export default function Deposit({ userSession }) {
         {loading ? (
           <span className="flex items-center justify-center gap-3">
             <div className="crypto-loader"></div>
-            PROCESSING
+            <span className="text-xs sm:text-sm">PROCESSING</span>
           </span>
         ) : (
-          'INITIATE DEPOSIT'
+          <span className="text-xs sm:text-sm">INITIATE DEPOSIT</span>
         )}
       </button>
 
       {depositData && (
-        <div className="status-success p-6">
+        <div className="status-success p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 border border-[#00ff88] flex items-center justify-center">
-              <span className="text-[#00ff88] font-bold">✓</span>
+            <div className="w-6 h-6 sm:w-8 sm:h-8 border border-[#00ff88] flex items-center justify-center flex-shrink-0">
+              <span className="text-[#00ff88] font-bold text-sm sm:text-base">✓</span>
             </div>
-            <p className="text-[#00ff88] font-bold text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
+            <p className="text-[#00ff88] font-bold text-base sm:text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
               DEPOSIT SUCCESSFUL
             </p>
           </div>
-          <p className="text-gray-400 text-sm mb-6 font-mono">
+          <p className="text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6 font-mono">
             Store these credentials securely. Required for withdrawal.
           </p>
 
           {/* Secret */}
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
+          <div className="mb-3 sm:mb-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
               <div className="crypto-label">SECRET_KEY</div>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(depositData.secret);
                   alert('Secret copied to clipboard!');
                 }}
-                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition"
+                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition self-start sm:self-auto"
               >
                 [COPY]
               </button>
             </div>
-            <div className="hash-display">{depositData.secret}</div>
+            <div className="hash-display break-all text-xs sm:text-sm">{depositData.secret}</div>
           </div>
 
           {/* Nonce */}
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
+          <div className="mb-3 sm:mb-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
               <div className="crypto-label">NONCE_VALUE</div>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(depositData.nonce);
                   alert('Nonce copied to clipboard!');
                 }}
-                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition"
+                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition self-start sm:self-auto"
               >
                 [COPY]
               </button>
             </div>
-            <div className="hash-display">{depositData.nonce}</div>
+            <div className="hash-display break-all text-xs sm:text-sm">{depositData.nonce}</div>
           </div>
 
           {/* Amount */}
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
+          <div className="mb-3 sm:mb-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
               <div className="crypto-label">AMOUNT</div>
               <button
                 onClick={() => {
@@ -286,12 +289,12 @@ export default function Deposit({ userSession }) {
                   navigator.clipboard.writeText(displayAmount);
                   alert('Amount copied to clipboard!');
                 }}
-                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition"
+                className="text-[#00ff88] hover:text-white text-xs font-bold font-mono transition self-start sm:self-auto"
               >
                 [COPY]
               </button>
             </div>
-            <div className="text-white font-bold font-mono text-lg">
+            <div className="text-white font-bold font-mono text-base sm:text-lg">
               {(Number(depositData.amount) / 1000000).toFixed(2)} USDCx
             </div>
           </div>
@@ -306,12 +309,12 @@ export default function Deposit({ userSession }) {
             }}
             className="crypto-button-secondary w-full mt-4"
           >
-            COPY ALL CREDENTIALS
+            <span className="text-xs sm:text-sm">COPY ALL CREDENTIALS</span>
           </button>
 
           {/* Transaction Link */}
           {depositData.txId && (
-            <div className="mt-6 border-t border-[#00ff88]/20 pt-4">
+            <div className="mt-4 sm:mt-6 border-t border-[#00ff88]/20 pt-4">
               <div className="crypto-label mb-2">TRANSACTION_ID</div>
               <a
                 href={`https://explorer.hiro.so/txid/${depositData.txId}?chain=testnet`}
@@ -319,7 +322,7 @@ export default function Deposit({ userSession }) {
                 rel="noopener noreferrer"
                 className="text-[#00ff88] hover:text-white text-xs font-mono break-all flex items-center gap-2 transition"
               >
-                {depositData.txId}
+                <span className="flex-1">{depositData.txId}</span>
                 <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
@@ -329,11 +332,11 @@ export default function Deposit({ userSession }) {
         </div>
       )}
 
-      <div className="status-warning p-6">
-        <div className="flex items-start gap-3">
-          <span className="text-2xl">⚠</span>
-          <div>
-            <h4 className="text-yellow-400 font-bold text-sm mb-2 font-mono">SECURITY_WARNING</h4>
+      <div className="status-warning p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start gap-3">
+          <span className="text-xl sm:text-2xl flex-shrink-0">⚠</span>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-yellow-400 font-bold text-xs sm:text-sm mb-2 font-mono">SECURITY_WARNING</h4>
             <p className="text-gray-400 text-xs font-mono leading-relaxed">
               Credentials are stored locally in browser. Backup before clearing data.
               Loss of credentials = permanent loss of funds.

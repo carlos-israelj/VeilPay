@@ -48,29 +48,14 @@ const ERC20_ABI = [
 ];
 
 // Helper to encode Stacks address to bytes32 for xReserve
-// Based on official Stacks documentation: https://docs.stacks.co/more-guides/bridging-usdcx
 function encodeStacksAddress(stacksAddress) {
-  // Decode the c32check address to get version and hash160
-  // Returns: [version (number), hash160 (hex string)]
-  // Example: c32addressDecode('ST2TV...') => [26, 'a46ff88886c2ef9762d970b4d2c63678835bd39d']
   const [version, hash160Hex] = c32addressDecode(stacksAddress);
-
-  // Convert hex string to bytes
   const hash160Bytes = new Uint8Array(
     hash160Hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16))
   );
-
-  // Create 32-byte buffer following xReserve format:
-  // 11 bytes padding + 1 byte version + 20 bytes hash160
   const bytes = new Uint8Array(32);
-
-  // First 11 bytes are zero (padding)
-  // Byte 11: version (22=mainnet p2pkh, 26=testnet p2pkh)
   bytes[11] = version;
-
-  // Bytes 12-31: hash160 (20 bytes)
   bytes.set(hash160Bytes, 12);
-
   return '0x' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -80,7 +65,7 @@ export default function Bridge({ stacksAddress }) {
   const [ethAddress, setEthAddress] = useState('');
   const [usdcBalance, setUsdcBalance] = useState('0');
   const [ethBalance, setEthBalance] = useState('0');
-  const [bridgeStep, setBridgeStep] = useState(''); // 'approving', 'depositing', 'waiting', 'completed'
+  const [bridgeStep, setBridgeStep] = useState('');
   const [txHash, setTxHash] = useState('');
   const [progress, setProgress] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -94,23 +79,19 @@ export default function Bridge({ stacksAddress }) {
     if (savedState) {
       try {
         const state = JSON.parse(savedState);
-
-        // Only restore if there's an active transaction
         if (state.bridgeStep === 'waiting' || state.bridgeStep === 'completed') {
           setBridgeStep(state.bridgeStep);
           setTxHash(state.txHash);
           setProgress(state.progress || 0);
 
-          // If transaction is still waiting, resume the countdown
           if (state.bridgeStep === 'waiting' && state.startTime) {
-            const totalTime = 18 * 60; // 18 minutes in seconds
+            const totalTime = 18 * 60;
             const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
             const remaining = Math.max(0, totalTime - elapsed);
 
             setTimeRemaining(remaining);
             setProgress(Math.min(100, (elapsed / totalTime) * 100));
 
-            // Resume the countdown timer if not completed
             if (remaining > 0) {
               const interval = setInterval(() => {
                 const newElapsed = Math.floor((Date.now() - state.startTime) / 1000);
@@ -126,7 +107,6 @@ export default function Bridge({ stacksAddress }) {
 
               intervalRef.current = interval;
             } else {
-              // Time already elapsed, mark as completed
               setBridgeStep('completed');
             }
           }
@@ -136,7 +116,6 @@ export default function Bridge({ stacksAddress }) {
       }
     }
 
-    // Cleanup interval on unmount
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -144,18 +123,16 @@ export default function Bridge({ stacksAddress }) {
     };
   }, []);
 
-  // Save bridge state to localStorage whenever it changes
   useEffect(() => {
     if (bridgeStep === 'waiting' || bridgeStep === 'completed') {
       const state = {
         bridgeStep,
         txHash,
         progress,
-        startTime: Date.now() - ((18 * 60 - timeRemaining) * 1000), // Calculate original start time
+        startTime: Date.now() - ((18 * 60 - timeRemaining) * 1000),
       };
       localStorage.setItem('veilpay_bridge_state', JSON.stringify(state));
     } else if (!bridgeStep) {
-      // Clear saved state if no active transaction
       localStorage.removeItem('veilpay_bridge_state');
     }
   }, [bridgeStep, txHash, progress, timeRemaining]);
@@ -172,14 +149,12 @@ export default function Bridge({ stacksAddress }) {
       });
       setEthAddress(accounts[0]);
 
-      // Switch to Sepolia testnet
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0xaa36a7' }], // Sepolia chainId
+          params: [{ chainId: '0xaa36a7' }],
         });
       } catch (switchError) {
-        // Chain not added, try to add it
         if (switchError.code === 4902) {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
@@ -194,7 +169,6 @@ export default function Bridge({ stacksAddress }) {
         }
       }
 
-      // Get balances
       await updateBalances(accounts[0]);
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -208,11 +182,9 @@ export default function Bridge({ stacksAddress }) {
       transport: http(SEPOLIA_RPC_URL),
     });
 
-    // Get ETH balance
     const eth = await publicClient.getBalance({ address });
     setEthBalance(formatUnits(eth, 18));
 
-    // Get USDC balance
     const usdc = await publicClient.readContract({
       address: ETH_USDC_CONTRACT,
       abi: ERC20_ABI,
@@ -226,8 +198,6 @@ export default function Bridge({ stacksAddress }) {
     setEthAddress('');
     setUsdcBalance('0');
     setEthBalance('0');
-    // Don't clear bridge state if transaction is in progress
-    // This allows users to monitor their bridge transaction even after disconnecting
     if (bridgeStep !== 'waiting' && bridgeStep !== 'completed') {
       setBridgeStep('');
       setTxHash('');
@@ -269,7 +239,7 @@ export default function Bridge({ stacksAddress }) {
         transport: http(SEPOLIA_RPC_URL),
       });
 
-      const value = parseUnits(amount, 6); // USDC has 6 decimals
+      const value = parseUnits(amount, 6);
       const maxFee = 0n;
       const remoteRecipient = encodeStacksAddress(targetAddress);
       const hookData = '0x';
@@ -277,7 +247,6 @@ export default function Bridge({ stacksAddress }) {
       console.log('Bridging', amount, 'USDC to Stacks address:', targetAddress);
       console.log('Encoded recipient (bytes32):', remoteRecipient);
 
-      // Step 1: Approve xReserve to spend USDC
       console.log('Approving xReserve...');
       const approveTx = await walletClient.writeContract({
         address: ETH_USDC_CONTRACT,
@@ -291,7 +260,6 @@ export default function Bridge({ stacksAddress }) {
       await publicClient.waitForTransactionReceipt({ hash: approveTx });
       console.log('Approval confirmed');
 
-      // Step 2: Deposit to Stacks
       setBridgeStep('depositing');
       console.log('Depositing to Stacks...');
       const depositTx = await walletClient.writeContract({
@@ -305,18 +273,15 @@ export default function Bridge({ stacksAddress }) {
       console.log('Deposit tx:', depositTx);
       setTxHash(depositTx);
 
-      // Start waiting period (18 minutes = 1080 seconds)
       setBridgeStep('waiting');
       setLoading(false);
-      const totalTime = 18 * 60; // 18 minutes in seconds
+      const totalTime = 18 * 60;
       setTimeRemaining(totalTime);
 
-      // Clear any existing interval
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
 
-      // Update progress bar every second
       const startTime = Date.now();
       const interval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -331,10 +296,7 @@ export default function Bridge({ stacksAddress }) {
         }
       }, 1000);
 
-      // Store interval reference for cleanup
       intervalRef.current = interval;
-
-      // Update balances
       await updateBalances(ethAddress);
     } catch (error) {
       console.error('Bridge error:', error);
@@ -344,53 +306,57 @@ export default function Bridge({ stacksAddress }) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="crypto-box-accent p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-white font-black text-2xl" style={{ fontFamily: "'Syne', sans-serif" }}>
-            BRIDGE_PROTOCOL
-          </h3>
-          <div className="crypto-label">ETH→STACKS</div>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="crypto-box-accent p-4 sm:p-6 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5 bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,#00ff88_2px,#00ff88_3px)]"></div>
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+            <h3 className="text-white font-black text-xl sm:text-2xl" style={{ fontFamily: "'Syne', sans-serif" }}>
+              BRIDGE_PROTOCOL
+            </h3>
+            <div className="crypto-label">ETH→STACKS</div>
+          </div>
+          <p className="text-gray-400 text-xs sm:text-sm font-mono leading-relaxed">
+            Bridge USDC from Ethereum Sepolia to USDCx on Stacks testnet.
+            <br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>xReserve protocol | ETA: ~18 minutes
+          </p>
         </div>
-        <p className="text-gray-400 text-sm font-mono">
-          Bridge USDC from Ethereum Sepolia to USDCx on Stacks testnet.
-          <br />
-          xReserve protocol | ETA: ~18 minutes
-        </p>
       </div>
 
-      {/* Bridge Status Messages - Always visible if there's an active transaction */}
+      {/* Bridge Status Messages */}
       {bridgeStep === 'approving' && (
-        <div className="crypto-box p-6">
+        <div className="crypto-box p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="crypto-loader"></div>
-            <p className="text-[#00ff88] font-bold font-mono">STEP_1: APPROVING_USDC</p>
+            <p className="text-[#00ff88] font-bold font-mono text-sm sm:text-base">STEP_1: APPROVING_USDC</p>
           </div>
-          <p className="text-gray-400 text-sm font-mono">
+          <p className="text-gray-400 text-xs sm:text-sm font-mono">
             Confirm approval transaction in Ethereum wallet...
           </p>
         </div>
       )}
 
       {bridgeStep === 'depositing' && (
-        <div className="crypto-box p-6">
+        <div className="crypto-box p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="crypto-loader"></div>
-            <p className="text-[#00ff88] font-bold font-mono">STEP_2: DEPOSITING_TO_BRIDGE</p>
+            <p className="text-[#00ff88] font-bold font-mono text-sm sm:text-base">STEP_2: DEPOSITING_TO_BRIDGE</p>
           </div>
-          <p className="text-gray-400 text-sm font-mono">
+          <p className="text-gray-400 text-xs sm:text-sm font-mono">
             Sign and send bridge transaction in Ethereum wallet...
           </p>
         </div>
       )}
 
       {bridgeStep === 'waiting' && txHash && (
-        <div className="status-success p-6 space-y-4">
+        <div className="status-success p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 border border-[#00ff88] flex items-center justify-center">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 border border-[#00ff88] flex items-center justify-center flex-shrink-0">
               <span className="text-[#00ff88] font-bold text-xs">✓</span>
             </div>
-            <p className="text-[#00ff88] font-bold font-mono">BRIDGE_TX_SUBMITTED</p>
+            <p className="text-[#00ff88] font-bold font-mono text-sm sm:text-base">BRIDGE_TX_SUBMITTED</p>
           </div>
 
           <div className="space-y-2">
@@ -399,7 +365,7 @@ export default function Bridge({ stacksAddress }) {
               href={`https://sepolia.etherscan.io/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hash-display block hover:border-[#00ff88] transition cursor-pointer"
+              className="hash-display block hover:border-[#00ff88] transition cursor-pointer break-all text-xs sm:text-sm"
             >
               {txHash}
             </a>
@@ -408,17 +374,18 @@ export default function Bridge({ stacksAddress }) {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <div className="crypto-label">TIME_REMAINING</div>
-              <p className="text-[#00ff88] font-bold font-mono text-lg">
+              <p className="text-[#00ff88] font-bold font-mono text-base sm:text-lg">
                 {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, '0')}
               </p>
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-full bg-black/40 border border-[#00ff88]/20 h-3 overflow-hidden">
+            <div className="w-full bg-black/40 border border-[#00ff88]/20 h-2.5 sm:h-3 overflow-hidden">
               <div
-                className="bg-[#00ff88] h-full transition-all duration-1000 ease-linear"
+                className="bg-[#00ff88] h-full transition-all duration-1000 ease-linear relative overflow-hidden"
                 style={{ width: `${progress}%` }}
-              ></div>
+              >
+                <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent,transparent_10px,rgba(0,0,0,0.1)_10px,rgba(0,0,0,0.1)_20px)] animate-pulse"></div>
+              </div>
             </div>
 
             <p className="text-gray-500 text-xs text-center font-mono">
@@ -427,8 +394,8 @@ export default function Bridge({ stacksAddress }) {
           </div>
 
           {!ethAddress && (
-            <div className="crypto-box p-4 mt-4">
-              <p className="text-gray-400 text-sm font-mono">
+            <div className="crypto-box p-3 sm:p-4 mt-4">
+              <p className="text-gray-400 text-xs sm:text-sm font-mono">
                 <span className="text-[#00ff88] font-bold">NOTE:</span> You can safely disconnect Ethereum wallet.
                 Transaction will continue processing.
               </p>
@@ -438,26 +405,26 @@ export default function Bridge({ stacksAddress }) {
       )}
 
       {bridgeStep === 'completed' && txHash && (
-        <div className="status-success p-6 space-y-4">
+        <div className="status-success p-4 sm:p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 border border-[#00ff88] flex items-center justify-center">
-                <span className="text-[#00ff88] font-bold">✓</span>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 border border-[#00ff88] flex items-center justify-center flex-shrink-0">
+                <span className="text-[#00ff88] font-bold text-sm sm:text-base">✓</span>
               </div>
-              <p className="text-[#00ff88] font-bold text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
+              <p className="text-[#00ff88] font-bold text-base sm:text-lg" style={{ fontFamily: "'Syne', sans-serif" }}>
                 BRIDGE_COMPLETE
               </p>
             </div>
             <button
               onClick={clearBridgeState}
-              className="text-gray-500 hover:text-white text-sm font-bold transition font-mono"
+              className="text-gray-500 hover:text-white text-xs sm:text-sm font-bold transition font-mono"
               title="Clear bridge status"
             >
               [X]
             </button>
           </div>
 
-          <p className="text-gray-400 text-sm font-mono">
+          <p className="text-gray-400 text-xs sm:text-sm font-mono">
             USDCx now available on Stacks. Check balance in Deposit tab.
           </p>
 
@@ -467,7 +434,7 @@ export default function Bridge({ stacksAddress }) {
               href={`https://sepolia.etherscan.io/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hash-display block hover:border-[#00ff88] transition cursor-pointer"
+              className="hash-display block hover:border-[#00ff88] transition cursor-pointer break-all text-xs sm:text-sm"
             >
               {txHash}
             </a>
@@ -483,9 +450,9 @@ export default function Bridge({ stacksAddress }) {
       )}
 
       {bridgeStep === 'error' && (
-        <div className="status-error p-6">
-          <p className="text-red-400 font-bold mb-2 font-mono">BRIDGE_FAILED</p>
-          <p className="text-gray-400 text-sm font-mono">
+        <div className="status-error p-4 sm:p-6">
+          <p className="text-red-400 font-bold mb-2 font-mono text-sm sm:text-base">BRIDGE_FAILED</p>
+          <p className="text-gray-400 text-xs sm:text-sm font-mono">
             Retry operation or check console for error details.
           </p>
         </div>
@@ -500,27 +467,27 @@ export default function Bridge({ stacksAddress }) {
         </button>
       ) : (
         <>
-          <div className="crypto-box p-6 space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
+          <div className="crypto-box p-4 sm:p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+              <div className="flex-1 min-w-0">
                 <div className="crypto-label mb-2">ETHEREUM_ADDRESS</div>
-                <p className="text-white text-sm font-mono break-all">{ethAddress}</p>
+                <p className="text-white text-xs sm:text-sm font-mono break-all">{ethAddress}</p>
               </div>
               <button
                 onClick={disconnectEthWallet}
-                className="ml-4 bg-black/40 hover:bg-black/60 text-[#00ff88] px-4 py-2 text-xs font-bold font-mono transition border border-[#00ff88]/20 hover:border-[#00ff88]"
+                className="bg-black/40 hover:bg-black/60 text-[#00ff88] px-3 sm:px-4 py-2 text-xs font-bold font-mono transition border border-[#00ff88]/20 hover:border-[#00ff88] self-start sm:self-auto"
               >
                 [DISCONNECT]
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-6 mt-4">
-              <div className="bg-black/40 p-4 border border-[#00ff88]/20">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 mt-4">
+              <div className="bg-black/40 p-3 sm:p-4 border border-[#00ff88]/20">
                 <div className="crypto-label mb-1">ETH_BALANCE</div>
-                <p className="text-white font-bold text-lg font-mono">{parseFloat(ethBalance).toFixed(4)} ETH</p>
+                <p className="text-white font-bold text-sm sm:text-lg font-mono">{parseFloat(ethBalance).toFixed(4)} ETH</p>
               </div>
-              <div className="bg-black/40 p-4 border border-[#00ff88]/20">
+              <div className="bg-black/40 p-3 sm:p-4 border border-[#00ff88]/20">
                 <div className="crypto-label mb-1">USDC_BALANCE</div>
-                <p className="text-white font-bold text-lg font-mono">{parseFloat(usdcBalance).toFixed(2)} USDC</p>
+                <p className="text-white font-bold text-sm sm:text-lg font-mono">{parseFloat(usdcBalance).toFixed(2)} USDC</p>
               </div>
             </div>
           </div>
@@ -529,10 +496,10 @@ export default function Bridge({ stacksAddress }) {
           <div>
             <label className="crypto-label block mb-3">STACKS_RECIPIENT_ADDRESS</label>
 
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-3">
               <button
                 onClick={() => setUseConnectedWallet(true)}
-                className={`flex-1 py-3 px-4 font-bold text-sm font-mono transition border ${
+                className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 font-bold text-xs sm:text-sm font-mono transition border ${
                   useConnectedWallet
                     ? 'bg-[#00ff88] text-black border-[#00ff88]'
                     : 'bg-black/40 text-gray-400 border-[#00ff88]/20 hover:border-[#00ff88]'
@@ -542,7 +509,7 @@ export default function Bridge({ stacksAddress }) {
               </button>
               <button
                 onClick={() => setUseConnectedWallet(false)}
-                className={`flex-1 py-3 px-4 font-bold text-sm font-mono transition border ${
+                className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 font-bold text-xs sm:text-sm font-mono transition border ${
                   !useConnectedWallet
                     ? 'bg-[#00ff88] text-black border-[#00ff88]'
                     : 'bg-black/40 text-gray-400 border-[#00ff88]/20 hover:border-[#00ff88]'
@@ -553,9 +520,9 @@ export default function Bridge({ stacksAddress }) {
             </div>
 
             {useConnectedWallet ? (
-              <div className="crypto-box p-4">
+              <div className="crypto-box p-3 sm:p-4">
                 <div className="crypto-label mb-1">RECIPIENT</div>
-                <p className="text-white text-sm font-mono break-all">
+                <p className="text-white text-xs sm:text-sm font-mono break-all">
                   {stacksAddress || 'Connect Stacks wallet first'}
                 </p>
               </div>
@@ -565,7 +532,7 @@ export default function Bridge({ stacksAddress }) {
                 value={recipientAddress}
                 onChange={(e) => setRecipientAddress(e.target.value)}
                 placeholder="ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
-                className="crypto-input w-full"
+                className="crypto-input w-full text-xs sm:text-sm"
               />
             )}
           </div>
@@ -579,7 +546,7 @@ export default function Bridge({ stacksAddress }) {
               placeholder="1.00"
               step="0.01"
               min="1.00"
-              className="crypto-input w-full"
+              className="crypto-input w-full text-sm sm:text-base"
             />
             <p className="text-gray-500 text-xs mt-2 font-mono">
               minimum: 1.00 USDC | time: ~15 minutes
@@ -594,14 +561,16 @@ export default function Bridge({ stacksAddress }) {
             {loading ? (
               <span className="flex items-center justify-center gap-3">
                 <div className="crypto-loader"></div>
-                {bridgeStep === 'approving' ? 'APPROVING USDC' : 'DEPOSITING TO BRIDGE'}
+                <span className="text-xs sm:text-sm">{bridgeStep === 'approving' ? 'APPROVING USDC' : 'DEPOSITING TO BRIDGE'}</span>
               </span>
-            ) : 'BRIDGE USDC TO STACKS'}
+            ) : (
+              <span className="text-xs sm:text-sm">BRIDGE USDC TO STACKS</span>
+            )}
           </button>
 
           {!bridgeStep && (
-            <div className="status-warning p-6">
-              <p className="text-gray-400 text-sm font-mono">
+            <div className="status-warning p-4 sm:p-6">
+              <p className="text-gray-400 text-xs sm:text-sm font-mono">
                 <strong className="text-yellow-400 font-bold">TESTNET_FAUCETS</strong>
                 <br />
                 <br />

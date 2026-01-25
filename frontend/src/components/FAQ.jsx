@@ -171,24 +171,27 @@ export default function FAQ() {
   };
 
   return (
-    <div className="space-y-8 fade-in-up">
+    <div className="space-y-6 sm:space-y-8 fade-in-up">
       {/* Introduction Header with Declassification Style */}
-      <div className="crypto-box-accent p-6 stagger-1 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4 opacity-20 text-[#00ff88] font-mono text-xs rotate-12">
+      <div className="crypto-box-accent p-4 sm:p-6 stagger-1 relative overflow-hidden">
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 sm:p-4 opacity-20 text-[#00ff88] font-mono text-[10px] sm:text-xs rotate-12">
           DECLASSIFIED
         </div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white font-black text-2xl" style={{ fontFamily: "'Syne', sans-serif" }}>
-            KNOWLEDGE_BASE_ACCESS
-          </h3>
-          <div className="flex items-center gap-2 text-[#00ff88] text-xs font-mono">
-            <div className="w-2 h-2 bg-[#00ff88] rounded-full animate-pulse"></div>
-            UNRESTRICTED
+        <div className="absolute inset-0 opacity-5 bg-[repeating-linear-gradient(-45deg,transparent,transparent_10px,#00ff88_10px,#00ff88_11px)]"></div>
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <h3 className="text-white font-black text-xl sm:text-2xl lg:text-3xl" style={{ fontFamily: "'Syne', sans-serif" }}>
+              KNOWLEDGE_BASE_ACCESS
+            </h3>
+            <div className="flex items-center gap-2 text-[#00ff88] text-xs font-mono">
+              <div className="w-2 h-2 bg-[#00ff88] rounded-full animate-pulse"></div>
+              UNRESTRICTED
+            </div>
           </div>
+          <p className="text-gray-400 text-xs sm:text-sm font-mono leading-relaxed">
+            Access declassified documentation on VeilPay's privacy protocol, usage guidelines, and technical specifications.
+          </p>
         </div>
-        <p className="text-gray-400 text-sm font-mono leading-relaxed">
-          Access declassified documentation on VeilPay's privacy protocol, usage guidelines, and technical specifications.
-        </p>
       </div>
 
       {/* FAQ Categories with Document Classification Style */}
@@ -196,21 +199,21 @@ export default function FAQ() {
         const colors = getClassificationColor(category.classification);
 
         return (
-          <div key={catIndex} className={`crypto-box p-6 stagger-${Math.min(catIndex + 2, 5)}`}>
+          <div key={catIndex} className={`crypto-box p-4 sm:p-6 stagger-${Math.min(catIndex + 2, 5)}`}>
             {/* Category Header with Classification Badge */}
-            <div className="mb-6 pb-4 border-b border-[#00ff88]/20">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-white font-bold text-lg font-mono flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-sm">
+            <div className="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-[#00ff88]/20">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-2">
+                <h4 className="text-white font-bold text-base sm:text-lg font-mono flex items-center gap-2 sm:gap-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-xs sm:text-sm flex-shrink-0">
                     {catIndex + 1}
                   </div>
-                  {category.category.toUpperCase().replace(/ /g, '_')}
+                  <span className="break-words">{category.category.toUpperCase().replace(/ /g, '_')}</span>
                 </h4>
-                <div className={`${colors.border} ${colors.text} ${colors.bg} border px-3 py-1 text-xs font-mono font-bold`}>
+                <div className={`${colors.border} ${colors.text} ${colors.bg} border px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-mono font-bold self-start sm:self-auto flex-shrink-0`}>
                   {category.classification}
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-gray-500 text-xs font-mono">
+              <div className="flex items-center gap-2 text-gray-500 text-[10px] sm:text-xs font-mono">
                 <span>CLEARANCE LEVEL:</span>
                 <div className="flex-1 h-1 bg-black/60 relative overflow-hidden">
                   <div
@@ -222,7 +225,7 @@ export default function FAQ() {
             </div>
 
             {/* Questions Accordion */}
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {category.questions.map((faq, qIndex) => {
                 const isOpen = openIndex === `${catIndex}-${qIndex}`;
                 return (
@@ -231,7 +234,7 @@ export default function FAQ() {
                     className="relative crypto-box border border-[#00ff88]/10 overflow-hidden transition-all group hover:border-[#00ff88]/30"
                   >
                     {/* Declassification Stamp - appears on hover */}
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden sm:block">
                       <div className={`${colors.text} text-[10px] font-mono font-bold px-2 py-1 border ${colors.border} rotate-12`}>
                         AUTHORIZED
                       </div>
@@ -240,23 +243,23 @@ export default function FAQ() {
                     {/* Question Button */}
                     <button
                       onClick={() => toggleQuestion(catIndex, qIndex)}
-                      className="w-full p-5 text-left flex items-start justify-between hover:bg-black/40 transition-all group/btn"
+                      className="w-full p-3 sm:p-5 text-left flex items-start justify-between hover:bg-black/40 transition-all group/btn"
                     >
-                      <div className="flex items-start gap-4 flex-1 pr-4">
-                        <div className={`w-6 h-6 border ${colors.border} flex items-center justify-center text-xs ${colors.text} flex-shrink-0 mt-0.5 group-hover/btn:bg-[#00ff88]/5 transition-colors`}>
+                      <div className="flex items-start gap-2 sm:gap-4 flex-1 pr-3 sm:pr-4 min-w-0">
+                        <div className={`w-5 h-5 sm:w-6 sm:h-6 border ${colors.border} flex items-center justify-center text-[10px] sm:text-xs ${colors.text} flex-shrink-0 mt-0.5 group-hover/btn:bg-[#00ff88]/5 transition-colors`}>
                           Q
                         </div>
-                        <span className="text-white font-bold text-sm font-mono group-hover/btn:text-[#00ff88] transition-colors">
+                        <span className="text-white font-bold text-xs sm:text-sm font-mono group-hover/btn:text-[#00ff88] transition-colors break-words">
                           {faq.q}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         {/* Status indicator */}
-                        <div className={`text-xs font-mono ${isOpen ? 'text-[#00ff88]' : 'text-gray-600'} transition-colors`}>
+                        <div className={`text-[10px] sm:text-xs font-mono ${isOpen ? 'text-[#00ff88]' : 'text-gray-600'} transition-colors hidden sm:block`}>
                           {isOpen ? 'OPEN' : 'CLOSED'}
                         </div>
                         {/* Arrow */}
-                        <span className={`text-[#00ff88] text-lg transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                        <span className={`text-[#00ff88] text-base sm:text-lg transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
                           ▼
                         </span>
                       </div>
@@ -266,19 +269,19 @@ export default function FAQ() {
                     <div
                       className={`overflow-hidden transition-all duration-500 ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
                     >
-                      <div className="px-5 pb-5 pt-2 border-t border-[#00ff88]/20">
+                      <div className="px-3 sm:px-5 pb-3 sm:pb-5 pt-2 border-t border-[#00ff88]/20">
                         {/* Declassification header */}
-                        <div className="flex items-center gap-3 mb-3 pb-2 border-b border-[#00ff88]/10">
-                          <div className="w-6 h-6 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-xs text-[#00ff88] flex-shrink-0">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 pb-2 border-b border-[#00ff88]/10">
+                          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-[10px] sm:text-xs text-[#00ff88] flex-shrink-0">
                             A
                           </div>
                           <div className="flex items-center gap-2 text-[10px] font-mono text-gray-500">
                             <span>REDACTED:</span>
-                            <div className="flex gap-1">
+                            <div className="flex gap-0.5 sm:gap-1">
                               {[...Array(10)].map((_, i) => (
                                 <div
                                   key={i}
-                                  className={`w-1 h-3 transition-all duration-300 ${isOpen ? 'bg-[#00ff88]/20' : 'bg-gray-700'}`}
+                                  className={`w-0.5 sm:w-1 h-2 sm:h-3 transition-all duration-300 ${isOpen ? 'bg-[#00ff88]/20' : 'bg-gray-700'}`}
                                   style={{ transitionDelay: `${i * 50}ms` }}
                                 ></div>
                               ))}
@@ -290,12 +293,12 @@ export default function FAQ() {
                         </div>
 
                         {/* Answer content with typewriter-like reveal */}
-                        <div className={`text-gray-400 text-sm leading-relaxed font-mono transition-all duration-700 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
+                        <div className={`text-gray-400 text-xs sm:text-sm leading-relaxed font-mono transition-all duration-700 ${isOpen ? 'opacity-100' : 'opacity-0'} break-words`}>
                           {faq.a}
                         </div>
 
                         {/* Document footer */}
-                        <div className="mt-4 pt-3 border-t border-[#00ff88]/10 flex items-center justify-between text-[10px] font-mono text-gray-600">
+                        <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-[#00ff88]/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-[10px] font-mono text-gray-600">
                           <span>DOC_ID: VP-FAQ-{String(catIndex).padStart(2, '0')}{String(qIndex).padStart(2, '0')}</span>
                           <span className={colors.text}>CLASSIFICATION: {category.classification}</span>
                         </div>
@@ -310,17 +313,17 @@ export default function FAQ() {
       })}
 
       {/* Additional Resources - Styled as declassified archives */}
-      <div className="crypto-box p-6 stagger-4 relative overflow-hidden">
+      <div className="crypto-box p-4 sm:p-6 stagger-4 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00ff88]/50 to-transparent"></div>
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center">
-            <span className="text-[#00ff88] text-xs font-mono font-bold">DOC</span>
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center flex-shrink-0">
+            <span className="text-[#00ff88] text-[10px] sm:text-xs font-mono font-bold">DOC</span>
           </div>
-          <h4 className="text-[#00ff88] font-bold text-base font-mono">EXTERNAL_REFERENCE_ARCHIVES</h4>
+          <h4 className="text-[#00ff88] font-bold text-sm sm:text-base font-mono">EXTERNAL_REFERENCE_ARCHIVES</h4>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           {[
             { title: 'GitHub Repository', url: 'https://github.com/carlos-israelj/VeilPay', code: 'REPO-001' },
             { title: 'Stacks Documentation', url: 'https://docs.stacks.co', code: 'DOC-STX' },
@@ -332,17 +335,17 @@ export default function FAQ() {
               href={resource.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="crypto-box p-4 crypto-box-hover group"
+              className="crypto-box p-3 sm:p-4 crypto-box-hover group"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-bold text-sm font-mono group-hover:text-[#00ff88] transition-colors">
+                <span className="text-white font-bold text-xs sm:text-sm font-mono group-hover:text-[#00ff88] transition-colors break-words pr-2">
                   {resource.title}
                 </span>
-                <div className="text-[#00ff88] text-xs">→</div>
+                <div className="text-[#00ff88] text-xs flex-shrink-0">→</div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-gray-600 text-xs font-mono">REF:</span>
-                <span className="text-gray-500 text-xs font-mono">{resource.code}</span>
+                <span className="text-gray-600 text-[10px] sm:text-xs font-mono">REF:</span>
+                <span className="text-gray-500 text-[10px] sm:text-xs font-mono">{resource.code}</span>
               </div>
             </a>
           ))}
@@ -350,18 +353,18 @@ export default function FAQ() {
       </div>
 
       {/* Contact Section - Styled as classified document footer */}
-      <div className="status-success p-6 stagger-5 relative overflow-hidden">
-        <div className="absolute top-2 right-2 text-[#00ff88]/20 text-xs font-mono font-bold rotate-12">
+      <div className="status-success p-4 sm:p-6 stagger-5 relative overflow-hidden">
+        <div className="absolute top-2 right-2 text-[#00ff88]/20 text-[10px] sm:text-xs font-mono font-bold rotate-12">
           OPEN SOURCE
         </div>
 
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 border-2 border-[#00ff88] flex items-center justify-center text-2xl flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-[#00ff88] flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
             ?
           </div>
-          <div className="flex-1">
-            <h4 className="text-[#00ff88] font-bold text-base mb-3 font-mono">REQUEST_ADDITIONAL_INFORMATION</h4>
-            <p className="text-gray-400 text-sm font-mono leading-relaxed">
+          <div className="flex-1 min-w-0">
+            <h4 className="text-[#00ff88] font-bold text-sm sm:text-base mb-2 sm:mb-3 font-mono">REQUEST_ADDITIONAL_INFORMATION</h4>
+            <p className="text-gray-400 text-xs sm:text-sm font-mono leading-relaxed break-words">
               VeilPay operates as an open-source protocol. For technical inquiries, bug reports, or documentation requests,
               submit a formal issue report to the{' '}
               <a
@@ -374,7 +377,7 @@ export default function FAQ() {
               </a>
               .
             </p>
-            <div className="mt-4 pt-3 border-t border-[#00ff88]/20 text-xs font-mono text-gray-600">
+            <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-[#00ff88]/20 text-[10px] sm:text-xs font-mono text-gray-600">
               DOCUMENT STATUS: ACTIVE | LAST UPDATED: 2025-01-25 | CLEARANCE: PUBLIC
             </div>
           </div>

@@ -185,45 +185,45 @@ export default function Integrations() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 fade-in-up">
+    <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 fade-in-up">
       {/* Hero Header with Holographic Effect */}
-      <div className="crypto-box-accent p-8 stagger-1 relative overflow-hidden group">
+      <div className="crypto-box-accent p-4 sm:p-6 lg:p-8 stagger-1 relative overflow-hidden group">
         {/* Holographic gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#00ff88]/5 via-transparent to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00ff88] to-transparent"></div>
 
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-black text-white" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 sm:mb-4">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white" style={{ fontFamily: "'Syne', sans-serif" }}>
               INTEGRATION_ECOSYSTEM
             </h1>
-            <div className="flex items-center gap-2 text-[#00ff88] text-xs font-mono">
+            <div className="flex items-center gap-2 text-[#00ff88] text-[10px] sm:text-xs font-mono">
               <div className="w-2 h-2 bg-[#00ff88] rounded-full animate-pulse"></div>
               COMPOSABLE
             </div>
           </div>
 
-          <p className="text-gray-400 text-base mb-6 font-mono leading-relaxed">
+          <p className="text-gray-400 text-xs sm:text-sm lg:text-base mb-4 sm:mb-6 font-mono leading-relaxed">
             VeilPay is not just a standalone privacy protocol—it's infrastructure that enhances the entire Stacks ecosystem.
             Our zero-knowledge proof system can provide privacy guarantees for any USDCx-based application.
           </p>
 
           {/* Core Value Props with Visual Badges */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {[
               { label: "Composable Privacy", value: "Add privacy without rebuilding", icon: "↔" },
               { label: "Trustless Verification", value: "ZK proofs enable verification without identity", icon: "✓" },
               { label: "Network Effects", value: "Larger anonymity set improves privacy", icon: "↑" },
               { label: "Bitcoin Security", value: "Secured by Bitcoin finality via Stacks", icon: "₿" }
             ].map((prop, i) => (
-              <div key={i} className="crypto-box p-4 crypto-box-hover group/card">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-lg flex-shrink-0 group-hover/card:shadow-[0_0_15px_rgba(0,255,136,0.4)] transition-all">
+              <div key={i} className="crypto-box p-3 sm:p-4 crypto-box-hover group/card">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-base sm:text-lg flex-shrink-0 group-hover/card:shadow-[0_0_15px_rgba(0,255,136,0.4)] transition-all">
                     {prop.icon}
                   </div>
-                  <div className="flex-1">
-                    <div className="text-white font-bold text-sm font-mono mb-1">{prop.label}</div>
-                    <div className="text-gray-400 text-xs font-mono">{prop.value}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-bold text-xs sm:text-sm font-mono mb-1">{prop.label}</div>
+                    <div className="text-gray-400 text-[10px] sm:text-xs font-mono break-words">{prop.value}</div>
                   </div>
                 </div>
               </div>
@@ -233,34 +233,34 @@ export default function Integrations() {
       </div>
 
       {/* Integration Categories */}
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         {integrationCategories.map((category, idx) => {
           const tierColors = getTierColor(category.tier);
 
           return (
-            <div key={idx} className={`crypto-box p-6 stagger-${Math.min(idx + 2, 5)} relative overflow-hidden group/category`}>
+            <div key={idx} className={`crypto-box p-4 sm:p-5 lg:p-6 stagger-${Math.min(idx + 2, 5)} relative overflow-hidden group/category`}>
               {/* Holographic border effect */}
               <div className={`absolute inset-0 border-2 ${tierColors.border} opacity-0 group-hover/category:opacity-100 transition-opacity duration-500 pointer-events-none ${tierColors.glow}`}></div>
 
               {/* Category Header */}
-              <div className="mb-6 pb-4 border-b border-[#00ff88]/20 relative z-10">
-                <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+              <div className="mb-4 sm:mb-5 lg:mb-6 pb-3 sm:pb-4 border-b border-[#00ff88]/20 relative z-10">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className={`w-12 h-12 ${tierColors.bg} border ${tierColors.border} flex items-center justify-center text-2xl group-hover/category:${tierColors.glow} transition-all`}>
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${tierColors.bg} border ${tierColors.border} flex items-center justify-center text-xl sm:text-2xl group-hover/category:${tierColors.glow} transition-all flex-shrink-0`}>
                       {category.icon}
                     </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-white font-mono">{category.title}</h2>
-                      <p className="text-gray-400 text-sm font-mono">{category.description}</p>
+                    <div className="min-w-0">
+                      <h2 className="text-base sm:text-lg lg:text-xl font-bold text-white font-mono break-words">{category.title}</h2>
+                      <p className="text-gray-400 text-xs sm:text-sm font-mono break-words">{category.description}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {/* Tier Badge */}
-                    <div className={`${tierColors.border} ${tierColors.text} ${tierColors.bg} border px-3 py-1 text-xs font-mono font-bold`}>
+                    <div className={`${tierColors.border} ${tierColors.text} ${tierColors.bg} border px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-mono font-bold`}>
                       {category.tier}
                     </div>
                     {/* Category Badge */}
-                    <div className="border border-[#00ff88]/30 text-[#00ff88] bg-[#00ff88]/10 px-3 py-1 text-xs font-mono font-bold">
+                    <div className="border border-[#00ff88]/30 text-[#00ff88] bg-[#00ff88]/10 px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-mono font-bold">
                       {category.badge}
                     </div>
                   </div>
@@ -268,14 +268,14 @@ export default function Integrations() {
               </div>
 
               {/* Use Case Cards with Holographic Effects */}
-              <div className="space-y-4 relative z-10">
+              <div className="space-y-3 sm:space-y-4 relative z-10">
                 {category.integrations.map((integration, intIdx) => {
                   const maturityColors = getMaturityColor(integration.maturity);
 
                   return (
                     <div
                       key={intIdx}
-                      className="crypto-box border border-[#00ff88]/10 p-6 relative overflow-hidden group/card hover:border-[#00ff88]/30 transition-all"
+                      className="crypto-box border border-[#00ff88]/10 p-4 sm:p-5 lg:p-6 relative overflow-hidden group/card hover:border-[#00ff88]/30 transition-all"
                     >
                       {/* Holographic shine effect */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ff88]/5 to-transparent -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000 pointer-events-none"></div>
@@ -283,54 +283,54 @@ export default function Integrations() {
                       {/* Card Content */}
                       <div className="relative z-10">
                         {/* Header */}
-                        <div className="flex items-start justify-between mb-4 pb-3 border-b border-[#00ff88]/10">
-                          <h3 className="text-lg font-semibold text-white font-mono flex-1 pr-4 group-hover/card:text-[#00ff88] transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-[#00ff88]/10">
+                          <h3 className="text-base sm:text-lg font-semibold text-white font-mono pr-0 sm:pr-4 group-hover/card:text-[#00ff88] transition-colors break-words min-w-0">
                             {integration.useCase}
                           </h3>
                           {/* Maturity Badge */}
-                          <div className={`${maturityColors.border} ${maturityColors.text} ${maturityColors.bg} border px-2 py-1 text-[10px] font-mono font-bold flex-shrink-0`}>
+                          <div className={`${maturityColors.border} ${maturityColors.text} ${maturityColors.bg} border px-2 py-1 text-[10px] font-mono font-bold flex-shrink-0 self-start`}>
                             {integration.maturity}
                           </div>
                         </div>
 
                         {/* Problem/Solution Grid */}
-                        <div className="grid gap-4 mb-4">
-                          <div className="bg-red-400/5 border-l-4 border-red-400/40 p-4">
-                            <h4 className="text-xs font-semibold text-red-400 mb-2 font-mono flex items-center gap-2">
-                              <div className="w-4 h-4 border border-red-400 flex items-center justify-center text-[10px]">!</div>
+                        <div className="grid gap-3 sm:gap-4 mb-3 sm:mb-4">
+                          <div className="bg-red-400/5 border-l-2 sm:border-l-4 border-red-400/40 p-3 sm:p-4">
+                            <h4 className="text-[10px] sm:text-xs font-semibold text-red-400 mb-2 font-mono flex items-center gap-2">
+                              <div className="w-3 h-3 sm:w-4 sm:h-4 border border-red-400 flex items-center justify-center text-[8px] sm:text-[10px] flex-shrink-0">!</div>
                               PROBLEM
                             </h4>
-                            <p className="text-gray-400 text-sm font-mono leading-relaxed">{integration.problem}</p>
+                            <p className="text-gray-400 text-xs sm:text-sm font-mono leading-relaxed break-words">{integration.problem}</p>
                           </div>
 
-                          <div className="bg-[#00ff88]/5 border-l-4 border-[#00ff88]/40 p-4">
-                            <h4 className="text-xs font-semibold text-[#00ff88] mb-2 font-mono flex items-center gap-2">
-                              <div className="w-4 h-4 border border-[#00ff88] flex items-center justify-center text-[10px]">✓</div>
+                          <div className="bg-[#00ff88]/5 border-l-2 sm:border-l-4 border-[#00ff88]/40 p-3 sm:p-4">
+                            <h4 className="text-[10px] sm:text-xs font-semibold text-[#00ff88] mb-2 font-mono flex items-center gap-2">
+                              <div className="w-3 h-3 sm:w-4 sm:h-4 border border-[#00ff88] flex items-center justify-center text-[8px] sm:text-[10px] flex-shrink-0">✓</div>
                               SOLUTION
                             </h4>
-                            <p className="text-gray-400 text-sm font-mono leading-relaxed">{integration.solution}</p>
+                            <p className="text-gray-400 text-xs sm:text-sm font-mono leading-relaxed break-words">{integration.solution}</p>
                           </div>
                         </div>
 
                         {/* Implementation Details - Collapsible Style */}
-                        <div className="bg-black/40 border border-[#00ff88]/10 p-4 mb-3">
-                          <h4 className="text-xs font-semibold text-white mb-2 font-mono flex items-center gap-2">
-                            <div className="w-4 h-4 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-[10px] text-[#00ff88]">→</div>
+                        <div className="bg-black/40 border border-[#00ff88]/10 p-3 sm:p-4 mb-3">
+                          <h4 className="text-[10px] sm:text-xs font-semibold text-white mb-2 font-mono flex items-center gap-2">
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-[8px] sm:text-[10px] text-[#00ff88] flex-shrink-0">→</div>
                             IMPLEMENTATION
                           </h4>
-                          <p className="text-gray-400 text-sm font-mono leading-relaxed">{integration.implementation}</p>
+                          <p className="text-gray-400 text-xs sm:text-sm font-mono leading-relaxed break-words">{integration.implementation}</p>
                         </div>
 
                         {/* Value Proposition Highlight */}
-                        <div className="bg-gradient-to-r from-[#00ff88]/10 to-transparent border border-[#00ff88]/30 p-4 relative overflow-hidden group-hover/card:from-[#00ff88]/20 transition-all">
-                          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#00ff88]/5 to-transparent"></div>
-                          <div className="flex items-start gap-3 relative z-10">
-                            <div className="w-6 h-6 bg-[#00ff88] flex items-center justify-center text-black text-xs font-bold flex-shrink-0">
+                        <div className="bg-gradient-to-r from-[#00ff88]/10 to-transparent border border-[#00ff88]/30 p-3 sm:p-4 relative overflow-hidden group-hover/card:from-[#00ff88]/20 transition-all">
+                          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-20 bg-gradient-to-l from-[#00ff88]/5 to-transparent"></div>
+                          <div className="flex items-start gap-2 sm:gap-3 relative z-10">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#00ff88] flex items-center justify-center text-black text-xs font-bold flex-shrink-0">
                               $
                             </div>
-                            <div className="flex-1">
-                              <h4 className="text-xs font-semibold text-[#00ff88] mb-1 font-mono">VALUE_PROPOSITION</h4>
-                              <p className="text-gray-300 text-sm font-mono leading-relaxed">{integration.value}</p>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-[10px] sm:text-xs font-semibold text-[#00ff88] mb-1 font-mono">VALUE_PROPOSITION</h4>
+                              <p className="text-gray-300 text-xs sm:text-sm font-mono leading-relaxed break-words">{integration.value}</p>
                             </div>
                           </div>
                         </div>
@@ -345,63 +345,63 @@ export default function Integrations() {
       </div>
 
       {/* Integration Architecture Section */}
-      <div className="crypto-box-accent p-8 stagger-4 relative overflow-hidden group">
+      <div className="crypto-box-accent p-4 sm:p-6 lg:p-8 stagger-4 relative overflow-hidden group">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff88] to-transparent"></div>
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-2xl">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
               ⚙
             </div>
-            <h2 className="text-2xl font-bold text-white font-mono">INTEGRATION_ARCHITECTURE</h2>
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white font-mono break-words">INTEGRATION_ARCHITECTURE</h2>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 lg:gap-6 mb-4 sm:mb-5 lg:mb-6">
             {/* For Developers */}
-            <div className="crypto-box p-6 crypto-box-hover">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 bg-purple-400/20 border border-purple-400 flex items-center justify-center text-xs text-purple-400 font-mono font-bold">
+            <div className="crypto-box p-4 sm:p-5 lg:p-6 crypto-box-hover">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-purple-400/20 border border-purple-400 flex items-center justify-center text-[10px] sm:text-xs text-purple-400 font-mono font-bold flex-shrink-0">
                   DEV
                 </div>
-                <h3 className="text-lg font-semibold text-purple-400 font-mono">FOR_DEVELOPERS</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-purple-400 font-mono">FOR_DEVELOPERS</h3>
               </div>
-              <ul className="space-y-3 text-sm text-gray-400 font-mono">
+              <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-400 font-mono">
                 {[
                   "Accept VeilPay withdrawals as valid payment sources",
                   "Verify ZK proofs via Clarity contract integration",
                   "No custody required—remains self-custodial",
                   "Plug-and-play privacy with minimal code changes"
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 group/item">
-                    <div className="w-5 h-5 border border-purple-400/30 flex items-center justify-center text-purple-400 text-xs flex-shrink-0 mt-0.5 group-hover/item:bg-purple-400/10 transition-colors">
+                  <li key={i} className="flex items-start gap-2 sm:gap-3 group/item">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 border border-purple-400/30 flex items-center justify-center text-purple-400 text-[10px] sm:text-xs flex-shrink-0 mt-0.5 group-hover/item:bg-purple-400/10 transition-colors">
                       {i + 1}
                     </div>
-                    <span className="group-hover/item:text-gray-300 transition-colors">{item}</span>
+                    <span className="group-hover/item:text-gray-300 transition-colors break-words flex-1 min-w-0">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* For End Users */}
-            <div className="crypto-box p-6 crypto-box-hover">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-xs text-[#00ff88] font-mono font-bold">
+            <div className="crypto-box p-4 sm:p-5 lg:p-6 crypto-box-hover">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-[10px] sm:text-xs text-[#00ff88] font-mono font-bold flex-shrink-0">
                   USR
                 </div>
-                <h3 className="text-lg font-semibold text-[#00ff88] font-mono">FOR_END_USERS</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-[#00ff88] font-mono">FOR_END_USERS</h3>
               </div>
-              <ul className="space-y-3 text-sm text-gray-400 font-mono">
+              <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-400 font-mono">
                 {[
                   "Single deposit enables privacy across all integrated protocols",
                   "No need to learn new privacy tools for each dApp",
                   "Stronger anonymity set as ecosystem grows",
                   "Unified privacy UX across Stacks ecosystem"
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 group/item">
-                    <div className="w-5 h-5 border border-[#00ff88]/30 flex items-center justify-center text-[#00ff88] text-xs flex-shrink-0 mt-0.5 group-hover/item:bg-[#00ff88]/10 transition-colors">
+                  <li key={i} className="flex items-start gap-2 sm:gap-3 group/item">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 border border-[#00ff88]/30 flex items-center justify-center text-[#00ff88] text-[10px] sm:text-xs flex-shrink-0 mt-0.5 group-hover/item:bg-[#00ff88]/10 transition-colors">
                       {i + 1}
                     </div>
-                    <span className="group-hover/item:text-gray-300 transition-colors">{item}</span>
+                    <span className="group-hover/item:text-gray-300 transition-colors break-words flex-1 min-w-0">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -409,18 +409,18 @@ export default function Integrations() {
           </div>
 
           {/* Developer Resources */}
-          <div className="crypto-box p-5 border-l-4 border-[#00ff88]">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#00ff88] flex items-center justify-center text-black text-[10px] font-bold flex-shrink-0 mt-0.5 font-mono">
+          <div className="crypto-box p-4 sm:p-5 border-l-2 sm:border-l-4 border-[#00ff88]">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#00ff88] flex items-center justify-center text-black text-[10px] font-bold flex-shrink-0 mt-0.5 font-mono">
                 []
               </div>
-              <p className="text-sm text-gray-400 font-mono flex-1">
+              <p className="text-xs sm:text-sm text-gray-400 font-mono flex-1 min-w-0 break-words">
                 <strong className="text-white">DEVELOPER_RESOURCES:</strong> Integration guide, SDK, and testnet support available at{' '}
                 <a
                   href="https://github.com/carlos-israelj/VeilPay"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#00ff88] hover:text-white underline font-bold transition-colors"
+                  className="text-[#00ff88] hover:text-white underline font-bold transition-colors break-all"
                 >
                   github.com/carlos-israelj/VeilPay
                 </a>
@@ -431,16 +431,16 @@ export default function Integrations() {
       </div>
 
       {/* Closing Message */}
-      <div className="text-center crypto-box p-6 stagger-5 relative overflow-hidden group">
+      <div className="text-center crypto-box p-4 sm:p-5 lg:p-6 stagger-5 relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-t from-[#00ff88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
         <div className="relative z-10">
           <div className="inline-flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 border border-[#00ff88] flex items-center justify-center text-[#00ff88]">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 border border-[#00ff88] flex items-center justify-center text-[#00ff88] flex-shrink-0">
               ∞
             </div>
-            <span className="text-[#00ff88] font-mono text-sm font-bold">NETWORK_EFFECT_PROTOCOL</span>
+            <span className="text-[#00ff88] font-mono text-xs sm:text-sm font-bold">NETWORK_EFFECT_PROTOCOL</span>
           </div>
-          <p className="text-gray-400 text-sm font-mono max-w-3xl mx-auto leading-relaxed">
+          <p className="text-gray-400 text-xs sm:text-sm font-mono max-w-3xl mx-auto leading-relaxed">
             VeilPay provides the privacy infrastructure layer that the Stacks ecosystem needs to compete with traditional finance privacy standards.
             Every protocol that integrates VeilPay strengthens the network effect, creating better privacy for all users.
           </p>

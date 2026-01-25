@@ -131,46 +131,46 @@ export default function History() {
   };
 
   return (
-    <div className="space-y-8 fade-in-up">
+    <div className="space-y-6 sm:space-y-8 fade-in-up">
       {/* Terminal Header */}
-      <div className="crypto-box-accent p-6 stagger-1 relative overflow-hidden">
+      <div className="crypto-box-accent p-4 sm:p-6 stagger-1 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00ff88] to-transparent"></div>
 
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-[#00ff88] font-bold text-sm font-mono">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff88]/20 border border-[#00ff88] flex items-center justify-center text-[#00ff88] font-bold text-xs sm:text-sm font-mono flex-shrink-0">
               LOG
             </div>
-            <h2 className="text-white text-2xl font-black" style={{ fontFamily: "'Syne', sans-serif" }}>
+            <h2 className="text-white text-xl sm:text-2xl font-black" style={{ fontFamily: "'Syne', sans-serif" }}>
               TRANSACTION_LOG
             </h2>
           </div>
 
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' : 'bg-[#00ff88]'}`}></div>
-            <span className="text-xs font-mono text-gray-500">
+            <span className="text-[10px] sm:text-xs font-mono text-gray-500">
               {deposits.length} {deposits.length === 1 ? 'ENTRY' : 'ENTRIES'}
             </span>
           </div>
         </div>
 
-        <p className="text-gray-400 text-sm font-mono leading-relaxed">
+        <p className="text-gray-400 text-xs sm:text-sm font-mono leading-relaxed">
           Chronological record of ZK commitment operations. Credentials stored locally via browser storage.
         </p>
       </div>
 
       {/* Loading State */}
       {loading && deposits.length === 0 && (
-        <div className="crypto-box text-center py-16">
+        <div className="crypto-box text-center py-12 sm:py-16">
           <div className="inline-flex items-center gap-3 text-[#00ff88] mb-4">
             <div className="crypto-loader"></div>
-            <span className="font-mono text-sm">SCANNING_BLOCKCHAIN</span>
+            <span className="font-mono text-xs sm:text-sm">SCANNING_BLOCKCHAIN</span>
           </div>
           <div className="flex justify-center gap-1">
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className="w-2 h-8 bg-[#00ff88]/20"
+                className="w-1.5 sm:w-2 h-6 sm:h-8 bg-[#00ff88]/20"
                 style={{
                   animation: `pulse 1.5s ease-in-out ${i * 0.1}s infinite`
                 }}
@@ -182,15 +182,15 @@ export default function History() {
 
       {/* Empty State */}
       {!loading && deposits.length === 0 && (
-        <div className="crypto-box text-center py-16 relative overflow-hidden group">
+        <div className="crypto-box text-center py-12 sm:py-16 relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-b from-[#00ff88]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
           <div className="relative z-10">
-            <div className="w-20 h-20 border-2 border-[#00ff88]/30 mx-auto mb-6 flex items-center justify-center text-4xl text-[#00ff88]/50 font-mono">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 border-2 border-[#00ff88]/30 mx-auto mb-4 sm:mb-6 flex items-center justify-center text-3xl sm:text-4xl text-[#00ff88]/50 font-mono">
               [ ]
             </div>
-            <h3 className="text-white font-bold text-xl mb-2 font-mono">NULL_SET</h3>
-            <p className="text-gray-400 text-sm font-mono max-w-md mx-auto leading-relaxed">
+            <h3 className="text-white font-bold text-lg sm:text-xl mb-2 font-mono">NULL_SET</h3>
+            <p className="text-gray-400 text-xs sm:text-sm font-mono max-w-md mx-auto leading-relaxed px-4">
               No transaction history detected. Initialize first commitment via DEPOSIT interface.
             </p>
           </div>
@@ -225,35 +225,39 @@ export default function History() {
 
                 {/* Main content */}
                 <div
-                  className="pl-8 pr-6 py-5 cursor-pointer group/item"
+                  className="pl-6 sm:pl-8 pr-4 sm:pr-6 py-4 sm:py-5 cursor-pointer group/item"
                   onClick={() => setExpandedDeposit(isExpanded ? null : index)}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                     {/* Left: Terminal-style entry */}
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-gray-600 text-xs font-mono">
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                        <span className="text-gray-600 text-[10px] sm:text-xs font-mono break-all">
                           [{new Date(deposit.timestamp).toISOString().substring(0, 19).replace('T', ' ')}]
                         </span>
-                        <div className={`px-2 py-0.5 text-[10px] font-bold font-mono border ${getStatusColor(deposit.status)}`}>
+                        <div className={`px-2 py-0.5 text-[10px] font-bold font-mono border ${getStatusColor(deposit.status)} self-start`}>
                           {getStatusText(deposit.status)}
                         </div>
                       </div>
 
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-[#00ff88] text-lg font-bold font-mono">
-                          {formatAmount(deposit.amount)}
-                        </span>
-                        <span className="text-gray-500 text-sm font-mono">USDCx</span>
-                        <span className="text-gray-700 text-xs font-mono">→</span>
-                        <span className="text-gray-600 text-xs font-mono">
-                          commitment: {truncateHash(deposit.commitment)}
-                        </span>
+                      <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-3">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-[#00ff88] text-base sm:text-lg font-bold font-mono">
+                            {formatAmount(deposit.amount)}
+                          </span>
+                          <span className="text-gray-500 text-xs sm:text-sm font-mono">USDCx</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-gray-700 text-xs font-mono hidden sm:inline">→</span>
+                          <span className="text-gray-600 text-[10px] sm:text-xs font-mono break-all">
+                            commitment: {truncateHash(deposit.commitment)}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Right: Action indicator */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-shrink-0 self-end sm:self-start">
                       {deposit.txId && (
                         <a
                           href={`${EXPLORER_URL}/${deposit.txId}?chain=testnet`}
@@ -279,27 +283,27 @@ export default function History() {
 
                   {/* Expanded Details */}
                   {isExpanded && (
-                    <div className="mt-4 pt-4 border-t border-[#00ff88]/20 space-y-4 animate-fadeIn">
+                    <div className="mt-4 pt-4 border-t border-[#00ff88]/20 space-y-3 sm:space-y-4 animate-fadeIn">
                       {/* Metadata Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs font-mono">
                         <div className="bg-black/40 border border-[#00ff88]/10 p-3">
-                          <div className="text-[#00ff88]/60 mb-1">NULLIFIER_HASH</div>
-                          <div className="text-gray-400 break-all">{deposit.nullifier ? truncateHash(deposit.nullifier) : 'Computing...'}</div>
+                          <div className="text-[#00ff88]/60 mb-1 text-[10px] sm:text-xs">NULLIFIER_HASH</div>
+                          <div className="text-gray-400 break-all text-[10px] sm:text-xs">{deposit.nullifier ? truncateHash(deposit.nullifier) : 'Computing...'}</div>
                         </div>
 
                         <div className="bg-black/40 border border-[#00ff88]/10 p-3">
-                          <div className="text-[#00ff88]/60 mb-1">TIMESTAMP_UTC</div>
-                          <div className="text-gray-400">{new Date(deposit.timestamp).toUTCString()}</div>
+                          <div className="text-[#00ff88]/60 mb-1 text-[10px] sm:text-xs">TIMESTAMP_UTC</div>
+                          <div className="text-gray-400 text-[10px] sm:text-xs break-words">{new Date(deposit.timestamp).toUTCString()}</div>
                         </div>
 
-                        <div className="bg-black/40 border border-[#00ff88]/10 p-3">
-                          <div className="text-[#00ff88]/60 mb-1">COMMITMENT_FULL</div>
+                        <div className="bg-black/40 border border-[#00ff88]/10 p-3 sm:col-span-2">
+                          <div className="text-[#00ff88]/60 mb-1 text-[10px] sm:text-xs">COMMITMENT_FULL</div>
                           <div className="text-gray-400 break-all text-[10px]">{deposit.commitment}</div>
                         </div>
 
                         {deposit.txId && (
-                          <div className="bg-black/40 border border-[#00ff88]/10 p-3">
-                            <div className="text-[#00ff88]/60 mb-1">TX_HASH</div>
+                          <div className="bg-black/40 border border-[#00ff88]/10 p-3 sm:col-span-2">
+                            <div className="text-[#00ff88]/60 mb-1 text-[10px] sm:text-xs">TX_HASH</div>
                             <div className="text-gray-400 break-all text-[10px]">{deposit.txId}</div>
                           </div>
                         )}
@@ -307,14 +311,14 @@ export default function History() {
 
                       {/* Private Keys Section - Only shown when clicking "VIEW CREDENTIALS" for pending deposits */}
                       {isPending && (
-                        <div className="bg-red-400/5 border-l-4 border-red-400 p-4">
-                          <div className="flex items-start gap-3 mb-3">
-                            <div className="w-5 h-5 border border-red-400 flex items-center justify-center text-red-400 text-xs font-bold flex-shrink-0">
+                        <div className="bg-red-400/5 border-l-2 sm:border-l-4 border-red-400 p-3 sm:p-4">
+                          <div className="flex items-start gap-2 sm:gap-3 mb-3">
+                            <div className="w-4 h-4 sm:w-5 sm:h-5 border border-red-400 flex items-center justify-center text-red-400 text-xs font-bold flex-shrink-0">
                               !
                             </div>
-                            <div className="flex-1">
-                              <div className="text-red-400 font-bold text-xs font-mono mb-1">WITHDRAWAL_CREDENTIALS_REQUIRED</div>
-                              <div className="text-gray-400 text-xs font-mono">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-red-400 font-bold text-[10px] sm:text-xs font-mono mb-1">WITHDRAWAL_CREDENTIALS_REQUIRED</div>
+                              <div className="text-gray-400 text-[10px] sm:text-xs font-mono">
                                 Credentials stored locally. Export before clearing browser data.
                               </div>
                             </div>
@@ -334,11 +338,11 @@ export default function History() {
                           <div className="credentials-container hidden mt-3 space-y-2 animate-fadeIn">
                             <div className="bg-black/60 border border-red-400/30 p-3">
                               <div className="text-red-400/80 text-[10px] font-mono mb-1">SECRET</div>
-                              <code className="text-white text-xs font-mono break-all select-all">{deposit.secret}</code>
+                              <code className="text-white text-[10px] sm:text-xs font-mono break-all select-all">{deposit.secret}</code>
                             </div>
                             <div className="bg-black/60 border border-red-400/30 p-3">
                               <div className="text-red-400/80 text-[10px] font-mono mb-1">NONCE</div>
-                              <code className="text-white text-xs font-mono break-all select-all">{deposit.nonce}</code>
+                              <code className="text-white text-[10px] sm:text-xs font-mono break-all select-all">{deposit.nonce}</code>
                             </div>
                           </div>
                         </div>
@@ -346,12 +350,12 @@ export default function History() {
 
                       {/* Withdrawn Status */}
                       {!isPending && (
-                        <div className="bg-[#00ff88]/5 border-l-4 border-[#00ff88] p-4">
-                          <div className="flex items-center gap-2 text-[#00ff88] text-xs font-mono">
-                            <div className="w-4 h-4 border border-[#00ff88] flex items-center justify-center text-[10px] font-bold">
+                        <div className="bg-[#00ff88]/5 border-l-2 sm:border-l-4 border-[#00ff88] p-3 sm:p-4">
+                          <div className="flex items-center gap-2 text-[#00ff88] text-[10px] sm:text-xs font-mono">
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 border border-[#00ff88] flex items-center justify-center text-[8px] sm:text-[10px] font-bold flex-shrink-0">
                               ✓
                             </div>
-                            <span>COMMITMENT_NULLIFIED - Withdrawal completed successfully</span>
+                            <span className="break-words">COMMITMENT_NULLIFIED - Withdrawal completed successfully</span>
                           </div>
                         </div>
                       )}
@@ -366,24 +370,24 @@ export default function History() {
 
       {/* Control Bar */}
       {deposits.length > 0 && (
-        <div className="crypto-box p-4 flex items-center justify-between">
-          <div className="text-xs font-mono text-gray-500">
+        <div className="crypto-box p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-[10px] sm:text-xs font-mono text-gray-500 text-center sm:text-left">
             Showing {deposits.length} transaction{deposits.length !== 1 ? 's' : ''}
           </div>
 
           <button
             onClick={loadDepositsWithStatus}
             disabled={loading}
-            className="crypto-button-secondary px-6 py-2 text-sm"
+            className="crypto-button-secondary px-4 sm:px-6 py-2 text-xs sm:text-sm w-full sm:w-auto"
           >
             {loading ? (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center justify-center gap-2">
                 <div className="w-3 h-3 border border-[#00ff88] border-t-transparent rounded-full animate-spin"></div>
                 SYNCING
               </span>
             ) : (
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 REFRESH
