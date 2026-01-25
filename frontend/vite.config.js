@@ -29,5 +29,21 @@ export default defineConfig({
       events: 'events',
       util: 'util',
     }
-  }
+  },
+  build: {
+    // Ensure large files (WASM, zkey) are not inlined
+    assetsInlineLimit: 0,
+    rollupOptions: {
+      output: {
+        // Keep circuit files in their own folder
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name.endsWith('.wasm') || assetInfo.name.endsWith('.zkey')) {
+            return 'circuits/[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        }
+      }
+    }
+  },
+  publicDir: 'public'
 });
