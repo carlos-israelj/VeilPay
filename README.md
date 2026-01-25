@@ -6,18 +6,7 @@
 
 **Zero-Knowledge Privacy Protocol for USDCx on Stacks**
 
-[![Built on Stacks](https://img.shields.io/badge/Built%20on-Stacks-5546FF?style=for-the-badge&logo=stacks&logoColor=white)](https://www.stacks.co/)
-[![USDCx Integration](https://img.shields.io/badge/USDCx-Integrated-2775CA?style=for-the-badge&logo=circle&logoColor=white)](https://www.circle.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
-
-[![Network](https://img.shields.io/badge/Network-Stacks%20Testnet-5546FF?style=flat-square)](https://explorer.hiro.so/?chain=testnet)
-[![Smart Contracts](https://img.shields.io/badge/Contracts-Clarity-purple?style=flat-square)](https://clarity-lang.org/)
-[![ZK Proofs](https://img.shields.io/badge/ZK-Groth16%20SNARKs-00D1B2?style=flat-square)](https://docs.circom.io/)
-[![React](https://img.shields.io/badge/Frontend-React%2018-61DAFB?style=flat-square&logo=react)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=flat-square&logo=vite)](https://vitejs.dev/)
-
-[Live Demo](#) · [Documentation](./CLAUDE.md) · [Smart Contracts](#smart-contracts-testnet) · [Report Bug](https://github.com/carlos-israelj/VeilPay/issues)
+[Live Demo](https://veilpay.lat/) · [Documentation](./CLAUDE.md) · [Smart Contracts](#smart-contracts-testnet) · [GitHub](https://github.com/carlos-israelj/VeilPay)
 
 ---
 
@@ -350,25 +339,58 @@ sequenceDiagram
 
 ## Application Screenshots
 
+### Home Dashboard
+*Real-time privacy pool statistics and Merkle root tracking*
+
+![VeilPay Home - Zero-Knowledge Privacy Protocol](./screenshots/home-dashboard.png)
+
+**Features shown:**
+- Live total deposits counter
+- Current Merkle root hash
+- Terminal-style interface design
+- Real-time synchronization status
+
+---
+
 ### Deposit Interface
 *Lock USDCx with cryptographic commitment for complete privacy*
 
-![Deposit Interface - Generate secret and commitment for private deposits](#)
+![Deposit Interface - Private USDCx deposits](./screenshots/deposit-interface.png)
+
+**Features shown:**
+- USDCx balance display
+- Existing deposits list with commitment hashes
+- Deposit amount input
+- Security warning for credential storage
+- One-click deposit initiation
+
+---
 
 ### Withdrawal Interface
 *Withdraw to any address with Zero-Knowledge proof - completely unlinkable*
 
-![Withdrawal Interface - Prove ownership without revealing deposit](#)
+![Withdrawal Interface - Anonymous withdrawals](./screenshots/withdraw-interface.png)
 
-### Merkle Tree Visualization
-*1M+ capacity privacy pool with efficient cryptographic proofs*
+**Features shown:**
+- Secret and nonce input fields
+- Amount verification (must match deposit)
+- Recipient address selection (any Stacks address)
+- Security warnings for credential verification
+- ZK proof generation status
 
-![Merkle Tree - Privacy set accumulator with Poseidon hash](#)
+---
 
-### Proof Generation
-*Browser-based ZK proof generation in ~15 seconds*
+### Bridge Interface
+*Bridge USDC from Ethereum Sepolia to Stacks testnet via xReserve*
 
-![ZK Proof Generation - Client-side WASM circuit execution](#)
+![Bridge Interface - Cross-chain USDC transfer](./screenshots/bridge-interface.png)
+
+**Features shown:**
+- Ethereum wallet connection
+- ETH and USDC balance display
+- Stacks recipient address configuration
+- Amount input with minimum validation
+- xReserve protocol integration (~18 minute ETA)
 
 ---
 
@@ -595,10 +617,19 @@ clarinet deploy --testnet
 
 ## Smart Contracts (Testnet)
 
+### Deployed Contracts
+
+| Contract | Address | Explorer |
+|----------|---------|----------|
+| **veilpay.clar** | `ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1.veilpay` | [View on Explorer](https://explorer.hiro.so/txid/ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1.veilpay?chain=testnet) |
+| **usdcx (Circle)** | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx` | [View on Explorer](https://explorer.hiro.so/txid/ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx?chain=testnet) |
+
+### Contract Overview
+
 | Contract | Purpose | Key Functions |
 |----------|---------|---------------|
-| 📄 **veilpay.clar** | Privacy pool for USDCx deposits/withdrawals | `deposit`, `withdraw`, `update-root` |
-| 📄 **usdcx-trait.clar** | SIP-010 fungible token trait interface | Defines USDCx token interface |
+| **veilpay.clar** | Privacy pool for USDCx deposits/withdrawals | `deposit`, `withdraw`, `update-root` |
+| **usdcx-trait.clar** | SIP-010 fungible token trait interface | Defines USDCx token interface |
 
 ### Contract Functions
 
@@ -643,40 +674,77 @@ clarinet deploy --testnet
 
 ## Technology Stack
 
-| Layer | Technology | Purpose | Version |
-|-------|------------|---------|---------|
-| ⛓️ Blockchain | Stacks (Bitcoin L2) | Security & settlement | Nakamoto |
-| 📝 Smart Contracts | Clarity v2 | Type-safe, decidable logic | 2.4 |
-| 💵 Stablecoin | USDCx (via xReserve) | Stable value transfer | SIP-010 |
-| 🔐 ZK Proofs | Groth16 SNARKs | Zero-Knowledge privacy | - |
-| 🔢 Hash Function | Poseidon | SNARK-friendly hashing | circomlib |
-| ⚡ Circuit Language | Circom v2 | ZK constraint definition | 2.x |
-| 🧮 Proof Library | SnarkJS | Proof generation/verification | 0.7.x |
-| 🌲 Merkle Tree | merkletreejs + Poseidon | Commitment accumulator | 0.3.x |
-| ⚛️ Frontend | React 18 + Vite | Fast UI with HMR | 18.x / 5.x |
-| 🎨 Styling | Tailwind CSS | Utility-first styling | 3.x |
-| 🔗 Wallet Integration | @stacks/connect | Leather/Hiro/Xverse | 7.x |
-| 🖥️ Relayer | Node.js + Express | Off-chain proof verification | 18+ / 4.x |
-| 📡 Blockchain Client | @stacks/transactions | Stacks interaction | 7.x |
+### Core Cryptography
+
+| Component | Technology | Specification | Purpose |
+|-----------|------------|---------------|---------|
+| **Proof System** | Groth16 SNARKs | BN254 curve, ~1M constraints | Zero-Knowledge privacy guarantees |
+| **Hash Function** | Poseidon | 128-bit security, t=3/t=4 | SNARK-optimized cryptographic hashing |
+| **Circuit Compiler** | Circom 2.x | R1CS constraint system | Zero-Knowledge circuit definition |
+| **Proof Generation** | snarkjs 0.7.x | WASM + WebAssembly | Browser-based proof creation |
+| **Merkle Accumulator** | Custom Poseidon tree | 20 levels, 1M+ capacity | Commitment storage and verification |
+
+### Blockchain Infrastructure
+
+| Layer | Technology | Version | Role |
+|-------|------------|---------|------|
+| **Layer 1** | Bitcoin | Mainnet | Final settlement and security anchor |
+| **Layer 2** | Stacks (Nakamoto) | 2.4+ | Smart contract execution layer |
+| **Smart Contracts** | Clarity | 2.4 | Type-safe, decidable contract logic |
+| **Token Standard** | SIP-010 (USDCx) | Circle implementation | Fungible token interface |
+| **Cross-Chain Bridge** | xReserve Protocol | Circle official | Ethereum-Stacks USDC bridge |
+
+### Application Stack
+
+| Component | Technology | Version | Function |
+|-----------|------------|---------|----------|
+| **Frontend Framework** | React | 18.x | Component-based UI architecture |
+| **Build System** | Vite | 5.x | Fast development and production builds |
+| **Styling** | Tailwind CSS | 3.x | Utility-first responsive design |
+| **Wallet Integration** | @stacks/connect | 7.x | Leather, Hiro, Xverse wallet support |
+| **Blockchain SDK** | @stacks/transactions | 7.x | Transaction building and signing |
+
+### Off-Chain Infrastructure
+
+| Service | Technology | Version | Purpose |
+|---------|------------|---------|---------|
+| **Relayer Backend** | Node.js | 18+ LTS | Proof verification and transaction relay |
+| **API Framework** | Express.js | 4.x | RESTful API endpoints |
+| **Proof Verification** | snarkjs | 0.7.x | Off-chain SNARK verification |
+| **Event Indexer** | Custom indexer | - | Blockchain event monitoring |
+| **Merkle Management** | merkletreejs + Poseidon | 0.3.x | Tree state synchronization |
+
+### Development Tools
+
+| Tool | Purpose | Integration |
+|------|---------|-------------|
+| **Clarinet** | Smart contract testing and deployment | Local devnet, testnet deployment |
+| **circom** | Circuit compilation and R1CS generation | Constraint system development |
+| **snarkjs CLI** | Trusted setup and key generation | Powers of Tau ceremony |
+| **Git** | Version control and collaboration | GitHub repository |
 
 ---
 
-## Real-World Use Cases
+## Applications
 
-### Anonymous Donations
-Donate USDCx to causes without revealing your identity. On-chain analysis cannot link donor to recipient.
+### Institutional Use Cases
 
-### Private Business Payments
-Pay contractors or suppliers privately. Transaction amounts visible, but sender-receiver relationships hidden.
+**Corporate Treasury Management**
+Organizations can execute confidential treasury operations without exposing strategic financial activities to competitors. Transaction amounts remain visible for accounting compliance, while counterparty relationships are cryptographically protected.
 
-### Confidential Cross-Border Transfers
-Send stable USDCx internationally without exposing transaction graph to surveillance.
+**International Remittances**
+Cross-border transfers using stable USDCx without exposing sender-receiver relationships to surveillance infrastructure. Maintains regulatory compliance through use of Circle's regulated stablecoin while preserving transactional privacy.
 
-### Financial Privacy
-Preserve personal financial privacy while using regulated stablecoin infrastructure.
+**DeFi Protocol Integration**
+Privacy-preserving deposits and withdrawals from decentralized finance protocols. Breaks on-chain transaction graph analysis between wallet addresses, enabling confidential yield farming and liquidity provision.
 
-### Privacy-Preserving DeFi
-Deposit into DeFi protocols anonymously. Break on-chain tracking between wallet activities.
+### Individual Use Cases
+
+**Financial Privacy Protection**
+Individuals maintain personal financial confidentiality using regulated stablecoin infrastructure. Prevents profiling, targeting, and surveillance based on transaction history while preserving auditability when required.
+
+**Anonymous Contributions**
+Support organizations, causes, or individuals without identity disclosure. Cryptographic unlinkability ensures donor privacy while maintaining transparent fund reception for beneficiaries.
 
 ---
 
@@ -751,78 +819,123 @@ When Stacks adds SNARK precompiles, we can:
 
 ---
 
-## Roadmap
+## Development Roadmap
 
-### ✅ Phase 1 (Current - Hackathon Submission)
-- ✅ Groth16 ZK-SNARK circuits (Circom)
-- ✅ Poseidon hash integration (circuit + frontend + relayer)
-- ✅ Merkle tree accumulator (20 levels, 1M capacity)
-- ✅ Smart contract (deposit, withdraw, nullifiers)
-- ✅ Off-chain relayer (proof verification + indexing)
-- ✅ Browser-based proof generation (~15s)
-- ✅ React frontend with wallet integration
-- ✅ USDCx SIP-010 token support
-- ✅ Testnet deployment
-- ✅ Comprehensive documentation
+### Phase 1: Foundation (Completed)
+**Status:** Deployed on Stacks Testnet
+**Timeline:** Q4 2025 - Q1 2026
 
-### 🚧 Phase 2 (Q1 2026 - Post-Hackathon)
-- [ ] **Security audit** (smart contracts + ZK circuits)
-- [ ] **Decentralized relayer network** (remove single point of trust)
-- [ ] **Multi-denomination pools** (10, 100, 1000 USDCx for amount privacy)
-- [ ] **Optimistic verification** (challenge-based relayer accountability)
-- [ ] **Merkle tree snapshots** (IPFS/Arweave for state availability)
-- [ ] **Enhanced indexer** (faster sync, better reliability)
-- [ ] **Mobile-optimized UI** (faster proof generation)
-- [ ] **Mainnet deployment** (production-ready)
+**Core Protocol Implementation**
+- Groth16 ZK-SNARK circuits with Poseidon hash integration
+- 20-level Merkle tree accumulator supporting 1,048,576 deposits
+- Clarity smart contracts with deposit, withdrawal, and nullifier tracking
+- Off-chain relayer infrastructure with proof verification and event indexing
+- Browser-based proof generation using WebAssembly circuits
 
-### 🔮 Phase 3 (Q2 2026 - Advanced Features)
-- [ ] **Native on-chain verification** (when Stacks adds SNARK precompiles)
-- [ ] **Multi-token support** (beyond USDCx: STX, sBTC, etc.)
-- [ ] **Compliance tools** (optional identity disclosure for regulation)
-- [ ] **Payment streaming** (private continuous payments)
-- [ ] **Mobile app** (iOS/Android with native proof generation)
-- [ ] **Developer SDK** (integrate VeilPay privacy into your dApp)
-- [ ] **Cross-chain privacy** (bridge privacy between L1s)
+**User Interface & Integration**
+- React-based frontend with Stacks wallet integration (Leather, Hiro)
+- USDCx SIP-010 token support with native Circle integration
+- xReserve bridge interface for Ethereum-Stacks USDC transfers
+- Comprehensive technical documentation and developer guides
+
+**Current Status:** Functional testnet deployment processing real deposits and withdrawals with full Zero-Knowledge privacy guarantees.
 
 ---
 
-## Why VeilPay Matters
+### Phase 2: Security & Scalability (Q1-Q2 2026)
+**Focus:** Production hardening and trust minimization
 
-### Technical Innovation
-VeilPay represents a significant advancement in blockchain privacy technology:
+**Security Enhancements**
+- Professional security audit of smart contracts by reputable third-party firm
+- Formal verification of ZK circuits and cryptographic assumptions
+- Bug bounty program for community-driven security testing
+- Penetration testing of relayer infrastructure and API endpoints
 
-- **Novel ZK Architecture**: First implementation of hybrid off-chain verification optimized for Clarity's constraints
-- **Poseidon Hash Integration**: Consistent SNARK-friendly cryptography across entire technology stack
-- **Groth16 SNARKs**: State-of-the-art Zero-Knowledge proof system with optimal proof size
-- **Browser Proof Generation**: Client-side WASM circuits ensure trustless privacy
-- **Future-Proof Design**: Seamless migration path to on-chain verification when available
+**Protocol Improvements**
+- Multi-denomination pools (10, 100, 1000 USDCx) for enhanced amount privacy
+- Decentralized relayer network with reputation-based consensus
+- Optimistic verification with fraud proof challenge mechanism
+- Merkle tree state snapshots on IPFS/Arweave for data availability
 
-### Deep USDCx Integration
-Native integration with Circle's USDCx stablecoin infrastructure:
+**Infrastructure Optimization**
+- Enhanced blockchain indexer with faster synchronization and fault tolerance
+- Relayer load balancing and geographic distribution
+- Mobile-optimized UI with progressive web app (PWA) support
+- Performance optimization for sub-10-second proof generation
 
-- **SIP-010 Token Standard**: Direct smart contract integration with fungible token trait
-- **xReserve Protocol Compatible**: Seamless interoperability with Ethereum-bridged USDC
-- **Event Indexing**: Real-time blockchain monitoring for deposit synchronization
-- **Nullifier Registry**: On-chain double-spend prevention without compromising privacy
-- **Production Infrastructure**: Enterprise-ready relayer services and API endpoints
+**Deliverable:** Mainnet-ready protocol with institutional-grade security and decentralized operation.
 
-### User-Centric Design
-Privacy technology accessible to everyone:
+---
 
-- **Intuitive Workflow**: Deposit → Save credentials → Withdraw to any address
-- **Browser-Based**: No installation required, runs entirely in web browser
-- **Wallet Integration**: Native support for Leather and Hiro via @stacks/connect
-- **Comprehensive Documentation**: Developer guides, API references, and user tutorials
-- **Educational Resources**: Clear explanations of Zero-Knowledge concepts
+### Phase 3: Advanced Features (Q3-Q4 2026)
+**Focus:** Protocol extensibility and ecosystem integration
 
-### Ecosystem Impact
-VeilPay enables new possibilities for the Stacks ecosystem:
+**Native On-Chain Verification**
+- Migration to full on-chain SNARK verification when Stacks adds BN254/BLS12-381 precompiles
+- Trustless proof validation without relayer dependency
+- Backward-compatible upgrade path for existing deposits
 
-- **Privacy Infrastructure**: Foundation for privacy-preserving dApps and protocols
-- **Scalable Design**: Current architecture supports 1M+ deposits with room for growth
-- **Sustainable Model**: Relayer fee structure ensures long-term operational viability
-- **DeFi Integration**: Enables anonymous participation in decentralized finance
-- **Regulatory Balance**: Privacy through mathematics while using regulated stablecoin
+**Multi-Asset Support**
+- Privacy pools for STX (native Stacks token)
+- sBTC integration for Bitcoin-backed private transfers
+- Generalized SIP-010 token privacy framework
+- Cross-token swap privacy preservation
+
+**Compliance & Regulatory Tools**
+- Optional selective disclosure mechanism for authorized auditors
+- Zero-Knowledge proof of fund origin for regulatory compliance
+- Configurable privacy levels for institutional requirements
+- Audit trail generation without compromising user privacy
+
+**Developer Ecosystem**
+- VeilPay SDK for third-party dApp integration
+- Privacy-preserving payment channels and streaming
+- Mobile applications (iOS/Android) with native proof generation
+- Cross-chain privacy protocols for multi-L1 interoperability
+
+**Long-Term Vision:** Establish VeilPay as the de facto privacy infrastructure for the Stacks ecosystem, enabling confidential DeFi, private payments, and anonymous on-chain interactions at scale.
+
+---
+
+## Strategic Value Proposition
+
+### Technical Differentiation
+
+VeilPay represents a significant advancement in blockchain privacy infrastructure:
+
+**Cryptographic Innovation**
+- First implementation of hybrid ZK-SNARK verification architecture optimized for Clarity's constraint system
+- Consistent Poseidon hash integration across circuit, application, and infrastructure layers
+- Groth16 proof system with 192-byte constant-size proofs and 128-bit security parameters
+- Browser-native proof generation via WebAssembly, eliminating trusted backend requirements
+
+**Protocol Design**
+- Merkle tree accumulator supporting 1,048,576 deposits with logarithmic proof complexity
+- Nullifier-based double-spend prevention maintaining unlinkability guarantees
+- Forward-compatible architecture enabling seamless migration to native on-chain verification
+- Production-grade event indexing and state synchronization infrastructure
+
+### Market Position
+
+**USDCx Integration Leadership**
+- First and only Zero-Knowledge privacy protocol for Circle's USDCx on Stacks
+- Native SIP-010 token standard integration at smart contract layer
+- Full xReserve protocol compatibility for Ethereum-Stacks bridging
+- Regulatory-compliant infrastructure using Circle's institutional stablecoin
+
+**Ecosystem Enablement**
+- Foundational privacy infrastructure for Stacks DeFi ecosystem
+- Enables confidential institutional treasury operations
+- Supports privacy-preserving dApp development through composable primitives
+- Scalable architecture with clear growth trajectory to mainnet deployment
+
+### Operational Excellence
+
+**Enterprise-Ready Infrastructure**
+- RESTful API with documented endpoints for relayer services
+- Multi-wallet support (Leather, Hiro) via standard @stacks/connect integration
+- Comprehensive developer documentation including technical specifications
+- Open-source codebase with MIT licensing for community development
 
 ---
 
@@ -1027,46 +1140,41 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Team
 
-**Developer**: Carlos Israel Jiménez
-
-[![GitHub](https://img.shields.io/badge/GitHub-carlos--israelj-181717?style=for-the-badge&logo=github)](https://github.com/carlos-israelj)
+**Lead Developer**: Carlos Israel Jiménez
+**GitHub**: [@carlos-israelj](https://github.com/carlos-israelj)
 
 ---
 
 ## Acknowledgments
 
-- **Stacks Labs** for hosting the builder challenge and pioneering Bitcoin L2s
-- **Circle** for the xReserve protocol bringing USDC to Stacks
-- **Hiro** for developer tools (Clarinet, Stacks.js) and infrastructure
-- **DoraHacks** for platform support and hackathon organization
-- **Iden3** for Circom, SnarkJS, and circomlib (ZK tooling)
-- **Stacks Community** for feedback, testing, and support
-- **Tornado Cash** for pioneering privacy pool architecture
+VeilPay builds upon foundational work from:
+
+- **Stacks Labs** - Bitcoin Layer 2 infrastructure and Clarity smart contract language
+- **Circle** - xReserve protocol enabling USDC bridging to Stacks
+- **Hiro Systems** - Developer tooling including Clarinet and Stacks.js SDK
+- **Iden3** - Circom circuit compiler, SnarkJS library, and circomlib primitives
+- **Tornado Cash** - Pioneering work in privacy pool architecture and ZK-SNARK applications
+- **Stacks Community** - Technical feedback, security review, and testnet validation
 
 ---
 
-## Support
+## Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/carlos-israelj/VeilPay/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/carlos-israelj/VeilPay/discussions)
-- **Community**: [Skool Stackers](https://www.skool.com/stackers/about)
-- **Email**: [Contact via GitHub](https://github.com/carlos-israelj)
+**Technical Issues**: [GitHub Issues](https://github.com/carlos-israelj/VeilPay/issues)
+**Development Discussion**: [GitHub Discussions](https://github.com/carlos-israelj/VeilPay/discussions)
+**Community Forum**: [Stacks Community](https://www.skool.com/stackers/about)
 
 ---
 
 <div align="center">
 
----
-
-### Star this repository to support financial privacy
-
 <img src="./frontend/public/veilpay-icon.png" alt="VeilPay" width="60" height="60">
 
 **Built on Bitcoin · Powered by Stacks · Secured by Zero-Knowledge · Stabilized by USDCx**
 
-*Privacy is not about hiding something wrong. It's about protecting something right.*
-
 ---
+
+*Privacy is a fundamental right. VeilPay protects yours.*
 
 **© 2026 VeilPay** · Licensed under [MIT](./LICENSE)
 
