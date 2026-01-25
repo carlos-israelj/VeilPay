@@ -2,10 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
-  "framework": null,
   "rewrites": [
     {
-      "source": "/((?!circuits/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
