@@ -3,6 +3,7 @@
 
 import { createVeilPayX402Middleware } from './middleware.js';
 import { generateX402Schema } from './schema.js';
+import { generateX402ScanSchema } from './scan-schema.js';
 import { verifyProof } from '../verifier.js';
 import { getAssetConfig } from '../multi-asset.js';
 
@@ -58,6 +59,23 @@ function getSchemaHandler(req, res) {
     console.error('[x402] Schema generation error:', error);
     res.status(500).json({
       error: 'Failed to generate schema',
+      details: error.message,
+    });
+  }
+}
+
+/**
+ * GET /x402/scan
+ * Returns x402scan-compatible schema (for registry submission)
+ */
+function getScanSchemaHandler(req, res) {
+  try {
+    const schema = generateX402ScanSchema();
+    res.json(schema);
+  } catch (error) {
+    console.error('[x402] Scan schema generation error:', error);
+    res.status(500).json({
+      error: 'Failed to generate scan schema',
       details: error.message,
     });
   }
@@ -225,6 +243,7 @@ function registerX402Routes(app) {
 
   // Public routes (no payment required)
   app.get('/x402/schema', getSchemaHandler);
+  app.get('/x402/scan', getScanSchemaHandler);
   app.get('/x402/stats', getStatsHandler);
   app.post('/x402/verify-proof', postVerifyProofHandler);
 
@@ -272,6 +291,7 @@ function registerX402Routes(app) {
   console.log('[x402] Routes registered ✅');
   console.log('[x402] Available endpoints:');
   console.log('  GET  /x402/schema');
+  console.log('  GET  /x402/scan (for x402scan registry)');
   console.log('  GET  /x402/stats');
   console.log('  POST /x402/verify-proof');
   console.log('  GET  /x402/demo (1 STX)');
@@ -282,6 +302,7 @@ function registerX402Routes(app) {
 export {
   generatePaymentRequired,
   getSchemaHandler,
+  getScanSchemaHandler,
   getDemoContentHandler,
   getPaidContentHandler,
   postExecuteApiHandler,
