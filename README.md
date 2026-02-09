@@ -70,6 +70,9 @@ Browser-based Zero-Knowledge proof creation using WebAssembly circuits. No backe
 ### Hybrid Verification Architecture
 Off-chain proof verification via relayer with on-chain settlement. Designed for future migration to native on-chain verification when Stacks adds SNARK precompiles.
 
+### x402 Payment Protocol Integration (NEW!)
+VeilPay now supports the **x402-stacks programmatic payment protocol**, enabling private HTTP 402 payments with multi-asset support (STX, USDCx, sBTC). First implementation combining x402 with Zero-Knowledge privacy. [Learn more](./docs/X402-INTEGRATION.md)
+
 ---
 
 ## Technical Specifications

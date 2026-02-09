@@ -1,37 +1,75 @@
 services:
   - type: web
-    name: veilpay-relayer
-    env: node
+    name: veilpay-x402-relayer
+    runtime: node
     region: oregon
-    plan: free
+    plan: starter
     buildCommand: cd relayer && npm install
     startCommand: cd relayer && npm start
     envVars:
+      # Server Configuration
       - key: PORT
-        value: 10000
+        value: 4000
+
+      # Stacks Network (testnet for demo, mainnet for production)
       - key: STACKS_NETWORK
         value: testnet
+
+      # VeilPay Contract Details
       - key: CONTRACT_ADDRESS
         value: ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1
       - key: CONTRACT_NAME
         value: veilpay
+
+      # USDCx Token Contract
       - key: USDCX_ADDRESS
         value: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       - key: USDCX_NAME
         value: usdcx
+
+      # Multi-Asset Pool Contracts (Testnet) - DEPLOYED
+      - key: USDCX_CONTRACT_TESTNET
+        value: ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1.veilpay-usdcx
+      - key: SBTC_CONTRACT_TESTNET
+        value: ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1.veilpay-sbtc-v2
+
+      # Token Contracts (Testnet)
+      - key: USDCX_TOKEN_TESTNET
+        value: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx
+      - key: SBTC_TOKEN_TESTNET
+        value: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc
+
+      # Relayer Private Key (MUST BE SET IN RENDER DASHBOARD)
       - key: RELAYER_PRIVATE_KEY
         sync: false
+
+      # xReserve Bridge Configuration
       - key: XRESERVE_ADDRESS
         value: 0x008888878f94C0d87defdf0B07f46B93C1934442
       - key: ETH_USDC_ADDRESS
         value: 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
+
+      # Domain IDs
       - key: STACKS_DOMAIN_ID
         value: 10003
       - key: ETHEREUM_DOMAIN_ID
         value: 0
+
+      # Optional: Fee configuration
       - key: RELAYER_FEE_PERCENTAGE
         value: 0.1
+
+      # Optional: Minimum amounts (in micro-units)
       - key: MIN_DEPOSIT_AMOUNT
         value: 1000000
       - key: MIN_WITHDRAWAL_AMOUNT
         value: 4800000
+
+      # x402 Multi-Asset Configuration
+      - key: X402_FACILITATOR_URL
+        value: https://facilitator.stacksx402.com
+      - key: VENDOR_ADDRESS
+        value: ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1
+
+    healthCheckPath: /health
+    autoDeploy: true

@@ -7,6 +7,10 @@ import { RelayerSigner } from './signer.js';
 import { StacksClient } from './stacks-client.js';
 import { BlockchainIndexer } from './indexer.js';
 
+// x402 Multi-Asset Support
+import { registerX402Routes } from './x402/handlers.js';
+import { initializeMultiAsset, getSupportedAssets, getMultiAssetStats } from './multi-asset.js';
+
 dotenv.config();
 
 const app = express();
@@ -59,6 +63,16 @@ const indexer = new BlockchainIndexer(
   process.env.CONTRACT_NAME,
   process.env.STACKS_NETWORK || 'testnet'
 );
+
+// Multi-Asset: Initialize Merkle trees for each asset (STX, USDCx, sBTC)
+const merkleManagers = {
+  STX: new MerkleTreeManager(),
+  USDCx: new MerkleTreeManager(),
+  sBTC: new MerkleTreeManager(),
+};
+
+// Make merkle managers globally accessible for x402 handlers
+global.merkleManagers = merkleManagers;
 
 // Health check
 app.get('/health', (req, res) => {
@@ -191,23 +205,58 @@ app.post('/deposit-event', async (req, res) => {
 
 // Get relayer stats
 app.get('/stats', (req, res) => {
-  res.json({
+  // Legacy single-asset stats (STX/original veilpay)
+  const legacyStats = {
     totalDeposits: merkleTree.getLeafCount(),
     currentRoot: merkleTree.getRoot().toString('hex'),
     relayerAddress: signer.getAddress()
+  };
+
+  // Multi-asset stats
+  const multiAssetStats = getMultiAssetStats(merkleManagers);
+
+  res.json({
+    ...legacyStats,
+    multiAsset: multiAssetStats,
+    supportedAssets: getSupportedAssets(),
   });
 });
 
+// Register x402 routes
+registerX402Routes(app);
+
 app.listen(PORT, async () => {
-  console.log(`VeilPay Relayer running on port ${PORT}`);
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`VeilPay x402 Multi-Asset Relayer`);
+  console.log(`${'='.repeat(60)}`);
+  console.log(`Port: ${PORT}`);
   console.log(`Relayer address: ${signer.getAddress()}`);
-  console.log(`Contract: ${process.env.CONTRACT_ADDRESS}.${process.env.CONTRACT_NAME}`);
+  console.log(`Network: ${process.env.STACKS_NETWORK || 'testnet'}`);
+  console.log(`${'='.repeat(60)}\n`);
 
-  // Wait for Poseidon to initialize
-  console.log('Initializing Poseidon...');
-  await merkleTree.ensureInitialized();
+  // Initialize Poseidon for all Merkle trees
+  console.log('Initializing Poseidon hash...');
+  await merkleTree.ensureInitialized(); // Legacy tree (STX)
 
-  // Start blockchain indexer
-  console.log('Starting blockchain indexer...');
+  for (const asset of getSupportedAssets()) {
+    await merkleManagers[asset].ensureInitialized();
+  }
+  console.log('Poseidon initialized ✅\n');
+
+  // Initialize multi-asset support
+  await initializeMultiAsset();
+  console.log('');
+
+  // Start blockchain indexer (legacy STX contract)
+  console.log('Starting blockchain indexers...');
   indexer.startMonitoring(merkleTree, stacksClient, 30000); // Poll every 30 seconds
+
+  // TODO: Start indexers for USDCx and sBTC contracts
+  // const usdcxIndexer = new BlockchainIndexer(usdcxAddress, 'veilpay-usdcx', network);
+  // usdcxIndexer.startMonitoring(merkleManagers.USDCx, stacksClient, 30000);
+
+  console.log('Blockchain indexers started ✅\n');
+  console.log(`${'='.repeat(60)}`);
+  console.log(`Ready to process private payments! 🚀`);
+  console.log(`${'='.repeat(60)}\n`);
 });

@@ -1,0 +1,15 @@
+{
+  "network": "testnet",
+  "deployer": "ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1",
+  "timestamp": "2026-02-09T00:55:07.778Z",
+  "contracts": {
+    "veilpay-usdcx": {
+      "address": "ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1.veilpay-usdcx",
+      "txid": "f2f07b242edeb2f12d7ed3b58f74085ae7ee66b3b2ea1825d5e2200064dd4f49"
+    },
+    "veilpay-sbtc": {
+      "address": "ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1.veilpay-sbtc",
+      "txid": null
+    }
+  }
+}

@@ -20,7 +20,8 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "merkletreejs": "^0.3.11",
-    "snarkjs": "^0.7.0"
+    "snarkjs": "^0.7.0",
+    "x402-stacks": "^2.0.1"
   },
   "devDependencies": {
     "chai": "^4.3.7",
