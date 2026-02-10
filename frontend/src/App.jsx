@@ -10,6 +10,7 @@ import HowItWorks from './components/HowItWorks';
 import FAQ from './components/FAQ';
 import History from './components/History';
 import Integrations from './components/Integrations';
+import X402Demo from './components/X402Demo';
 import ToastContainer from './components/Toast';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
@@ -72,6 +73,7 @@ function App() {
                   { id: 'bridge', label: 'BRIDGE' },
                   { id: 'deposit', label: 'DEPOSIT' },
                   { id: 'withdraw', label: 'WITHDRAW' },
+                  { id: 'x402-demo', label: 'X402' },
                   { id: 'history', label: 'HISTORY' },
                   { id: 'how-it-works', label: 'PROTOCOL' },
                   { id: 'faq', label: 'FAQ' },
@@ -134,6 +136,7 @@ function App() {
                 { id: 'bridge', label: 'BRIDGE' },
                 { id: 'deposit', label: 'DEPOSIT' },
                 { id: 'withdraw', label: 'WITHDRAW' },
+                { id: 'x402-demo', label: 'X402' },
                 { id: 'history', label: 'HISTORY' },
                 { id: 'how-it-works', label: 'PROTOCOL' },
                 { id: 'faq', label: 'FAQ' },
@@ -334,6 +337,8 @@ function App() {
                 <FAQ />
               ) : activeTab === 'integrations' ? (
                 <Integrations />
+              ) : activeTab === 'x402-demo' ? (
+                <X402Demo userSession={userSession} />
               ) : null}
             </div>
           </div>

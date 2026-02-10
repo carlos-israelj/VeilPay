@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { generateProof } from '../utils/proof';
 import { calculateCommitment } from '../utils/crypto';
 import axios from 'axios';
+import AssetSelector, { ASSET_CONFIG } from './AssetSelector';
 
-const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:3001';
+const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'https://veilpay-x402-relayer.onrender.com';
 
 export default function Withdraw({ userSession }) {
+  const [selectedAsset, setSelectedAsset] = useState('STX'); // Default to STX
   const [secret, setSecret] = useState('');
   const [nonce, setNonce] = useState('');
   const [amount, setAmount] = useState('');
@@ -21,8 +23,9 @@ export default function Withdraw({ userSession }) {
     }
 
     try {
-      // Convert amount to micro-units
-      const amountMicro = Math.floor(parseFloat(amount) * 1000000);
+      const assetConfig = ASSET_CONFIG[selectedAsset];
+      // Convert amount to micro-units based on asset decimals
+      const amountMicro = Math.floor(parseFloat(amount) * Math.pow(10, assetConfig.decimals));
 
       // Calculate commitment
       const commitment = await calculateCommitment(secret, amountMicro.toString(), nonce);
@@ -44,16 +47,17 @@ export default function Withdraw({ userSession }) {
     try {
       setLoading(true);
 
-      // Convert amount to micro-units
-      const amountMicro = Math.floor(parseFloat(amount) * 1000000);
+      const assetConfig = ASSET_CONFIG[selectedAsset];
+      // Convert amount to micro-units based on asset decimals
+      const amountMicro = Math.floor(parseFloat(amount) * Math.pow(10, assetConfig.decimals));
 
       // Calculate commitment
       const commitment = await calculateCommitment(secret, amountMicro.toString(), nonce);
       console.log('Using commitment:', commitment);
 
-      // Get merkle proof from relayer
+      // Get merkle proof from relayer (with asset parameter)
       const proofResponse = await axios.get(
-        `${RELAYER_URL}/proof/${commitment}`
+        `${RELAYER_URL}/proof/${commitment}?asset=${selectedAsset}`
       );
 
       if (!proofResponse.data.proof) {
@@ -62,8 +66,8 @@ export default function Withdraw({ userSession }) {
 
       const { pathElements, pathIndices } = proofResponse.data.proof;
 
-      // Get current root
-      const rootResponse = await axios.get(`${RELAYER_URL}/root`);
+      // Get current root for the selected asset
+      const rootResponse = await axios.get(`${RELAYER_URL}/root?asset=${selectedAsset}`);
       const root = rootResponse.data.root;
 
       // Generate ZK proof
@@ -78,7 +82,7 @@ export default function Withdraw({ userSession }) {
         root,
       });
 
-      // Submit to relayer
+      // Submit to relayer (with asset parameter)
       console.log('Submitting to relayer...');
       const withdrawResponse = await axios.post(`${RELAYER_URL}/withdraw`, {
         proof,
@@ -87,6 +91,7 @@ export default function Withdraw({ userSession }) {
         recipient,
         amount: amountMicro,
         root,
+        asset: selectedAsset, // Include asset type
       });
 
       console.log('Withdrawal submitted:', withdrawResponse.data.txid);
@@ -126,6 +131,13 @@ export default function Withdraw({ userSession }) {
           </p>
         </div>
       </div>
+
+      {/* Asset Selector */}
+      <AssetSelector
+        selectedAsset={selectedAsset}
+        onChange={setSelectedAsset}
+        userAddress={userSession?.isUserSignedIn() ? userSession.loadUserData().profile.stxAddress.testnet : null}
+      />
 
       {/* Instructions */}
       <div className="crypto-box p-4 sm:p-5 relative overflow-hidden group">
@@ -182,18 +194,18 @@ export default function Withdraw({ userSession }) {
 
         {/* Amount Input */}
         <div>
-          <label className="crypto-label block mb-2 sm:mb-3">AMOUNT_USDCX</label>
+          <label className="crypto-label block mb-2 sm:mb-3">AMOUNT_{selectedAsset}</label>
           <input
             type="number"
-            step="0.01"
-            min="1"
+            step={selectedAsset === 'sBTC' ? '0.00000001' : '0.01'}
+            min={ASSET_CONFIG[selectedAsset].minAmount}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="1.00"
+            placeholder={ASSET_CONFIG[selectedAsset].minAmount.toString()}
             className="crypto-input w-full text-sm sm:text-base"
           />
           <p className="text-gray-500 text-xs mt-2 font-mono">
-            must match exact deposit amount
+            must match exact deposit amount | minimum: {ASSET_CONFIG[selectedAsset].minAmount} {selectedAsset}
           </p>
         </div>
 

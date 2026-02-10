@@ -20,16 +20,20 @@ function randomFieldElement() {
 
 /**
  * Generate deposit commitment
+ * @param {string|number} amount - Amount in human-readable units
+ * @param {number} decimals - Number of decimals for the asset (6 for STX/USDCx, 8 for sBTC)
  */
-export async function generateDeposit(amount) {
+export async function generateDeposit(amount, decimals = 6) {
   const p = await getPoseidon();
 
   const secret = randomFieldElement();
   const nonce = randomFieldElement();
 
-  // Convert amount to micro-units (USDCx has 6 decimals)
-  // If amount is a decimal number, multiply by 1,000,000
-  const amountInMicroUnits = Math.floor(Number(amount) * 1_000_000);
+  // Convert amount to micro-units based on decimals
+  // STX/USDCx: 6 decimals (multiply by 1,000,000)
+  // sBTC: 8 decimals (multiply by 100,000,000)
+  const multiplier = Math.pow(10, decimals);
+  const amountInMicroUnits = Math.floor(Number(amount) * multiplier);
 
   // Calculate commitment: poseidon(secret, amount, nonce)
   const commitment = p([secret, BigInt(amountInMicroUnits), nonce]);

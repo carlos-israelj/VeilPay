@@ -9,8 +9,10 @@ import {
 } from '@stacks/transactions';
 import { STACKS_TESTNET } from '@stacks/network';
 import { openContractCall } from '@stacks/connect';
+import AssetSelector, { ASSET_CONFIG } from './AssetSelector';
 
 export default function Deposit({ userSession }) {
+  const [selectedAsset, setSelectedAsset] = useState('STX'); // Default to STX
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [depositData, setDepositData] = useState(null);
@@ -72,14 +74,16 @@ export default function Deposit({ userSession }) {
     try {
       setLoading(true);
 
+      const assetConfig = ASSET_CONFIG[selectedAsset];
       const amountNum = parseFloat(amount);
-      if (amountNum < 1.0) {
-        alert('Minimum deposit amount is 1.00 USDCx');
+
+      if (amountNum < assetConfig.minAmount) {
+        alert(`Minimum deposit amount is ${assetConfig.minAmount} ${selectedAsset}`);
         setLoading(false);
         return;
       }
 
-      const deposit = await generateDeposit(amount);
+      const deposit = await generateDeposit(amount, assetConfig.decimals);
 
       const storedDeposits = JSON.parse(
         localStorage.getItem('veilpay_deposits') || '[]'
@@ -90,6 +94,7 @@ export default function Deposit({ userSession }) {
         commitment: deposit.commitment,
         amount: deposit.amount,
         amountDisplay: amount,
+        asset: selectedAsset,
         timestamp: Date.now(),
       });
       localStorage.setItem('veilpay_deposits', JSON.stringify(storedDeposits));
@@ -97,30 +102,47 @@ export default function Deposit({ userSession }) {
       const userData = userSession.loadUserData();
       const senderAddress = userData.profile.stxAddress.testnet;
 
-      const usdcxAddress = import.meta.env.VITE_USDCX_ADDRESS || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
-      const usdcxName = import.meta.env.VITE_USDCX_NAME || 'usdcx';
+      // Build post-conditions based on asset type
+      let postConditions = [];
+      let functionArgs = [];
 
-      const postConditions = [
-        Pc.principal(senderAddress)
-          .willSendEq(deposit.amount)
-          .ft(`${usdcxAddress}.${usdcxName}`, 'usdcx-token')
-      ];
-
-      const txOptions = {
-        contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
-        contractName: import.meta.env.VITE_CONTRACT_NAME || 'veilpay',
-        functionName: 'deposit',
-        functionArgs: [
+      if (assetConfig.isNative) {
+        // STX native asset
+        postConditions = [
+          Pc.principal(senderAddress)
+            .willSendEq(deposit.amount)
+            .stx()
+        ];
+        functionArgs = [
           Cl.buffer(Buffer.from(deposit.commitment, 'hex')),
           Cl.uint(deposit.amount),
-          Cl.contractPrincipal(usdcxAddress, usdcxName)
-        ],
+        ];
+      } else {
+        // SIP-010 token (USDCx or sBTC)
+        const [tokenAddress, tokenName] = assetConfig.tokenContract.split('.');
+        postConditions = [
+          Pc.principal(senderAddress)
+            .willSendEq(deposit.amount)
+            .ft(`${assetConfig.tokenContract}`, `${tokenName}-token`)
+        ];
+        functionArgs = [
+          Cl.buffer(Buffer.from(deposit.commitment, 'hex')),
+          Cl.uint(deposit.amount),
+          Cl.contractPrincipal(tokenAddress, tokenName)
+        ];
+      }
+
+      const txOptions = {
+        contractAddress: assetConfig.contractAddress,
+        contractName: assetConfig.contractName,
+        functionName: 'deposit',
+        functionArgs,
         postConditions,
         postConditionMode: PostConditionMode.Deny,
         network: STACKS_TESTNET,
         appDetails: {
           name: 'VeilPay',
-          icon: window.location.origin + '/logo.png',
+          icon: window.location.origin + '/veilpay-icon.png',
         },
         onFinish: (data) => {
           console.log('Deposit successful:', data.txId);
@@ -134,7 +156,7 @@ export default function Deposit({ userSession }) {
             localStorage.setItem('veilpay_deposits', JSON.stringify(storedDeposits));
           }
 
-          setDepositData({ ...deposit, txId: data.txId });
+          setDepositData({ ...deposit, txId: data.txId, asset: selectedAsset });
           setLoading(false);
           setDeposits(storedDeposits);
         },
@@ -154,21 +176,12 @@ export default function Deposit({ userSession }) {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* USDCx Balance Display */}
-      <div className="crypto-box p-4 sm:p-6 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,#00ff88_5px,#00ff88_6px)]"></div>
-        <div className="relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex-1">
-              <div className="crypto-label mb-1 sm:mb-2">USDCX_BALANCE</div>
-              <div className="text-white text-2xl sm:text-3xl lg:text-4xl font-black" style={{ fontFamily: "'Syne', sans-serif" }}>
-                {usdcxBalance}
-              </div>
-            </div>
-            <div className="live-indicator"></div>
-          </div>
-        </div>
-      </div>
+      {/* Asset Selector */}
+      <AssetSelector
+        selectedAsset={selectedAsset}
+        onChange={setSelectedAsset}
+        userAddress={userSession?.isUserSignedIn() ? userSession.loadUserData().profile.stxAddress.testnet : null}
+      />
 
       {/* Deposit History */}
       {deposits.length > 0 && (
@@ -180,39 +193,52 @@ export default function Deposit({ userSession }) {
             <div className="crypto-label">{deposits.length} TOTAL</div>
           </div>
           <div className="space-y-2 sm:space-y-3 max-h-64 overflow-y-auto">
-            {deposits.map((dep, idx) => (
-              <div key={idx} className="border border-[#00ff88]/20 bg-black/20 p-3 sm:p-4 hover:border-[#00ff88]/40 transition-colors">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
-                  <span className="text-[#00ff88] font-bold font-mono text-sm sm:text-base">
-                    {dep.amountDisplay || (dep.amount / 1000000).toFixed(2)} USDCx
-                  </span>
-                  <span className="text-gray-500 text-xs font-mono">
-                    {new Date(dep.timestamp).toLocaleDateString()}
-                  </span>
+            {deposits.map((dep, idx) => {
+              const assetConfig = ASSET_CONFIG[dep.asset || 'USDCx'];
+              const displayAmount = dep.amountDisplay || (dep.amount / Math.pow(10, assetConfig.decimals)).toFixed(assetConfig.decimals === 8 ? 8 : 2);
+
+              return (
+                <div key={idx} className="border border-[#00ff88]/20 bg-black/20 p-3 sm:p-4 hover:border-[#00ff88]/40 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-2xl"
+                        style={{ color: assetConfig.color }}
+                      >
+                        {assetConfig.icon}
+                      </span>
+                      <span className="text-[#00ff88] font-bold font-mono text-sm sm:text-base">
+                        {displayAmount} {dep.asset || 'USDCx'}
+                      </span>
+                    </div>
+                    <span className="text-gray-500 text-xs font-mono">
+                      {new Date(dep.timestamp).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="hash-display text-xs break-all">
+                    {dep.commitment.substring(0, 48)}...
+                  </div>
                 </div>
-                <div className="hash-display text-xs break-all">
-                  {dep.commitment.substring(0, 48)}...
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* Deposit Form */}
       <div>
-        <label className="crypto-label block mb-3">DEPOSIT_AMOUNT</label>
+        <label className="crypto-label block mb-3">DEPOSIT_AMOUNT_{selectedAsset}</label>
         <input
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="1.00"
-          step="0.01"
-          min="1.00"
+          placeholder={ASSET_CONFIG[selectedAsset].minAmount.toString()}
+          step={selectedAsset === 'sBTC' ? '0.00000001' : '0.01'}
+          min={ASSET_CONFIG[selectedAsset].minAmount}
           className="crypto-input w-full text-sm sm:text-base"
         />
         <p className="text-gray-500 text-xs mt-2 font-mono">
-          available: {usdcxBalance} USDCx | minimum: 1.00 USDCx
+          minimum: {ASSET_CONFIG[selectedAsset].minAmount} {selectedAsset}
         </p>
       </div>
 
@@ -285,7 +311,8 @@ export default function Deposit({ userSession }) {
               <div className="crypto-label">AMOUNT</div>
               <button
                 onClick={() => {
-                  const displayAmount = (Number(depositData.amount) / 1000000).toFixed(2);
+                  const assetConfig = ASSET_CONFIG[depositData.asset || selectedAsset];
+                  const displayAmount = (Number(depositData.amount) / Math.pow(10, assetConfig.decimals)).toFixed(assetConfig.decimals === 8 ? 8 : 2);
                   navigator.clipboard.writeText(displayAmount);
                   alert('Amount copied to clipboard!');
                 }}
@@ -295,7 +322,11 @@ export default function Deposit({ userSession }) {
               </button>
             </div>
             <div className="text-white font-bold font-mono text-base sm:text-lg">
-              {(Number(depositData.amount) / 1000000).toFixed(2)} USDCx
+              {(() => {
+                const assetConfig = ASSET_CONFIG[depositData.asset || selectedAsset];
+                const displayAmount = (Number(depositData.amount) / Math.pow(10, assetConfig.decimals)).toFixed(assetConfig.decimals === 8 ? 8 : 2);
+                return `${displayAmount} ${depositData.asset || selectedAsset}`;
+              })()}
             </div>
           </div>
 
