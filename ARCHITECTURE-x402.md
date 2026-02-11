@@ -8,6 +8,8 @@
 
 **VeilPay x402** is the first x402-compatible privacy protocol on Stacks, enabling programmatic payments with cryptographic privacy guarantees. Users and AI agents can pay for services via standard HTTP 402 protocol while maintaining complete anonymity through Zero-Knowledge proofs. Supports STX, USDCx, and sBTC for maximum flexibility.
 
+**NEW: Bot-to-Bot Economy** — VeilPay x402 now includes a complete autonomous bot ecosystem where AI agents can hire other specialized bots for analysis, auditing, and intelligence gathering — all with complete payment privacy. This enables the first truly private machine-to-machine commerce network.
+
 ### Why it can't exist without both x402 and Zero-Knowledge
 
 On standard x402 implementations, every payment is publicly traceable on-chain — you can see exactly who paid whom for what. VeilPay x402 combines HTTP 402's programmatic payment standard with Groth16 ZK-SNARKs to provide **cryptographic unlinkability**. When you pay for an API or service, the vendor receives payment but has zero knowledge of your identity. Combined with multi-asset support (STX/USDCx/sBTC), this creates the first privacy-preserving payment infrastructure for the x402 ecosystem.
@@ -20,10 +22,12 @@ On standard x402 implementations, every payment is publicly traceable on-chain �
 
 ### Target users
 
-- **AI Agents** — Autonomous systems that need to pay for APIs privately
+- **AI Agents / Autonomous Bots** — Bots that hire other bots for specialized tasks privately
+- **DAOs** — Treasury analysis, competitive intelligence, governance research without revealing strategy
+- **VCs / Investors** — Due diligence, project analysis without alerting markets
+- **Traders** — Signal aggregation, risk assessment without frontrunning
 - **Developers** — APIs requiring payment without exposing customer identities
 - **Privacy-conscious users** — Crypto holders who want financial confidentiality
-- **Businesses** — Competitive intelligence, treasury operations, B2B payments
 
 ### Prize potential
 
@@ -112,6 +116,559 @@ On standard x402 implementations, every payment is publicly traceable on-chain �
 │          │ ←──────────────│  └───────────────────────────┘      │
 └──────────┘  Service Access│  (Private: unlinkable payment)      │
               + Payment      └─────────────────────────────────────┘
+```
+
+---
+
+## 2.5. Bot-to-Bot Economy Architecture
+
+**VeilPay x402 enables the first autonomous AI agent economy with cryptographic privacy.** Bots can hire other specialized bots for tasks like security audits, tokenomics analysis, and sentiment research — with complete payment unlinkability.
+
+### Bot Ecosystem Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    AUTONOMOUS BOT ECONOMY                        │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────┐     │
+│  │         COORDINATOR BOT (Orquestador)                  │     │
+│  │  "Investment Analyzer Bot"                             │     │
+│  │                                                         │     │
+│  │  • Receives analysis requests from users/DAOs          │     │
+│  │  • Deposits STX to VeilPay pool                        │     │
+│  │  • Hires 3 specialized worker bots                     │     │
+│  │  • Aggregates results into comprehensive report        │     │
+│  │                                                         │     │
+│  │  Pricing: 10 STX per full analysis                     │     │
+│  └────────────┬───────────────┬───────────────┬───────────┘     │
+│               │               │               │                  │
+│    ┌──────────▼────────┐ ┌───▼────────┐ ┌───▼────────┐        │
+│    │  SECURITY BOT     │ │ TOKENOMICS │ │ SENTIMENT  │        │
+│    │  (Auditor)        │ │    BOT     │ │    BOT     │        │
+│    │                   │ │  (Analyzer)│ │ (Analyzer) │        │
+│    │  x402: 5 STX      │ │ x402: 3 STX│ │ x402: 2 STX│        │
+│    │  via VeilPay      │ │ via VeilPay│ │ via VeilPay│        │
+│    └───────────────────┘ └────────────┘ └────────────┘        │
+│                                                                  │
+└──────────────────────────┬───────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              VeilPay x402 PRIVACY LAYER (EXISTING)               │
+│                                                                  │
+│  • ZK Proof Generation (browser/Node.js)                        │
+│  • Payment Unlinkability (Poseidon Merkle trees)                │
+│  • Multi-Asset Support (STX/USDCx/sBTC)                         │
+│  • Nullifier Tracking (double-spend prevention)                 │
+│                                                                  │
+│  Blockchain shows:                                              │
+│  ✅ "Someone paid 5 STX" (Security Bot)                         │
+│  ✅ "Someone paid 3 STX" (Tokenomics Bot)                       │
+│  ✅ "Someone paid 2 STX" (Sentiment Bot)                        │
+│  ❌ NO LINKAGE between the 3 payments                           │
+│  ❌ IMPOSSIBLE to know they came from same coordinator          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Worker Bots Specifications
+
+#### Bot 1: Security Auditor Bot 🔒
+
+**Purpose:** Analyzes Clarity smart contracts for security vulnerabilities
+
+**Pricing:** 5 STX per audit (via x402 + VeilPay)
+
+**Technology Stack:**
+- **APIs:**
+  - Stacks API (contract source) - FREE
+  - OpenAI GPT-3.5-turbo - $0.002/1K tokens
+- **Analysis:**
+  - Static code analysis (pattern matching)
+  - Vulnerability detection (reentrancy, overflow, access control)
+  - AI-powered security insights
+- **Cost:** $0.01-0.02 per audit with AI
+
+**Input:**
+```json
+{
+  "contractAddress": "ST1ABC...",
+  "contractName": "my-defi-protocol",
+  "network": "testnet"
+}
+```
+
+**Output:**
+```json
+{
+  "securityScore": "7.5/10",
+  "vulnerabilities": [
+    {
+      "type": "unchecked-arithmetic",
+      "severity": "medium",
+      "line": 42,
+      "description": "Potential integer overflow in balance calculation"
+    },
+    {
+      "type": "reentrancy-risk",
+      "severity": "high",
+      "line": 108,
+      "description": "External call before state update"
+    }
+  ],
+  "recommendations": [
+    "Add SafeMath or bounds checking",
+    "Implement reentrancy guard pattern"
+  ],
+  "aiInsights": "The contract shows medium-high risk due to unchecked arithmetic operations. The most critical issue is the potential reentrancy vulnerability at line 108..."
+}
+```
+
+**Capabilities:**
+- Reentrancy detection
+- Integer overflow/underflow
+- Access control issues
+- State manipulation risks
+- Unchecked external calls
+- Denial of service vectors
+
+---
+
+#### Bot 2: Tokenomics Analyzer Bot 📊
+
+**Purpose:** Analyzes token economics, supply dynamics, and holder distribution
+
+**Pricing:** 3 STX per analysis (via x402 + VeilPay)
+
+**Technology Stack:**
+- **APIs (all FREE):**
+  - Stacks API (supply, holders)
+  - Coingecko API (prices, market data)
+  - DexScreener API (DEX liquidity)
+- **Analysis:**
+  - Market cap & FDV calculations
+  - Holder concentration (Gini coefficient)
+  - Liquidity analysis
+  - Distribution metrics
+- **Cost:** $0 (all free APIs)
+
+**Input:**
+```json
+{
+  "tokenContract": "ST1ABC...alex-token",
+  "network": "testnet"
+}
+```
+
+**Output:**
+```json
+{
+  "metrics": {
+    "totalSupply": "1000000000",
+    "circulatingSupply": "500000000",
+    "price": "$0.05",
+    "marketCap": "$25M",
+    "fdv": "$50M",
+    "holders": 1250,
+    "giniCoefficient": 0.65,
+    "liquidityUSD": "$500K",
+    "liquidityRatio": "2%"
+  },
+  "analysis": {
+    "concentration": "Medium - Top 10 holders own 45%",
+    "liquidity": "Good - 2% of market cap in DEX pools",
+    "distribution": "Fair - Gini 0.65 indicates moderate inequality",
+    "circulation": "50% - Half of supply is circulating"
+  },
+  "recommendation": "Moderate BUY - Good liquidity, moderate concentration",
+  "riskLevel": "Medium"
+}
+```
+
+**Capabilities:**
+- Total/circulating supply analysis
+- Holder distribution & concentration
+- Price tracking & market cap
+- DEX liquidity analysis
+- Token velocity calculations
+- Whale wallet tracking
+
+---
+
+#### Bot 3: Sentiment Analyzer Bot 📱
+
+**Purpose:** Analyzes project sentiment via development activity, on-chain metrics, and news
+
+**Pricing:** 2 STX per report (via x402 + VeilPay)
+
+**Technology Stack:**
+- **APIs:**
+  - GitHub API (dev activity) - FREE (5000 req/hr)
+  - Stacks API (on-chain activity) - FREE
+  - CryptoPanic API (news) - FREE (50 req/day)
+  - OpenAI GPT-3.5-turbo - $0.002/1K tokens
+- **Analysis:**
+  - Development velocity
+  - On-chain transaction patterns
+  - News sentiment (AI-powered)
+  - Community activity scoring
+- **Cost:** $0.01-0.02 per analysis with AI
+
+**Input:**
+```json
+{
+  "projectName": "alex-protocol",
+  "githubRepo": "alexgo-io/alex-v1",
+  "tokenContract": "ST1ABC...alex",
+  "network": "testnet"
+}
+```
+
+**Output:**
+```json
+{
+  "developmentActivity": {
+    "commits30d": 145,
+    "prs30d": 23,
+    "openIssues": 12,
+    "contributors": 8,
+    "lastCommit": "2 hours ago",
+    "score": "High",
+    "trend": "Increasing"
+  },
+  "onChainActivity": {
+    "txVolume30d": "$2.5M",
+    "activeAddresses": 3200,
+    "dailyTxs": 850,
+    "score": "Medium-High",
+    "trend": "Stable"
+  },
+  "newsSentiment": {
+    "positive": 12,
+    "neutral": 8,
+    "negative": 2,
+    "score": "Positive",
+    "recentHeadlines": [
+      "ALEX Protocol announces new liquidity incentives",
+      "Trading volume up 45% this week"
+    ],
+    "aiSummary": "Overall sentiment is bullish with strong development momentum and positive community reception to recent announcements..."
+  },
+  "overallSentiment": "Bullish",
+  "confidence": "75%",
+  "recommendation": "Positive outlook - strong dev activity and community sentiment"
+}
+```
+
+**Capabilities:**
+- GitHub commit/PR tracking
+- Development team analysis
+- On-chain transaction monitoring
+- Active address tracking
+- News aggregation & sentiment
+- AI-powered text analysis
+- Community engagement scoring
+
+---
+
+### Coordinator Bot: Investment Analyzer
+
+**Purpose:** Orchestrates the 3 worker bots to provide comprehensive project analysis
+
+**Pricing:** 10 STX per full analysis (pays 10 STX to workers, keeps profit via margin)
+
+**Flow:**
+
+```javascript
+async function analyzeProject(projectData) {
+  // 1. Coordinator deposits 10 STX to VeilPay pool
+  const { secret, nonce } = await veilpayDeposit(10, 'STX');
+
+  // 2. Create private x402 client
+  const privateClient = createPrivateX402Client(secret, nonce, 'STX');
+
+  // 3. Hire Security Bot (5 STX via VeilPay ZK proof)
+  const securityReport = await privateClient.post(
+    'http://security-bot:4001/audit',
+    {
+      contractAddress: projectData.contractAddress,
+      contractName: projectData.contractName
+    }
+  );
+  // Blockchain shows: "Someone paid 5 STX" (unlinkable)
+
+  // 4. Hire Tokenomics Bot (3 STX via VeilPay ZK proof)
+  const tokenomicsReport = await privateClient.post(
+    'http://tokenomics-bot:4002/analyze',
+    { tokenContract: projectData.tokenContract }
+  );
+  // Blockchain shows: "Someone paid 3 STX" (unlinkable to #3)
+
+  // 5. Hire Sentiment Bot (2 STX via VeilPay ZK proof)
+  const sentimentReport = await privateClient.post(
+    'http://sentiment-bot:4003/analyze',
+    {
+      projectName: projectData.projectName,
+      githubRepo: projectData.githubRepo
+    }
+  );
+  // Blockchain shows: "Someone paid 2 STX" (unlinkable to #3 & #4)
+
+  // 6. Aggregate results
+  return {
+    timestamp: new Date().toISOString(),
+    project: projectData.projectName,
+    security: securityReport.data,
+    tokenomics: tokenomicsReport.data,
+    sentiment: sentimentReport.data,
+    overallScore: calculateOverallScore(
+      securityReport.data.securityScore,
+      tokenomicsReport.data.riskLevel,
+      sentimentReport.data.overallSentiment
+    ),
+    recommendation: generateFinalRecommendation(...),
+    privacyGuarantee: "✅ All 3 bot payments cryptographically unlinkable",
+    costBreakdown: {
+      security: "5 STX",
+      tokenomics: "3 STX",
+      sentiment: "2 STX",
+      total: "10 STX",
+      aiCost: "$0.05-0.07"
+    }
+  };
+}
+```
+
+**Output Example:**
+
+```json
+{
+  "project": "ALEX Protocol",
+  "timestamp": "2026-02-10T15:30:00Z",
+  "security": {
+    "score": "7.5/10",
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "low": 2
+  },
+  "tokenomics": {
+    "marketCap": "$25M",
+    "holders": 1250,
+    "concentration": "Medium",
+    "liquidity": "Good"
+  },
+  "sentiment": {
+    "overall": "Bullish",
+    "devActivity": "High",
+    "community": "Positive"
+  },
+  "overallScore": "8.2/10",
+  "recommendation": "BUY - Strong fundamentals with minor security concerns. High development activity and positive market sentiment. Address medium-severity vulnerabilities before major deployment.",
+  "investmentThesis": "ALEX shows strong tokenomics and community support. Security audit reveals manageable risks that should be addressed. Overall a solid investment with 8.2/10 score.",
+  "privacyGuarantee": "✅ All 3 bot payments are cryptographically unlinkable on-chain. No observer can determine that Security, Tokenomics, and Sentiment bots were hired by the same coordinator.",
+  "costBreakdown": {
+    "security": "5 STX ($5)",
+    "tokenomics": "3 STX ($3)",
+    "sentiment": "2 STX ($2)",
+    "total": "10 STX ($10)",
+    "aiCost": "$0.06 (GPT-3.5-turbo)"
+  }
+}
+```
+
+### Privacy Guarantees
+
+**What's Hidden:**
+- ✅ Which coordinator hired which worker bot
+- ✅ How many bots a coordinator is using
+- ✅ What project is being analyzed (bots see data, blockchain doesn't)
+- ✅ Coordinator's identity/wallet address
+- ✅ Correlation between multiple bot hires
+
+**What's Public:**
+- ❌ "Someone paid 5 STX to Security Bot" (visible)
+- ❌ "Someone paid 3 STX to Tokenomics Bot" (visible)
+- ❌ "Someone paid 2 STX to Sentiment Bot" (visible)
+- ✅ **BUT:** No linkage between these 3 payments (cryptographically guaranteed)
+
+**Attack Resistance:**
+- **Transaction graph analysis:** IMPOSSIBLE (ZK proofs break linkability)
+- **Timing correlation:** MITIGATED (nullifiers used at different times)
+- **Amount-based tracking:** MITIGATED (common denominations)
+- **IP tracking:** Use Tor/VPN (standard privacy practice)
+
+### Cost Structure (Heavy AI Usage)
+
+| Component | Free APIs | AI Processing | Total per Call | 100 Calls |
+|-----------|-----------|---------------|----------------|-----------|
+| **Security Bot** | $0 | $0.01-0.02 | $0.01-0.02 | $1-2 |
+| **Tokenomics Bot** | $0 | $0 (no AI) | $0 | $0 |
+| **Sentiment Bot** | $0 | $0.02-0.03 | $0.02-0.03 | $2-3 |
+| **Coordinator** (aggregation) | $0 | $0.02 | $0.02 | $2 |
+| **TOTAL per workflow** | $0 | $0.05-0.07 | **$0.05-0.07** | **$5-7** |
+
+**For 100 complete analyses:**
+- AI Cost: $5-7
+- Bot payments: 1000 STX ($1000) revenue
+- **Profit margin: 99.3%** (AI costs are negligible vs payment revenue)
+
+### Bot Registry & Discovery
+
+**Bot Registry Contract (Future):**
+```clarity
+;; bot-registry.clar
+(define-map registered-bots
+  { bot-id: (string-ascii 50) }
+  {
+    name: (string-ascii 100),
+    endpoint: (string-ascii 200),
+    price-stx: uint,
+    capabilities: (list 10 (string-ascii 50)),
+    reputation-score: uint,
+    total-jobs: uint
+  }
+)
+
+;; Register a new bot
+(define-public (register-bot (bot-id (string-ascii 50)) (details {...}))
+  ;; Bot operator registers their service
+  ;; Pays registration fee
+  ;; Gets listed in discoverable registry
+)
+
+;; Get bot details
+(define-read-only (get-bot (bot-id (string-ascii 50)))
+  (map-get? registered-bots { bot-id: bot-id })
+)
+```
+
+**Discovery API:**
+```javascript
+// GET /bots/discover
+{
+  "bots": [
+    {
+      "id": "security-auditor-v1",
+      "name": "Security Auditor Bot",
+      "category": "security",
+      "endpoint": "https://security-bot.veilpay.xyz",
+      "pricing": {
+        "asset": "STX",
+        "amount": "5000000",
+        "description": "5 STX per audit"
+      },
+      "capabilities": [
+        "reentrancy-detection",
+        "overflow-detection",
+        "access-control-analysis"
+      ],
+      "reputation": 4.8,
+      "totalJobs": 342,
+      "supportsVeilPay": true,
+      "privacyEnabled": true
+    },
+    {
+      "id": "tokenomics-analyzer-v1",
+      "name": "Tokenomics Analyzer Bot",
+      "category": "analytics",
+      "endpoint": "https://tokenomics-bot.veilpay.xyz",
+      "pricing": {
+        "asset": "STX",
+        "amount": "3000000",
+        "description": "3 STX per analysis"
+      },
+      "capabilities": [
+        "supply-analysis",
+        "holder-distribution",
+        "liquidity-tracking"
+      ],
+      "reputation": 4.9,
+      "totalJobs": 567,
+      "supportsVeilPay": true,
+      "privacyEnabled": true
+    }
+  ]
+}
+```
+
+### Use Cases
+
+#### Use Case 1: DAO Due Diligence (Privacy Critical)
+
+**Scenario:** MegaDAO wants to analyze 5 potential investment targets without revealing interest
+
+**Traditional Problem:**
+```
+MegaDAO wallet pays Research Bot for "Project X" analysis
+→ On-chain transaction visible
+→ Project X team sees DAO interest
+→ Price manipulation before deal
+→ Other VCs front-run the investment
+```
+
+**VeilPay Solution:**
+```
+MegaDAO uses Coordinator Bot via VeilPay
+→ 5 complete analyses (Security + Tokenomics + Sentiment)
+→ 15 total bot payments (5 projects × 3 bots)
+→ Blockchain shows 15 unlinkable payments
+→ IMPOSSIBLE to know MegaDAO is researching these projects
+→ IMPOSSIBLE to correlate the 3 bots per project
+→ DAO maintains competitive advantage
+```
+
+**Value:** Prevents front-running, maintains strategic secrecy
+
+---
+
+#### Use Case 2: VC Competitive Intelligence
+
+**Scenario:** VC Fund evaluates 20 protocols per month
+
+**Cost Comparison:**
+```
+Manual research:
+├── 20 projects × 40 hours × $100/hr = $80,000/month
+└── High cost, slow, inconsistent
+
+VeilPay Bot-to-Bot:
+├── 20 projects × 10 STX = 200 STX ($200)
+├── AI costs: 20 × $0.07 = $1.40
+└── Total: $201.40/month (99.7% cost reduction!)
+```
+
+**Privacy Benefit:**
+- Competitors can't see which protocols VC is researching
+- No price impact from public research activity
+- Maintains information asymmetry advantage
+
+---
+
+#### Use Case 3: Trader Strategy Execution
+
+**Scenario:** Algorithmic trader uses multiple signal bots
+
+**Traditional Problem:**
+```
+Trader subscribes to:
+├── Whale tracking bot
+├── Liquidation alert bot
+└── Technical analysis bot
+
+On-chain evidence:
+→ All 3 subscriptions visible
+→ Front-runners see strategy
+→ MEV bots sandwich trades
+→ Profit margins erode
+```
+
+**VeilPay Solution:**
+```
+Trader uses Coordinator to hire bots privately
+→ Signal aggregation unlinkable
+→ No front-running possible
+→ Strategy remains confidential
+→ Maintains alpha
 ```
 
 ---
@@ -908,9 +1465,11 @@ VeilPay/
 ├── contracts/                  # Clarity Smart Contracts
 │   ├── veilpay-stx.clar        # STX privacy pool
 │   ├── veilpay-usdcx.clar      # USDCx privacy pool
-│   ├── veilpay-sbtc.clar       # sBTC privacy pool (NEW)
+│   ├── veilpay-sbtc.clar       # sBTC privacy pool
 │   ├── usdcx-trait.clar        # SIP-010 trait
-│   ├── x402-router.clar        # Multi-asset routing (NEW)
+│   ├── sbtc-trait.clar         # sBTC trait
+│   ├── x402-router.clar        # Multi-asset routing (optional)
+│   ├── bot-registry.clar       # NEW: Bot registration contract
 │   ├── deploy-v2.js
 │   └── Clarinet.toml
 │
@@ -922,31 +1481,90 @@ VeilPay/
 │   │   └── verification_key.json
 │   └── test/
 │
+├── bots/                       # 🆕 BOT ECOSYSTEM
+│   ├── registry/
+│   │   ├── bot-registry.js     # Bot registration system
+│   │   ├── bot-discovery.js    # Bot discovery API
+│   │   └── bot-types.js        # Bot schemas/interfaces
+│   │
+│   ├── examples/
+│   │   ├── coordinator-bot/    # 🎯 COORDINATOR BOT
+│   │   │   ├── index.js        # Main coordinator logic
+│   │   │   ├── job-manager.js  # Job assignment
+│   │   │   ├── result-aggregator.js  # Aggregate worker results
+│   │   │   ├── scoring.js      # Overall score calculation
+│   │   │   ├── package.json
+│   │   │   └── .env.example    # VeilPay credentials
+│   │   │
+│   │   └── worker-bots/
+│   │       ├── security-bot/   # 🔒 SECURITY AUDITOR
+│   │       │   ├── index.js    # Express server (x402 endpoints)
+│   │       │   ├── analyzer.js # Static analysis + pattern matching
+│   │       │   ├── vulnerability-db.js  # Known vulnerabilities
+│   │       │   ├── ai-insights.js  # GPT-3.5 integration (optional)
+│   │       │   ├── package.json
+│   │       │   └── .env.example  # OpenAI API key
+│   │       │
+│   │       ├── tokenomics-bot/ # 📊 TOKENOMICS ANALYZER
+│   │       │   ├── index.js    # Express server (x402 endpoints)
+│   │       │   ├── metrics.js  # Supply, holders, concentration
+│   │       │   ├── dex-data.js # DEX liquidity fetcher
+│   │       │   ├── calculator.js  # Gini coefficient, etc
+│   │       │   ├── package.json
+│   │       │   └── .env.example
+│   │       │
+│   │       └── sentiment-bot/  # 📱 SENTIMENT ANALYZER
+│   │           ├── index.js    # Express server (x402 endpoints)
+│   │           ├── github-scraper.js  # Dev activity
+│   │           ├── onchain-metrics.js # Transaction volume
+│   │           ├── news-fetcher.js  # CryptoPanic API
+│   │           ├── ai-sentiment.js  # GPT-3.5 news analysis
+│   │           ├── package.json
+│   │           └── .env.example  # API keys
+│   │
+│   ├── marketplace/
+│   │   ├── bot-marketplace-api.js  # Marketplace backend
+│   │   └── bot-catalog.json    # Available bots catalog
+│   │
+│   └── README.md               # Bot development guide
+│
 ├── relayer/                    # Node.js Relayer
 │   ├── src/
 │   │   ├── index.js            # Express server
-│   │   ├── x402-wrapper.js     # NEW: x402 endpoints
+│   │   ├── x402/
+│   │   │   ├── handlers.js     # x402 endpoints (existing)
+│   │   │   ├── middleware.js   # VeilPay x402 middleware
+│   │   │   ├── bot-endpoints.js  # 🆕 Bot-specific routes
+│   │   │   ├── bot-payment-tracker.js  # 🆕 Track bot payments
+│   │   │   ├── schema.js       # x402scan schema
+│   │   │   └── scan-schema.js  # x402scan registration
 │   │   ├── merkle.js           # Merkle tree (Poseidon)
 │   │   ├── verifier.js         # ZK proof verification
 │   │   ├── indexer.js          # Blockchain events
 │   │   ├── stacks-client.js    # Transaction builder
-│   │   └── multi-asset.js      # NEW: Asset routing
+│   │   ├── multi-asset.js      # Asset routing
+│   │   └── signer.js           # Relayer signatures
 │   ├── .env.example
 │   └── package.json
 │
 ├── frontend/                   # React + Vite
 │   ├── src/
-│   │   ├── App.jsx
+│   │   ├── App.jsx             # Main app (updated with bot tabs)
 │   │   ├── components/
 │   │   │   ├── Deposit.jsx
 │   │   │   ├── Withdraw.jsx
-│   │   │   ├── X402Demo.jsx    # NEW: AI agent demo
-│   │   │   ├── AssetSelector.jsx  # NEW
-│   │   │   └── PrivacyBadge.jsx
+│   │   │   ├── X402Demo.jsx
+│   │   │   ├── AssetSelector.jsx
+│   │   │   ├── PrivacyBadge.jsx
+│   │   │   ├── BotMarketplace.jsx  # 🆕 Bot marketplace UI
+│   │   │   ├── BotCard.jsx         # 🆕 Individual bot display
+│   │   │   ├── CoordinatorDashboard.jsx  # 🆕 Job management
+│   │   │   ├── BotPaymentHistory.jsx  # 🆕 Payment tracking
+│   │   │   └── TransactionGraph.jsx   # 🆕 Privacy visualization
 │   │   ├── utils/
 │   │   │   ├── crypto.js       # Poseidon hash
 │   │   │   ├── proof.js        # ZK proof generation
-│   │   │   └── x402-client.js  # NEW: x402 integration
+│   │   │   └── x402-client.js  # x402 integration
 │   │   └── main.jsx
 │   ├── public/
 │   │   └── circuits/
@@ -955,8 +1573,11 @@ VeilPay/
 │   └── package.json
 │
 ├── docs/
-│   ├── API.md                  # NEW: x402 API docs
-│   ├── INTEGRATION.md          # NEW: How to integrate
+│   ├── API.md                  # x402 API docs
+│   ├── INTEGRATION.md          # Integration guide
+│   ├── BOT-DEVELOPER-GUIDE.md  # 🆕 How to build bots
+│   ├── BOT-TO-BOT-API.md       # 🆕 Bot-to-bot API reference
+│   ├── BOT-EXAMPLES.md         # 🆕 Code examples
 │   └── ARCHITECTURE-x402.md    # This file
 │
 ├── README.md
@@ -1000,9 +1621,56 @@ VITE_STACKS_NETWORK=testnet
 VITE_X402_ENABLED=true
 ```
 
+### Bots (.env) — NEW
+
+**Security Bot:**
+```env
+PORT=4001
+OPENAI_API_KEY=sk-...  # Optional for AI insights
+USE_AI=true  # Set to false for $0 cost
+STACKS_NETWORK=testnet
+```
+
+**Tokenomics Bot:**
+```env
+PORT=4002
+COINGECKO_API_KEY=  # Optional (free tier works)
+DEXSCREENER_API_KEY=  # Optional (free tier works)
+STACKS_NETWORK=testnet
+```
+
+**Sentiment Bot:**
+```env
+PORT=4003
+GITHUB_TOKEN=ghp_...  # GitHub personal access token (free)
+CRYPTOPANIC_API_KEY=  # Free tier: 50 req/day
+OPENAI_API_KEY=sk-...  # Optional for AI news analysis
+USE_AI=true
+STACKS_NETWORK=testnet
+```
+
+**Coordinator Bot:**
+```env
+PORT=4000
+VEILPAY_SECRET=...  # Saved from VeilPay deposit
+VEILPAY_NONCE=...   # Saved from VeilPay deposit
+VEILPAY_ASSET=STX   # STX | USDCx | sBTC
+
+# Worker bot endpoints
+SECURITY_BOT_URL=http://localhost:4001
+TOKENOMICS_BOT_URL=http://localhost:4002
+SENTIMENT_BOT_URL=http://localhost:4003
+
+# VeilPay relayer
+RELAYER_URL=http://localhost:3001
+STACKS_NETWORK=testnet
+```
+
 ---
 
 ## 13. Key Dependencies
+
+### Core VeilPay Dependencies
 
 ```json
 {
@@ -1014,6 +1682,7 @@ VITE_X402_ENABLED=true
     "circomlibjs": "^0.1.7",
     "@stacks/transactions": "^7.0",
     "@stacks/connect": "^7.0",
+    "@stacks/network": "^7.0",
     "merkletreejs": "^0.3.11",
     "ethers": "^6.0"
   },
@@ -1021,6 +1690,58 @@ VITE_X402_ENABLED=true
     "circom": "^2.1",
     "typescript": "^5",
     "vite": "^5"
+  }
+}
+```
+
+### Bot-Specific Dependencies (NEW)
+
+**All Bots:**
+```json
+{
+  "dependencies": {
+    "express": "^4.18",
+    "axios": "^1.6",
+    "dotenv": "^16.0",
+    "@stacks/transactions": "^7.0",
+    "@stacks/network": "^7.0"
+  }
+}
+```
+
+**Security Bot (additional):**
+```json
+{
+  "dependencies": {
+    "openai": "^4.20.0"  // Optional for AI insights ($0.002/1K tokens)
+  }
+}
+```
+
+**Tokenomics Bot (additional):**
+```json
+{
+  "dependencies": {
+    "node-fetch": "^3.3"  // For API calls (free)
+  }
+}
+```
+
+**Sentiment Bot (additional):**
+```json
+{
+  "dependencies": {
+    "@octokit/rest": "^20.0",  // GitHub API (free)
+    "openai": "^4.20.0"  // Optional for news analysis ($0.002/1K tokens)
+  }
+}
+```
+
+**Coordinator Bot (additional):**
+```json
+{
+  "dependencies": {
+    "veilpay-x402": "file:../../frontend/src/utils/x402-client.js"  // VeilPay client
   }
 }
 ```
@@ -1050,6 +1771,26 @@ VITE_X402_ENABLED=true
 | Withdrawal transaction | ~0.02 STX | Relayer pays, recoups via fee |
 | Test deposits (10 x 1 STX) | 10 STX | Funds recoverable |
 | **Total for MVP testing** | ~11 STX (~$15) | |
+
+### Bot-to-Bot Ecosystem Costs (NEW)
+
+| Component | Cost per Analysis | 100 Analyses | Notes |
+|-----------|-------------------|--------------|-------|
+| **Security Bot** (with AI) | $0.01-0.02 | $1-2 | GPT-3.5 insights |
+| **Tokenomics Bot** | $0 | $0 | Free APIs only |
+| **Sentiment Bot** (with AI) | $0.02-0.03 | $2-3 | GPT-3.5 news analysis |
+| **Coordinator** (aggregation) | $0.02 | $2 | Report generation |
+| **TOTAL per workflow** | **$0.05-0.07** | **$5-7** | Heavy AI usage |
+
+**Revenue Model:**
+- Coordinator charges: 10 STX (~$10)
+- AI costs: $0.05-0.07
+- **Profit margin: 99.3%**
+
+**Deployment Costs:**
+- 3 Worker Bots on Render: $0 (free tier) or $21/month (3 × $7)
+- Coordinator Bot on Render: $0 (free tier) or $7/month
+- **Total hosting: $0-28/month**
 
 ### x402 Payments
 

@@ -78,6 +78,89 @@ const merkleManagers = {
 // Make merkle managers globally accessible for x402 handlers
 global.merkleManagers = merkleManagers;
 
+// x402scan Discovery Endpoint (Root with 402 Payment Required)
+app.get('/', (req, res) => {
+  res.status(402).json({
+    x402Version: 2,
+    name: "VeilPay x402 Multi-Asset Privacy Protocol",
+    description: "Zero-Knowledge privacy protocol for STX, USDCx, and sBTC with AI bot marketplace",
+    image: "https://veilpay.vercel.app/veilpay-icon.png",
+    website: "https://veilpay.lat",
+    accepts: [
+      {
+        method: "POST",
+        path: "/x402/bots/security/audit",
+        description: "AI-powered smart contract security auditing",
+        price: {
+          STX: "5000000",
+          USDCx: "5000000",
+          sBTC: "50000"
+        },
+        outputSchema: {
+          type: "object",
+          properties: {
+            status: { type: "string" },
+            audit: {
+              type: "object",
+              properties: {
+                staticAnalysis: { type: "object" },
+                aiInsights: { type: "object" },
+                executiveSummary: { type: "object" }
+              }
+            }
+          }
+        }
+      },
+      {
+        method: "POST",
+        path: "/x402/bots/tokenomics/analyze",
+        description: "Token metrics and liquidity analysis",
+        price: {
+          STX: "3000000",
+          USDCx: "3000000",
+          sBTC: "30000"
+        }
+      },
+      {
+        method: "POST",
+        path: "/x402/bots/sentiment/analyze",
+        description: "Multi-source project sentiment analysis",
+        price: {
+          STX: "2000000",
+          USDCx: "2000000",
+          sBTC: "20000"
+        }
+      },
+      {
+        method: "POST",
+        path: "/x402/bots/coordinator/analyze",
+        description: "Full project analysis via all worker bots",
+        price: {
+          STX: "10000000",
+          USDCx: "10000000",
+          sBTC: "100000"
+        }
+      },
+      {
+        method: "POST",
+        path: "/withdraw",
+        description: "Private ZK-SNARK withdrawal with proof",
+        price: {
+          STX: "0",
+          USDCx: "0",
+          sBTC: "0"
+        }
+      }
+    ],
+    paymentMethods: ["veilpay-zk", "standard-x402"],
+    links: {
+      documentation: "https://github.com/carlos-israelj/VeilPay/blob/main/docs/API.md",
+      botGuide: "https://github.com/carlos-israelj/VeilPay/blob/main/docs/BOT-DEVELOPER-GUIDE.md",
+      github: "https://github.com/carlos-israelj/VeilPay"
+    }
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'veilpay-relayer' });

@@ -1,4 +1,5 @@
 services:
+  # Main Relayer Service
   - type: web
     name: veilpay-x402-relayer
     runtime: node
@@ -71,5 +72,127 @@ services:
       - key: VENDOR_ADDRESS
         value: ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1
 
+      # Bot Worker URLs (Production)
+      - key: SECURITY_BOT_URL
+        value: https://veilpay-security-bot.onrender.com
+      - key: TOKENOMICS_BOT_URL
+        value: https://veilpay-tokenomics-bot.onrender.com
+      - key: SENTIMENT_BOT_URL
+        value: https://veilpay-sentiment-bot.onrender.com
+      - key: COORDINATOR_BOT_URL
+        value: https://veilpay-coordinator-bot.onrender.com
+
+      # OpenAI API Key (for bot proxying)
+      - key: OPENAI_API_KEY
+        sync: false  # Set in Render dashboard
+
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Security Bot Worker
+  - type: web
+    name: veilpay-security-bot
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: cd bots/examples/worker-bots/security-bot && npm install
+    startCommand: cd bots/examples/worker-bots/security-bot && npm start
+    envVars:
+      - key: PORT
+        value: 4001
+      - key: OPENAI_API_KEY
+        sync: false  # Set in Render dashboard
+      - key: STACKS_API
+        value: https://api.testnet.hiro.so
+      - key: BOT_PRICE_STX
+        value: 5
+      - key: BOT_NAME
+        value: VeilPay Security Auditor
+      - key: BOT_DESCRIPTION
+        value: AI-powered smart contract security analysis
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Tokenomics Bot Worker
+  - type: web
+    name: veilpay-tokenomics-bot
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: cd bots/examples/worker-bots/tokenomics-bot && npm install
+    startCommand: cd bots/examples/worker-bots/tokenomics-bot && npm start
+    envVars:
+      - key: PORT
+        value: 4002
+      - key: STACKS_API
+        value: https://api.testnet.hiro.so
+      - key: BOT_PRICE_STX
+        value: 3
+      - key: BOT_NAME
+        value: VeilPay Tokenomics Analyzer
+      - key: BOT_DESCRIPTION
+        value: Token metrics and liquidity analysis
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Sentiment Bot Worker
+  - type: web
+    name: veilpay-sentiment-bot
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: cd bots/examples/worker-bots/sentiment-bot && npm install
+    startCommand: cd bots/examples/worker-bots/sentiment-bot && npm start
+    envVars:
+      - key: PORT
+        value: 4003
+      - key: OPENAI_API_KEY
+        sync: false  # Set in Render dashboard
+      - key: STACKS_API
+        value: https://api.testnet.hiro.so
+      - key: CRYPTOPANIC_API_KEY
+        sync: false  # Optional - set in Render dashboard
+      - key: BOT_PRICE_STX
+        value: 2
+      - key: BOT_NAME
+        value: VeilPay Sentiment Analyzer
+      - key: BOT_DESCRIPTION
+        value: Multi-source project sentiment analysis
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Coordinator Bot
+  - type: web
+    name: veilpay-coordinator-bot
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: cd bots/examples/coordinator-bot && npm install
+    startCommand: cd bots/examples/coordinator-bot && npm start
+    envVars:
+      - key: PORT
+        value: 4004
+      - key: OPENAI_API_KEY
+        sync: false  # Set in Render dashboard
+      - key: STACKS_NETWORK
+        value: testnet
+      - key: CONTRACT_ADDRESS
+        value: ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1
+      - key: VEILPAY_STX_CONTRACT
+        value: ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1.veilpay
+      - key: COORDINATOR_PRIVATE_KEY
+        sync: false  # Set in Render dashboard
+      - key: SECURITY_BOT_URL
+        value: https://veilpay-security-bot.onrender.com
+      - key: TOKENOMICS_BOT_URL
+        value: https://veilpay-tokenomics-bot.onrender.com
+      - key: SENTIMENT_BOT_URL
+        value: https://veilpay-sentiment-bot.onrender.com
+      - key: BOT_PRICE_STX
+        value: 10
+      - key: BOT_NAME
+        value: VeilPay Coordinator Bot
+      - key: BOT_DESCRIPTION
+        value: Full project analysis via all worker bots
     healthCheckPath: /health
     autoDeploy: true
