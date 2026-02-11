@@ -28,5 +28,8 @@
     "circuits",
     "relayer",
     "frontend"
-  ]
+  ],
+  "dependencies": {
+    "@stacks/wallet-sdk": "^7.2.0"
+  }
 }

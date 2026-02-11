@@ -56,5 +56,8 @@ frontend/.cache/
 contracts/artifacts/
 contracts/.cache/
 
+# Utility scripts (contain sensitive wallet operations)
+scripts/
+
 # Claude Code documentation
 CLAUDE.md
