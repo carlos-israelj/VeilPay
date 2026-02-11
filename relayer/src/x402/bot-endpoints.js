@@ -10,9 +10,9 @@ import { createVeilPayX402Middleware } from './middleware.js';
 import { analyzeContract } from '../bots/security/analyzer.js';
 import { AISecurityAnalyzer } from '../bots/security/ai-insights.js';
 import { TokenMetricsAnalyzer } from '../bots/tokenomics/metrics.js';
-import { DexDataFetcher } from '../bots/tokenomics/dex-data.js';
+import { DEXDataFetcher } from '../bots/tokenomics/dex-data.js';
 import { GitHubScraper } from '../bots/sentiment/github-scraper.js';
-import { OnChainMetricsAnalyzer } from '../bots/sentiment/onchain-metrics.js';
+import { OnChainMetrics } from '../bots/sentiment/onchain-metrics.js';
 import { NewsFetcher } from '../bots/sentiment/news-fetcher.js';
 import { AISentimentAnalyzer } from '../bots/sentiment/ai-sentiment.js';
 
@@ -212,7 +212,7 @@ export function setupBotEndpoints(app) {
         const metricsResult = await metricsAnalyzer.analyzeToken(tokenContract);
 
         // DEX liquidity analysis
-        const dexFetcher = new DexDataFetcher();
+        const dexFetcher = new DEXDataFetcher();
         const liquidityResult = await dexFetcher.getLiquidityData(tokenContract, tokenSymbol);
 
         // Calculate overall score
@@ -289,7 +289,7 @@ export function setupBotEndpoints(app) {
         let onChain = null;
         if (contractAddress && contractName) {
           try {
-            const onChainAnalyzer = new OnChainMetricsAnalyzer(stacksApi);
+            const onChainAnalyzer = new OnChainMetrics(stacksApi);
             onChain = await onChainAnalyzer.analyzeContract(contractAddress, contractName);
           } catch (error) {
             console.error('On-chain analysis failed:', error.message);
@@ -416,7 +416,7 @@ export function setupBotEndpoints(app) {
           const tokenContract = `${contractAddress}.${contractName}`;
           const metricsAnalyzer = new TokenMetricsAnalyzer(stacksApi);
           const metricsResult = await metricsAnalyzer.analyzeToken(tokenContract);
-          const dexFetcher = new DexDataFetcher();
+          const dexFetcher = new DEXDataFetcher();
           const liquidityResult = await dexFetcher.getLiquidityData(tokenContract, tokenSymbol);
           const overallScore = Math.round((metricsResult.metrics.healthScore * 0.6) + ((liquidityResult?.liquidityScore || 0) * 0.4));
 
