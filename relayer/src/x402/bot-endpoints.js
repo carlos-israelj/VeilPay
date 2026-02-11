@@ -8,7 +8,7 @@ import { createVeilPayX402Middleware } from './middleware.js';
 
 // Import bot analysis modules (run locally, not via HTTP)
 import { analyzeContract } from '../bots/security/analyzer.js';
-import { AIInsightsGenerator } from '../bots/security/ai-insights.js';
+import { AISecurityAnalyzer } from '../bots/security/ai-insights.js';
 import { TokenMetricsAnalyzer } from '../bots/tokenomics/metrics.js';
 import { DexDataFetcher } from '../bots/tokenomics/dex-data.js';
 import { GitHubScraper } from '../bots/sentiment/github-scraper.js';
@@ -140,7 +140,7 @@ export function setupBotEndpoints(app) {
 
         if (process.env.OPENAI_API_KEY && fullAnalysis) {
           try {
-            const aiAnalyzer = new AIInsightsGenerator(process.env.OPENAI_API_KEY);
+            const aiAnalyzer = new AISecurityAnalyzer(process.env.OPENAI_API_KEY);
 
             // Fetch contract source for AI analysis
             const sourceResponse = await stacksApi.get(`/v2/contracts/source/${contractAddress}/${contractName}`);
@@ -398,7 +398,7 @@ export function setupBotEndpoints(app) {
           let aiInsights = null;
           let executiveSummary = null;
           if (process.env.OPENAI_API_KEY) {
-            const aiAnalyzer = new AIInsightsGenerator(process.env.OPENAI_API_KEY);
+            const aiAnalyzer = new AISecurityAnalyzer(process.env.OPENAI_API_KEY);
             const sourceResponse = await stacksApi.get(`/v2/contracts/source/${contractAddress}/${contractName}`);
             aiInsights = await aiAnalyzer.generateInsights(sourceResponse.data.source, staticAnalysis);
             executiveSummary = aiAnalyzer.generateExecutiveSummary(staticAnalysis, aiInsights);
