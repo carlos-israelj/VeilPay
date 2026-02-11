@@ -11,6 +11,10 @@ import { BlockchainIndexer } from './indexer.js';
 import { registerX402Routes } from './x402/handlers.js';
 import { initializeMultiAsset, getSupportedAssets, getMultiAssetStats } from './multi-asset.js';
 
+// x402 Bot Marketplace
+import { setupBotEndpoints } from './x402/bot-endpoints.js';
+import { initializePaymentTracker, getPaymentStats, getRecentPayments } from './x402/bot-payment-tracker.js';
+
 dotenv.config();
 
 const app = express();
@@ -225,6 +229,22 @@ app.get('/stats', (req, res) => {
 // Register x402 routes
 registerX402Routes(app);
 
+// Register bot marketplace endpoints
+setupBotEndpoints(app);
+
+// Bot payment stats endpoint
+app.get('/x402/stats', (req, res) => {
+  const stats = getPaymentStats();
+  const recentPayments = getRecentPayments(20);
+
+  res.json({
+    status: 'success',
+    stats,
+    recentPayments,
+    marketplace: 'VeilPay Bot-to-Bot Economy'
+  });
+});
+
 app.listen(PORT, async () => {
   console.log(`\n${'='.repeat(60)}`);
   console.log(`VeilPay x402 Multi-Asset Relayer`);
@@ -246,6 +266,9 @@ app.listen(PORT, async () => {
   // Initialize multi-asset support
   await initializeMultiAsset();
   console.log('');
+
+  // Initialize bot payment tracker
+  initializePaymentTracker();
 
   // Start blockchain indexer (legacy STX contract)
   console.log('Starting blockchain indexers...');
