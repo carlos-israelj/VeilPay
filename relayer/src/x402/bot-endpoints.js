@@ -1,9 +1,20 @@
 /**
  * x402 Bot Endpoints for VeilPay
  * Exposes bot marketplace endpoints with x402 payment integration
+ * Bots run locally within the relayer process (monolith architecture)
  */
 
 import { createVeilPayX402Middleware } from './middleware.js';
+
+// Import bot analysis modules (run locally, not via HTTP)
+import { analyzeContract } from '../bots/security/analyzer.js';
+import { AIInsightsGenerator } from '../bots/security/ai-insights.js';
+import { TokenMetricsAnalyzer } from '../bots/tokenomics/metrics.js';
+import { DexDataFetcher } from '../bots/tokenomics/dex-data.js';
+import { GitHubScraper } from '../bots/sentiment/github-scraper.js';
+import { OnChainMetricsAnalyzer } from '../bots/sentiment/onchain-metrics.js';
+import { NewsFetcher } from '../bots/sentiment/news-fetcher.js';
+import { AISentimentAnalyzer } from '../bots/sentiment/ai-sentiment.js';
 
 /**
  * Bot marketplace endpoints configuration
@@ -112,19 +123,47 @@ export function setupBotEndpoints(app) {
           });
         }
 
-        // Forward request to Security Bot
+        // Execute Security Bot analysis locally
         const axios = (await import('axios')).default;
-        const botUrl = process.env.SECURITY_BOT_URL || 'http://localhost:4001';
+        const stacksApi = axios.create({
+          baseURL: process.env.STACKS_API || 'https://api.testnet.hiro.so'
+        });
 
-        const botResponse = await axios.post(`${botUrl}/audit`, {
-          contractAddress,
-          contractName,
-          fullAnalysis
-        }, { timeout: 30000 });
+        console.log(`🛡️  Security Bot: Auditing ${contractAddress}.${contractName}...`);
 
-        // Add payment metadata
+        // Static analysis
+        const staticAnalysis = await analyzeContract(contractAddress, contractName, stacksApi);
+
+        // AI insights (if OpenAI key is available)
+        let aiInsights = null;
+        let executiveSummary = null;
+
+        if (process.env.OPENAI_API_KEY && fullAnalysis) {
+          try {
+            const aiAnalyzer = new AIInsightsGenerator(process.env.OPENAI_API_KEY);
+
+            // Fetch contract source for AI analysis
+            const sourceResponse = await stacksApi.get(`/v2/contracts/source/${contractAddress}/${contractName}`);
+            const sourceCode = sourceResponse.data.source;
+
+            aiInsights = await aiAnalyzer.generateInsights(sourceCode, staticAnalysis);
+            executiveSummary = aiAnalyzer.generateExecutiveSummary(staticAnalysis, aiInsights);
+          } catch (error) {
+            console.error('AI analysis failed:', error.message);
+          }
+        }
+
+        // Build response
         const response = {
-          ...botResponse.data,
+          status: 'success',
+          audit: {
+            contractAddress,
+            contractName,
+            staticAnalysis,
+            aiInsights,
+            executiveSummary,
+            completedAt: new Date().toISOString()
+          },
           payment: req.veilpayPayment || { method: 'x402-standard' }
         };
 
@@ -160,16 +199,38 @@ export function setupBotEndpoints(app) {
           });
         }
 
+        // Execute Tokenomics Bot analysis locally
         const axios = (await import('axios')).default;
-        const botUrl = process.env.TOKENOMICS_BOT_URL || 'http://localhost:4002';
+        const stacksApi = axios.create({
+          baseURL: process.env.STACKS_API || 'https://api.testnet.hiro.so'
+        });
 
-        const botResponse = await axios.post(`${botUrl}/analyze`, {
-          tokenContract,
-          tokenSymbol
-        }, { timeout: 30000 });
+        console.log(`📊 Tokenomics Bot: Analyzing ${tokenContract}...`);
+
+        // Token metrics analysis
+        const metricsAnalyzer = new TokenMetricsAnalyzer(stacksApi);
+        const metricsResult = await metricsAnalyzer.analyzeToken(tokenContract);
+
+        // DEX liquidity analysis
+        const dexFetcher = new DexDataFetcher();
+        const liquidityResult = await dexFetcher.getLiquidityData(tokenContract, tokenSymbol);
+
+        // Calculate overall score
+        const overallScore = Math.round(
+          (metricsResult.metrics.healthScore * 0.6) +
+          ((liquidityResult?.liquidityScore || 0) * 0.4)
+        );
 
         const response = {
-          ...botResponse.data,
+          status: 'success',
+          analysis: {
+            tokenContract,
+            tokenSymbol: tokenSymbol || 'Unknown',
+            overallScore,
+            tokenMetrics: metricsResult,
+            liquidityData: liquidityResult,
+            completedAt: new Date().toISOString()
+          },
           payment: req.veilpayPayment || { method: 'x402-standard' }
         };
 
@@ -205,19 +266,81 @@ export function setupBotEndpoints(app) {
           });
         }
 
+        // Execute Sentiment Bot analysis locally
         const axios = (await import('axios')).default;
-        const botUrl = process.env.SENTIMENT_BOT_URL || 'http://localhost:4003';
+        const stacksApi = axios.create({
+          baseURL: process.env.STACKS_API || 'https://api.testnet.hiro.so'
+        });
 
-        const botResponse = await axios.post(`${botUrl}/analyze`, {
-          projectName,
-          githubUrl,
-          contractAddress,
-          contractName,
-          tokenSymbol
-        }, { timeout: 45000 });
+        console.log(`💭 Sentiment Bot: Analyzing ${projectName}...`);
+
+        // GitHub analysis
+        let github = null;
+        if (githubUrl) {
+          try {
+            const githubScraper = new GitHubScraper();
+            github = await githubScraper.scrapeRepository(githubUrl);
+          } catch (error) {
+            console.error('GitHub analysis failed:', error.message);
+          }
+        }
+
+        // On-chain metrics
+        let onChain = null;
+        if (contractAddress && contractName) {
+          try {
+            const onChainAnalyzer = new OnChainMetricsAnalyzer(stacksApi);
+            onChain = await onChainAnalyzer.analyzeContract(contractAddress, contractName);
+          } catch (error) {
+            console.error('On-chain analysis failed:', error.message);
+          }
+        }
+
+        // News sentiment
+        let news = null;
+        if (process.env.CRYPTOPANIC_API_KEY) {
+          try {
+            const newsFetcher = new NewsFetcher(process.env.CRYPTOPANIC_API_KEY);
+            news = await newsFetcher.fetchNews(tokenSymbol || projectName);
+          } catch (error) {
+            console.error('News analysis failed:', error.message);
+          }
+        }
+
+        // AI sentiment synthesis (if OpenAI key available)
+        let aiSentiment = null;
+        let executiveSummary = null;
+        if (process.env.OPENAI_API_KEY) {
+          try {
+            const aiAnalyzer = new AISentimentAnalyzer(process.env.OPENAI_API_KEY);
+            aiSentiment = await aiAnalyzer.analyzeSentiment(github, onChain, news, projectName);
+            executiveSummary = aiAnalyzer.generateExecutiveSummary(github, onChain, news, aiSentiment);
+          } catch (error) {
+            console.error('AI sentiment failed:', error.message);
+          }
+        }
+
+        // Calculate overall score
+        const scores = [];
+        if (github?.healthScore) scores.push(github.healthScore);
+        if (onChain?.activityScore) scores.push(onChain.activityScore);
+        if (news?.sentimentScore) scores.push(news.sentimentScore);
+        const overallScore = scores.length > 0
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+          : 50;
 
         const response = {
-          ...botResponse.data,
+          status: 'success',
+          sentiment: {
+            projectName,
+            overallScore,
+            github,
+            onChain,
+            news,
+            aiSentiment,
+            executiveSummary,
+            completedAt: new Date().toISOString()
+          },
           payment: req.veilpayPayment || { method: 'x402-standard' }
         };
 
@@ -253,20 +376,133 @@ export function setupBotEndpoints(app) {
           });
         }
 
+        // Execute Coordinator Bot - runs all 3 worker bots locally
         const axios = (await import('axios')).default;
-        const botUrl = process.env.COORDINATOR_BOT_URL || 'http://localhost:4000';
+        const stacksApi = axios.create({
+          baseURL: process.env.STACKS_API || 'https://api.testnet.hiro.so'
+        });
 
-        const botResponse = await axios.post(`${botUrl}/analyze`, {
-          projectName,
-          contractAddress,
-          contractName,
-          tokenSymbol,
-          githubUrl
-        }, { timeout: 60000 });
+        console.log(`🤖 Coordinator Bot: Full analysis for ${projectName}...`);
+
+        const results = {
+          security: null,
+          tokenomics: null,
+          sentiment: null
+        };
+
+        // Run Security Bot
+        try {
+          console.log('  🛡️  Running Security Bot...');
+          const staticAnalysis = await analyzeContract(contractAddress, contractName, stacksApi);
+
+          let aiInsights = null;
+          let executiveSummary = null;
+          if (process.env.OPENAI_API_KEY) {
+            const aiAnalyzer = new AIInsightsGenerator(process.env.OPENAI_API_KEY);
+            const sourceResponse = await stacksApi.get(`/v2/contracts/source/${contractAddress}/${contractName}`);
+            aiInsights = await aiAnalyzer.generateInsights(sourceResponse.data.source, staticAnalysis);
+            executiveSummary = aiAnalyzer.generateExecutiveSummary(staticAnalysis, aiInsights);
+          }
+
+          results.security = { staticAnalysis, aiInsights, executiveSummary };
+        } catch (error) {
+          console.error('Security analysis failed:', error.message);
+          results.security = { error: error.message };
+        }
+
+        // Run Tokenomics Bot
+        try {
+          console.log('  📊 Running Tokenomics Bot...');
+          const tokenContract = `${contractAddress}.${contractName}`;
+          const metricsAnalyzer = new TokenMetricsAnalyzer(stacksApi);
+          const metricsResult = await metricsAnalyzer.analyzeToken(tokenContract);
+          const dexFetcher = new DexDataFetcher();
+          const liquidityResult = await dexFetcher.getLiquidityData(tokenContract, tokenSymbol);
+          const overallScore = Math.round((metricsResult.metrics.healthScore * 0.6) + ((liquidityResult?.liquidityScore || 0) * 0.4));
+
+          results.tokenomics = { overallScore, tokenMetrics: metricsResult, liquidityData: liquidityResult };
+        } catch (error) {
+          console.error('Tokenomics analysis failed:', error.message);
+          results.tokenomics = { error: error.message };
+        }
+
+        // Run Sentiment Bot
+        try {
+          console.log('  💭 Running Sentiment Bot...');
+          const githubScraper = new GitHubScraper();
+          const github = githubUrl ? await githubScraper.scrapeRepository(githubUrl) : null;
+
+          const onChainAnalyzer = new OnChainMetricsAnalyzer(stacksApi);
+          const onChain = await onChainAnalyzer.analyzeContract(contractAddress, contractName);
+
+          let news = null;
+          if (process.env.CRYPTOPANIC_API_KEY) {
+            const newsFetcher = new NewsFetcher(process.env.CRYPTOPANIC_API_KEY);
+            news = await newsFetcher.fetchNews(tokenSymbol || projectName);
+          }
+
+          let aiSentiment = null;
+          let executiveSummary = null;
+          if (process.env.OPENAI_API_KEY) {
+            const aiAnalyzer = new AISentimentAnalyzer(process.env.OPENAI_API_KEY);
+            aiSentiment = await aiAnalyzer.analyzeSentiment(github, onChain, news, projectName);
+            executiveSummary = aiAnalyzer.generateExecutiveSummary(github, onChain, news, aiSentiment);
+          }
+
+          const scores = [];
+          if (github?.healthScore) scores.push(github.healthScore);
+          if (onChain?.activityScore) scores.push(onChain.activityScore);
+          if (news?.sentimentScore) scores.push(news.sentimentScore);
+          const overallScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 50;
+
+          results.sentiment = { overallScore, github, onChain, news, aiSentiment, executiveSummary };
+        } catch (error) {
+          console.error('Sentiment analysis failed:', error.message);
+          results.sentiment = { error: error.message };
+        }
+
+        // Calculate overall score
+        const scores = [];
+        if (results.security && !results.security.error) {
+          scores.push(100 - (results.security.staticAnalysis?.riskScore || 50));
+        }
+        if (results.tokenomics && !results.tokenomics.error) {
+          scores.push(results.tokenomics.overallScore || 50);
+        }
+        if (results.sentiment && !results.sentiment.error) {
+          scores.push(results.sentiment.overallScore || 50);
+        }
+        const overallScore = scores.length > 0
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+          : 50;
+
+        // Generate recommendation
+        let recommendation = { action: 'Hold', rationale: 'Incomplete analysis', confidence: 'Low' };
+        if (overallScore >= 80) {
+          recommendation = { action: 'Strong Buy', rationale: 'Excellent fundamentals across all metrics', confidence: 'High' };
+        } else if (overallScore >= 65) {
+          recommendation = { action: 'Buy', rationale: 'Good overall fundamentals with minor concerns', confidence: 'Medium' };
+        } else if (overallScore >= 50) {
+          recommendation = { action: 'Hold', rationale: 'Mixed signals, proceed with caution', confidence: 'Medium' };
+        } else {
+          recommendation = { action: 'Avoid', rationale: 'Multiple concerns identified', confidence: 'High' };
+        }
 
         const response = {
-          ...botResponse.data,
-          payment: req.veilpayPayment || { method: 'x402-standard' }
+          status: 'success',
+          overallScore,
+          recommendation,
+          detailedResults: results,
+          payment: {
+            method: req.veilpayPayment?.method || 'x402-standard',
+            totalCost: '10 STX',
+            breakdown: {
+              securityBot: '5 STX',
+              tokenomicsBot: '3 STX',
+              sentimentBot: '2 STX'
+            }
+          },
+          completedAt: new Date().toISOString()
         };
 
         res.json(response);
