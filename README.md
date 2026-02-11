@@ -4,9 +4,11 @@
 
 # VeilPay
 
-**Zero-Knowledge Privacy Protocol for USDCx on Stacks**
+**Zero-Knowledge Privacy Protocol for Multi-Asset Transfers on Stacks**
 
-[Live Demo](https://veilpay.lat/) · [Documentation](./CLAUDE.md) · [Smart Contracts](#smart-contracts-testnet) · [GitHub](https://github.com/carlos-israelj/VeilPay)
+**NEW:** Bot-to-Bot AI Economy with Private Payments 🤖
+
+[Live Demo](https://veilpay.lat/) · [Bot Marketplace](./docs/BOT-DEVELOPER-GUIDE.md) · [API Docs](./docs/API.md) · [Smart Contracts](#smart-contracts-testnet) · [GitHub](https://github.com/carlos-israelj/VeilPay)
 
 ---
 
@@ -72,6 +74,9 @@ Off-chain proof verification via relayer with on-chain settlement. Designed for 
 
 ### x402 Payment Protocol Integration (NEW!)
 VeilPay now supports the **x402-stacks programmatic payment protocol**, enabling private HTTP 402 payments with multi-asset support (STX, USDCx, sBTC). First implementation combining x402 with Zero-Knowledge privacy. [Learn more](./docs/X402-INTEGRATION.md)
+
+### Bot-to-Bot AI Economy (NEW!)
+VeilPay now hosts a **marketplace of AI analysis bots** that accept private payments via ZK proofs. Bots can hire other bots without transaction correlation, creating the first fully private AI agent economy on Stacks. Includes Security Bot (5 STX), Tokenomics Bot (3 STX), Sentiment Bot (2 STX), and Coordinator Bot (10 STX). [Developer Guide](./docs/BOT-DEVELOPER-GUIDE.md)
 
 ---
 
@@ -340,6 +345,109 @@ sequenceDiagram
 
 ---
 
+## Bot-to-Bot AI Economy
+
+VeilPay introduces the **first decentralized bot marketplace** where AI agents can hire specialized analysis bots using private ZK-SNARK payments. All bot-to-bot payments are made through VeilPay pools, ensuring complete transaction unlinkability.
+
+### Available Bots
+
+| Bot | Price | Capabilities | Use Case |
+|-----|-------|--------------|----------|
+| **Security Bot** | 5 STX | AI-powered contract auditing, reentrancy detection, access control analysis | Smart contract security assessment |
+| **Tokenomics Bot** | 3 STX | SIP-010 token analysis, holder distribution, DEX liquidity metrics | Token health evaluation |
+| **Sentiment Bot** | 2 STX | GitHub activity, on-chain metrics, news sentiment, AI synthesis | Project sentiment analysis |
+| **Coordinator Bot** | 10 STX | Orchestrates all 3 worker bots, generates investment recommendations | Full project due diligence |
+
+### How It Works
+
+**Standard x402 Payment Flow:**
+```
+1. User calls bot endpoint: POST /x402/bots/security/audit
+2. Bot returns HTTP 402 (Payment Required)
+3. User pays 5 STX via standard x402 flow
+4. Bot executes analysis and returns results
+```
+
+**Private VeilPay Payment Flow:**
+```
+1. User deposits STX to VeilPay pool (one-time)
+2. User receives (secret, nonce) credentials
+3. User generates ZK proof for payment
+4. User calls bot with proof headers
+5. Bot verifies proof via relayer
+6. Bot executes analysis - FULLY PRIVATE!
+```
+
+### Bot-to-Bot Payments
+
+The **Coordinator Bot** demonstrates autonomous bot hiring with complete privacy:
+
+```javascript
+// Coordinator Bot privately hires 3 worker bots
+const securityResult = await veilPayClient.callWorkerBot(
+  'https://security-bot.onrender.com',
+  '/audit',
+  { contractAddress, contractName },
+  secret,  // VeilPay credentials
+  nonce,
+  5_000_000 // 5 STX payment
+);
+
+// No transaction correlation between coordinator and worker bots!
+```
+
+**Privacy Guarantee**: Even the worker bots cannot determine which coordinator hired them. All payments are cryptographically unlinkable.
+
+### Integration Guide
+
+Developers can integrate VeilPay bot marketplace in two ways:
+
+**1. Use Existing Bots** - Hire Security, Tokenomics, Sentiment, or Coordinator bots via standard API calls:
+```javascript
+import axios from 'axios';
+
+const relayer = axios.create({
+  baseURL: 'https://veilpay-relayer.onrender.com'
+});
+
+// Hire Security Bot (5 STX payment)
+const response = await relayer.post('/x402/bots/security/audit', {
+  contractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+  contractName: 'my-contract',
+  fullAnalysis: true
+});
+```
+
+**2. Build Your Own Bot** - Create custom analysis bots and monetize via VeilPay:
+- Set pricing in STX/USDCx/sBTC
+- Implement analysis logic
+- Register with VeilPay relayer
+- Accept private ZK proof payments
+
+See [Bot Developer Guide](./docs/BOT-DEVELOPER-GUIDE.md) for complete implementation instructions.
+
+### Example Use Cases
+
+**AI Agent Automation:**
+- DeFi trading bot analyzes token safety before executing swaps
+- Portfolio manager bot assesses project fundamentals
+- Risk management bot continuously monitors contract security
+- All bot payments are private - no transaction graph correlation
+
+**Developer Tools:**
+- CI/CD integration for automatic contract audits
+- Pre-deployment security scanning
+- Token launch due diligence
+- Investment research automation
+
+**Decentralized Intelligence:**
+- Multi-bot analysis pipelines
+- Collaborative AI research
+- Privacy-preserving data markets
+- Bot reputation systems
+
+---
+
 ## Application Screenshots
 
 ### Home Dashboard
@@ -412,7 +520,9 @@ VeilPay/
 │   └── package.json
 │
 ├── contracts/                    # Clarity Smart Contracts
-│   ├── veilpay.clar              # Privacy pool contract
+│   ├── veilpay.clar              # Privacy pool contract (STX)
+│   ├── veilpay-usdcx.clar        # Privacy pool contract (USDCx)
+│   ├── veilpay-sbtc.clar         # Privacy pool contract (sBTC)
 │   ├── usdcx-trait.clar          # SIP-010 token trait
 │   ├── Clarinet.toml             # Clarinet configuration
 │   └── deployments/              # Deployment configs
@@ -425,6 +535,9 @@ VeilPay/
 │   │   ├── indexer.js            # Blockchain event indexer
 │   │   ├── stacks-client.js      # Stacks transaction builder
 │   │   ├── signer.js             # Relayer signature logic
+│   │   ├── x402/                 # x402 Payment Protocol
+│   │   │   ├── bot-endpoints.js  # Bot marketplace endpoints
+│   │   │   └── bot-payment-tracker.js # Bot payment analytics
 │   │   ├── withdraw.wasm         # Circuit WASM (for verification)
 │   │   ├── withdraw_final.zkey   # Proving key
 │   │   └── verification_key.json # Verification key
@@ -436,10 +549,16 @@ VeilPay/
 │   │   ├── App.jsx               # Main application
 │   │   ├── components/           # React components
 │   │   │   ├── Deposit.jsx       # Deposit interface
-│   │   │   └── Withdraw.jsx      # Withdrawal interface
+│   │   │   ├── Withdraw.jsx      # Withdrawal interface
+│   │   │   ├── AssetSelector.jsx # Multi-asset selector
+│   │   │   ├── BotMarketplace.jsx # Bot marketplace UI
+│   │   │   ├── BotCard.jsx       # Individual bot card
+│   │   │   ├── BotAnalysisModal.jsx # Bot analysis modal
+│   │   │   └── X402Demo.jsx      # x402 payment demo
 │   │   ├── utils/
 │   │   │   ├── crypto.js         # Poseidon hash utilities
-│   │   │   └── proof.js          # ZK proof generation
+│   │   │   ├── proof.js          # ZK proof generation
+│   │   │   └── x402-client.js    # x402 payment client
 │   │   ├── main.jsx              # Entry point
 │   │   └── index.css
 │   ├── public/
@@ -451,7 +570,22 @@ VeilPay/
 │   ├── tailwind.config.js
 │   └── package.json
 │
+├── bots/                         # AI Analysis Bots (NEW!)
+│   └── examples/
+│       ├── worker-bots/          # Individual analysis bots
+│       │   ├── security-bot/     # AI-powered contract auditing (5 STX)
+│       │   ├── tokenomics-bot/   # Token metrics analysis (3 STX)
+│       │   └── sentiment-bot/    # Multi-source sentiment (2 STX)
+│       └── coordinator-bot/      # Multi-bot orchestrator (10 STX)
+│           ├── index.js          # Express server
+│           ├── job-manager.js    # Bot coordination logic
+│           ├── result-aggregator.js # AI result synthesis
+│           └── veilpay-client.js # VeilPay ZK payment client
+│
 ├── docs/                         # Documentation
+│   ├── BOT-DEVELOPER-GUIDE.md    # Bot marketplace integration guide
+│   ├── API.md                    # Relayer API documentation
+│   └── X402-INTEGRATION.md       # x402 payment protocol guide
 ├── CLAUDE.md                     # Developer guide for Claude Code
 ├── README.md                     # This file
 ├── TESTNET_GUIDE.md              # Testnet deployment guide
@@ -706,6 +840,7 @@ clarinet deploy --testnet
 | **Styling** | Tailwind CSS | 3.x | Utility-first responsive design |
 | **Wallet Integration** | @stacks/connect | 7.x | Leather, Hiro, Xverse wallet support |
 | **Blockchain SDK** | @stacks/transactions | 7.x | Transaction building and signing |
+| **Payment Protocol** | x402-stacks | 1.x | HTTP 402 programmatic payments |
 
 ### Off-Chain Infrastructure
 
@@ -716,6 +851,8 @@ clarinet deploy --testnet
 | **Proof Verification** | snarkjs | 0.7.x | Off-chain SNARK verification |
 | **Event Indexer** | Custom indexer | - | Blockchain event monitoring |
 | **Merkle Management** | merkletreejs + Poseidon | 0.3.x | Tree state synchronization |
+| **Bot Marketplace** | Express.js + x402 | - | AI analysis bot ecosystem |
+| **AI Analysis** | OpenAI GPT-3.5-turbo | - | Bot intelligence engine |
 
 ### Development Tools
 
@@ -748,6 +885,17 @@ Individuals maintain personal financial confidentiality using regulated stableco
 
 **Anonymous Contributions**
 Support organizations, causes, or individuals without identity disclosure. Cryptographic unlinkability ensures donor privacy while maintaining transparent fund reception for beneficiaries.
+
+### AI Agent & Bot Economy
+
+**Autonomous Bot Automation**
+AI agents hire specialized analysis bots with complete transaction privacy. DeFi trading bots assess token safety, portfolio managers evaluate fundamentals, risk bots monitor security—all payments unlinkable via VeilPay ZK proofs.
+
+**Decentralized Intelligence Markets**
+Privacy-preserving data markets where bots purchase analysis, research, and insights without revealing purchase patterns. Bot coordination pipelines run autonomously with cryptographic privacy guarantees.
+
+**Developer CI/CD Integration**
+Automated security audits, pre-deployment scanning, and continuous monitoring integrated into development workflows. Bot services paid via VeilPay ensure development activity remains confidential from competitors.
 
 ---
 
@@ -946,16 +1094,18 @@ VeilPay represents a significant advancement in blockchain privacy infrastructur
 
 | Metric | Value | Details |
 |--------|-------|---------|
-| **Codebase** | 8,500+ lines | Across circuits, contracts, relayer, frontend |
-| **Smart Contracts** | 2 contracts | `veilpay.clar`, `usdcx-trait.clar` |
+| **Codebase** | 15,000+ lines | Across circuits, contracts, relayer, frontend, bots |
+| **Smart Contracts** | 4 contracts | `veilpay.clar`, `veilpay-usdcx.clar`, `veilpay-sbtc.clar`, `usdcx-trait.clar` |
 | **ZK Circuits** | ~1M constraints | `withdraw.circom` (Groth16) |
-| **Merkle Tree** | 20 levels | 1,048,576 deposit capacity |
+| **Merkle Tree** | 20 levels | 1,048,576 deposit capacity per asset |
+| **Supported Assets** | 3 assets | STX, USDCx, sBTC |
+| **Bot Marketplace** | 4 bots | Security, Tokenomics, Sentiment, Coordinator |
 | **Proof Generation** | ~15 seconds | Browser-based (WASM) |
 | **Proof Verification** | ~500ms | Off-chain relayer |
 | **Proof Size** | 192 bytes | Constant (3 elliptic curve points) |
 | **Gas Efficiency** | Optimized | Deposit: ~XXX, Withdraw: ~XXX* |
 | **Supported Wallets** | 2 wallets | Leather, Hiro |
-| **API Endpoints** | 6 endpoints | RESTful relayer API |
+| **API Endpoints** | 15+ endpoints | Relayer API + Bot marketplace |
 
 <sub>* Gas costs measured on Stacks testnet</sub>
 
