@@ -11,6 +11,7 @@ import FAQ from './components/FAQ';
 import History from './components/History';
 import Integrations from './components/Integrations';
 import X402Demo from './components/X402Demo';
+import BotMarketplace from './components/BotMarketplace';
 import ToastContainer from './components/Toast';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
@@ -73,6 +74,7 @@ function App() {
                   { id: 'bridge', label: 'BRIDGE' },
                   { id: 'deposit', label: 'DEPOSIT' },
                   { id: 'withdraw', label: 'WITHDRAW' },
+                  { id: 'bots', label: 'BOTS' },
                   { id: 'x402-demo', label: 'X402' },
                   { id: 'history', label: 'HISTORY' },
                   { id: 'how-it-works', label: 'PROTOCOL' },
@@ -136,6 +138,7 @@ function App() {
                 { id: 'bridge', label: 'BRIDGE' },
                 { id: 'deposit', label: 'DEPOSIT' },
                 { id: 'withdraw', label: 'WITHDRAW' },
+                { id: 'bots', label: 'BOTS' },
                 { id: 'x402-demo', label: 'X402' },
                 { id: 'history', label: 'HISTORY' },
                 { id: 'how-it-works', label: 'PROTOCOL' },
@@ -339,6 +342,8 @@ function App() {
                 <Integrations />
               ) : activeTab === 'x402-demo' ? (
                 <X402Demo userSession={userSession} />
+              ) : activeTab === 'bots' ? (
+                <BotMarketplace userSession={userSession} />
               ) : null}
             </div>
           </div>
