@@ -14,7 +14,6 @@
     "dotenv": "^16.0.0",
     "@stacks/transactions": "^7.0.0",
     "@stacks/network": "^7.0.0",
-    "x402-stacks": "^0.1.0",
     "circomlibjs": "^0.1.7",
     "cors": "^2.8.5"
   },
