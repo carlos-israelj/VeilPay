@@ -51,8 +51,13 @@ export function createX402Client(options = {}) {
       account = { privateKey: appPrivateKey };
     }
 
+    // Convert network to CAIP-2 format
+    // testnet → stacks:2147483648, mainnet → stacks:1
+    const networkEnv = import.meta.env.VITE_STACKS_NETWORK || 'testnet';
+    const networkCAIP2 = networkEnv === 'mainnet' ? 'stacks:1' : 'stacks:2147483648';
+
     return wrapAxiosWithPayment(baseClient, account, {
-      network: import.meta.env.VITE_STACKS_NETWORK || 'testnet',
+      network: networkCAIP2,
       facilitatorUrl: import.meta.env.VITE_X402_FACILITATOR_URL || 'https://facilitator.stacksx402.com',
       onPaymentRequired: (paymentRequest) => {
         console.log('[x402] Payment required:', paymentRequest);
