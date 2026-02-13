@@ -51,7 +51,9 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  // Expose x402 headers so browser JavaScript can read them
+  exposedHeaders: ['payment-required', 'payment-response']
 }));
 
 app.use(express.json());
