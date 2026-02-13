@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { createStandardX402Client } from '../utils/x402-client';
 
 /**
  * BotAnalysisModal - Modal for bot analysis input and execution
@@ -26,6 +26,11 @@ export default function BotAnalysisModal({ bot, userSession, onClose }) {
     try {
       setLoading(true);
       setError(null);
+
+      // Check if user is signed in
+      if (!userSession?.isUserSignedIn()) {
+        throw new Error('Please connect your wallet to hire bots');
+      }
 
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -74,7 +79,11 @@ export default function BotAnalysisModal({ bot, userSession, onClose }) {
       }
 
       console.log(`Calling bot endpoint: ${bot.endpoint}`);
-      const response = await axios.post(`${API_URL}${bot.endpoint}`, payload, {
+
+      // Create x402 client with automatic payment handling
+      const client = createStandardX402Client(userSession);
+
+      const response = await client.post(bot.endpoint, payload, {
         timeout: 120000 // 2 minute timeout for coordinator bot
       });
 
