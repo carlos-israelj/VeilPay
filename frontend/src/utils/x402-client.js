@@ -66,6 +66,18 @@ export function createX402Client(options = {}) {
     }
   );
 
+  // DEBUG: Log all outgoing requests to see if payment-signature is included
+  baseClient.interceptors.request.use(
+    (config) => {
+      if (config.headers['payment-signature']) {
+        console.log('[DEBUG] Request with payment-signature header detected');
+        console.log('[DEBUG] payment-signature:', config.headers['payment-signature']);
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
   // If using standard x402 (no privacy)
   if (!usePrivatePayment) {
     // Check if user is signed in
