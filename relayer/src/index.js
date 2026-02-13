@@ -17,6 +17,20 @@ import { initializePaymentTracker, getPaymentStats, getRecentPayments } from './
 
 dotenv.config();
 
+// Auto-detect base URL for x402 based on environment
+if (!process.env.X402_BASE_URL) {
+  // Check if running on Render (RENDER env var is set by Render.com)
+  if (process.env.RENDER) {
+    process.env.X402_BASE_URL = 'https://veilpay-x402-relayer.onrender.com';
+    console.log('[x402] Auto-detected Render environment, using HTTPS base URL');
+  } else {
+    // Local development
+    const port = process.env.PORT || 4000;
+    process.env.X402_BASE_URL = `http://localhost:${port}`;
+    console.log(`[x402] Local development, using HTTP base URL on port ${port}`);
+  }
+}
+
 const app = express();
 
 // CORS configuration - allow requests from frontend
