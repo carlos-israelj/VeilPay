@@ -20,10 +20,10 @@ const ASSET_CONFIG = {
     decimals: 6,
     minAmount: 1.0,
     minAmountMicro: '1000000',
-    contractName: 'veilpay',
+    contractName: 'veilpay-stx',
     contractAddress: 'ST2TVNVEDWFBX25NRW8GP6D3WHAXEXGH7T3MBT1T1',
     description: 'Native blockchain currency',
-    poolInfo: 'Original privacy pool',
+    poolInfo: 'Native STX privacy pool',
     isNative: true,
   },
   USDCx: {

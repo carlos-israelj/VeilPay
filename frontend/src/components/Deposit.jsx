@@ -102,12 +102,14 @@ export default function Deposit({ userSession }) {
       const userData = userSession.loadUserData();
       const senderAddress = userData.profile.stxAddress.testnet;
 
-      // Build post-conditions based on asset type
+      // Build post-conditions and function args based on asset type
       let postConditions = [];
       let functionArgs = [];
+      let contractName = assetConfig.contractName;
 
       if (assetConfig.isNative) {
-        // STX native asset
+        // STX native asset - uses veilpay-stx contract
+        contractName = 'veilpay-stx';
         postConditions = [
           Pc.principal(senderAddress)
             .willSendEq(deposit.amount)
@@ -118,7 +120,7 @@ export default function Deposit({ userSession }) {
           Cl.uint(deposit.amount),
         ];
       } else {
-        // SIP-010 token (USDCx or sBTC)
+        // SIP-010 token (USDCx or sBTC) - uses asset-specific contract
         const [tokenAddress, tokenName] = assetConfig.tokenContract.split('.');
         postConditions = [
           Pc.principal(senderAddress)
@@ -134,7 +136,7 @@ export default function Deposit({ userSession }) {
 
       const txOptions = {
         contractAddress: assetConfig.contractAddress,
-        contractName: assetConfig.contractName,
+        contractName: contractName,
         functionName: 'deposit',
         functionArgs,
         postConditions,
