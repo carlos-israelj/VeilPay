@@ -5,7 +5,7 @@
  */
 
 import axios from 'axios';
-import { wrapAxiosWithPayment } from 'x402-stacks';
+import { wrapAxiosWithPayment, privateKeyToAccount } from 'x402-stacks';
 import { generateProof } from './proof';
 import { calculateCommitment, calculateNullifier } from './crypto';
 
@@ -43,31 +43,28 @@ export function createX402Client(options = {}) {
 
   // If using standard x402 (no privacy)
   if (!usePrivatePayment) {
-    // Extract Stacks account from userSession
-    let account = null;
-    if (userSession?.isUserSignedIn()) {
-      const userData = userSession.loadUserData();
-      const appPrivateKey = userData.appPrivateKey;
-      account = { privateKey: appPrivateKey };
+    // Check if user is signed in
+    if (!userSession?.isUserSignedIn()) {
+      throw new Error('Please connect your wallet to use x402 payments');
     }
 
-    // Convert network to CAIP-2 format
-    // testnet → stacks:2147483648, mainnet → stacks:1
-    const networkEnv = import.meta.env.VITE_STACKS_NETWORK || 'testnet';
-    const networkCAIP2 = networkEnv === 'mainnet' ? 'stacks:1' : 'stacks:2147483648';
+    // Extract Stacks account from userSession
+    const userData = userSession.loadUserData();
+    const appPrivateKey = userData.appPrivateKey;
 
-    return wrapAxiosWithPayment(baseClient, account, {
-      network: networkCAIP2,
-      facilitatorUrl: import.meta.env.VITE_X402_FACILITATOR_URL || 'https://facilitator.stacksx402.com',
-      onPaymentRequired: (paymentRequest) => {
-        console.log('[x402] Payment required:', paymentRequest);
-        if (onPaymentRequired) onPaymentRequired(paymentRequest);
-      },
-      onPaymentSuccess: (paymentResponse) => {
-        console.log('[x402] Payment successful:', paymentResponse);
-        if (onPaymentSuccess) onPaymentSuccess(paymentResponse);
-      },
+    // Get network type (testnet or mainnet)
+    const networkEnv = import.meta.env.VITE_STACKS_NETWORK || 'testnet';
+
+    // Create StacksAccount using privateKeyToAccount
+    const account = privateKeyToAccount(appPrivateKey, networkEnv);
+
+    console.log('[x402] Created account:', {
+      address: account.address,
+      network: account.network
     });
+
+    // Wrap axios with x402 payment handling (only 2 params!)
+    return wrapAxiosWithPayment(baseClient, account);
   }
 
   // Private payment mode with ZK proofs
