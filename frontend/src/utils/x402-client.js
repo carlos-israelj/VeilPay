@@ -88,8 +88,84 @@ export function createX402Client(options = {}) {
       network: account.network
     });
 
+    // Add circuit breaker BEFORE wrapping with x402
+    // This prevents infinite loops by catching errors early
+    const MAX_RETRIES = 2;
+    const FATAL_ERRORS = [
+      'unexpected_settle_error',
+      'settlement_failed',
+      'insufficient_funds',
+      'transaction_failed',
+      'invalid_signature'
+    ];
+
+    let retryCount = 0;
+    let lastRequestUrl = '';
+
+    baseClient.interceptors.response.use(
+      (response) => {
+        // Reset retry count on success
+        retryCount = 0;
+        return response;
+      },
+      (error) => {
+        const currentUrl = error.config?.url || '';
+
+        // Reset counter if this is a new request
+        if (currentUrl !== lastRequestUrl) {
+          retryCount = 0;
+          lastRequestUrl = currentUrl;
+        }
+
+        // Handle 402 Payment Required
+        if (error.response?.status === 402) {
+          const errorData = error.response?.data;
+          const errorType = errorData?.error || '';
+
+          // Check for fatal errors
+          if (FATAL_ERRORS.includes(errorType)) {
+            console.error(`[x402] Fatal payment error detected: ${errorType}`);
+            retryCount = 0; // Reset
+
+            // Convert to non-402 error to prevent x402-stacks retry
+            const fatalError = new Error(
+              `Payment Error: ${errorType}. ${errorData?.message || 'Please check your wallet balance and try again.'}`
+            );
+            fatalError.status = 500; // Change status to prevent x402 retry
+            fatalError.originalError = errorData;
+
+            return Promise.reject(fatalError);
+          }
+
+          // Increment retry counter
+          retryCount++;
+
+          if (retryCount > MAX_RETRIES) {
+            console.error(`[x402] Max retries (${MAX_RETRIES}) exceeded`);
+            retryCount = 0; // Reset
+
+            const maxRetriesError = new Error(
+              `Payment failed after ${MAX_RETRIES} attempts. Please try again later.`
+            );
+            maxRetriesError.status = 500;
+
+            return Promise.reject(maxRetriesError);
+          }
+
+          console.log(`[x402] Payment attempt ${retryCount}/${MAX_RETRIES}`);
+        } else {
+          // Non-402 error
+          retryCount = 0;
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
     // Wrap axios with x402 payment handling (only 2 params!)
-    return wrapAxiosWithPayment(baseClient, account);
+    const x402Client = wrapAxiosWithPayment(baseClient, account);
+
+    return x402Client;
   }
 
   // Private payment mode with ZK proofs

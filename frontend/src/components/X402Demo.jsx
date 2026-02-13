@@ -103,9 +103,32 @@ export default function X402Demo({ userSession }) {
     } catch (err) {
       console.error('[X402Demo] Error:', err);
 
+      // Extract error message from various error formats
+      let errorMessage = 'Unknown error occurred';
+      let errorDetails = 'Payment or proof generation failed';
+
+      if (err.message) {
+        errorMessage = err.message;
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      }
+
+      if (err.response?.data?.details) {
+        errorDetails = err.response.data.details;
+      } else if (err.response?.data?.message) {
+        errorDetails = err.response.data.message;
+      }
+
+      // Special handling for common errors
+      if (errorMessage.includes('Payment failed after') || errorMessage.includes('settlement')) {
+        errorDetails = 'The payment request failed multiple times. This could be due to: ' +
+          '(1) Network issues, (2) Insufficient balance, or (3) Server payment processing error. ' +
+          'Please check your wallet balance and try again in a few moments.';
+      }
+
       setError({
-        message: err.response?.data?.error || err.message,
-        details: err.response?.data?.details || 'Payment or proof generation failed',
+        message: errorMessage,
+        details: errorDetails,
         endpoint: endpoint.name,
       });
     } finally {
