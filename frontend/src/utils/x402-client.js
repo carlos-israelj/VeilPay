@@ -28,6 +28,7 @@ export function createX402Client(options = {}) {
     secret = null,
     nonce = null,
     asset = 'STX',
+    userSession = null,
     onPaymentRequired = null,
     onPaymentSuccess = null,
   } = options;
@@ -42,7 +43,15 @@ export function createX402Client(options = {}) {
 
   // If using standard x402 (no privacy)
   if (!usePrivatePayment) {
-    return wrapAxiosWithPayment(baseClient, {
+    // Extract Stacks account from userSession
+    let account = null;
+    if (userSession?.isUserSignedIn()) {
+      const userData = userSession.loadUserData();
+      const appPrivateKey = userData.appPrivateKey;
+      account = { privateKey: appPrivateKey };
+    }
+
+    return wrapAxiosWithPayment(baseClient, account, {
       network: import.meta.env.VITE_STACKS_NETWORK || 'testnet',
       facilitatorUrl: import.meta.env.VITE_X402_FACILITATOR_URL || 'https://facilitator.stacksx402.com',
       onPaymentRequired: (paymentRequest) => {
@@ -153,10 +162,11 @@ export function createX402Client(options = {}) {
 
 /**
  * Create simple x402 client (standard mode)
+ * @param {Object} userSession - Stacks user session for signing transactions
  * @returns {AxiosInstance} Standard x402 client without privacy
  */
-export function createStandardX402Client() {
-  return createX402Client({ usePrivatePayment: false });
+export function createStandardX402Client(userSession) {
+  return createX402Client({ usePrivatePayment: false, userSession });
 }
 
 /**

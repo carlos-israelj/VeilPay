@@ -76,7 +76,11 @@ export default function X402Demo({ userSession }) {
         client = createPrivateX402Client(secret, nonce, endpoint.asset);
       } else {
         // Standard x402 payment
-        client = createStandardX402Client();
+        if (!userSession?.isUserSignedIn()) {
+          throw new Error('Please connect your wallet to use standard x402 payments');
+        }
+
+        client = createStandardX402Client(userSession);
       }
 
       // Make request (will automatically handle 402)
