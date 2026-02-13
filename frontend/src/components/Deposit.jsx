@@ -111,7 +111,7 @@ export default function Deposit({ userSession }) {
         postConditions = [
           Pc.principal(senderAddress)
             .willSendEq(deposit.amount)
-            .stx()
+            .ustx()
         ];
         functionArgs = [
           Cl.buffer(Buffer.from(deposit.commitment, 'hex')),
