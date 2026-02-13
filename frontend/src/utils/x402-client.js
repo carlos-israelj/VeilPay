@@ -41,6 +41,31 @@ export function createX402Client(options = {}) {
     },
   });
 
+  // DEBUG: Add interceptor to log raw 402 responses BEFORE x402-stacks processes them
+  baseClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 402) {
+        console.log('[DEBUG] Raw 402 response headers:', error.response.headers);
+        console.log('[DEBUG] payment-required header:', error.response.headers['payment-required']);
+        console.log('[DEBUG] Response data:', error.response.data);
+
+        // Try to decode header manually
+        const paymentHeader = error.response.headers['payment-required'];
+        if (paymentHeader) {
+          try {
+            const decoded = Buffer.from(paymentHeader, 'base64').toString('utf-8');
+            console.log('[DEBUG] Decoded payment header:', decoded);
+            console.log('[DEBUG] Parsed payment header:', JSON.parse(decoded));
+          } catch (e) {
+            console.error('[DEBUG] Failed to decode payment header:', e);
+          }
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
+
   // If using standard x402 (no privacy)
   if (!usePrivatePayment) {
     // Check if user is signed in
