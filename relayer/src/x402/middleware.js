@@ -122,12 +122,18 @@ function createVeilPayX402Middleware(config) {
     } else {
       // STANDARD x402 FLOW: Use normal x402-stacks middleware
       // This responds with 402 Payment Required if no payment provided
+
+      // Convert network to CAIP-2 format if needed
+      const networkCAIP2 = network === 'mainnet' ? 'stacks:1' : 'stacks:2147483648';
+
       const standardMiddleware = paymentMiddleware({
+        scheme: 'exact',
+        network: networkCAIP2,
         amount: amount,
+        asset: asset || 'STX',
         payTo: payTo,
-        network: network,
-        facilitatorUrl: facilitatorUrl,
-        asset: asset,
+        maxTimeoutSeconds: 300,
+        facilitatorUrl: facilitatorUrl || 'https://facilitator.stacksx402.com',
         description: description,
       });
 
